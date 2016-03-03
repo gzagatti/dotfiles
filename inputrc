@@ -1,0 +1,34 @@
+# Completions {{{
+# show completion matches immediately
+set show-all-if-ambiguous on
+
+# show completion matches only if there is no partial completion
+set show-all-if-unmodified on
+
+# do not insert the completion text if it is already present
+set skip-completed-text on
+
+# ignore case
+set completion-ignore-case on
+# }}}
+
+# VI editing mode {{{
+set editing-mode vi
+set show-mode-in-prompt on
+
+# insert mode key bindings
+set keymap vi-insert
+"\C-l": clear-screen
+"\C-p": history-search-backward
+"\C-n": history-search-forward
+"\C-o": menu-complete
+"\C-k": menu-complete-backward
+
+# command mode key bindings
+set keymap vi-command
+"\C-p": history-search-backward
+"\C-n": history-search-forward
+
+# }}}
+
+
