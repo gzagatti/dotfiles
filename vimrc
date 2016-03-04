@@ -212,10 +212,12 @@ let g:pad#open_in_split = 0
 ""}}}
 
 ""slimux {{{
-map <Leader>s :SlimuxREPLSendLine<CR>
-vmap <Leader>s :SlimuxREPLSendSelection<CR>
-map <Leader>a :SlimuxShellLast<CR>
-map <Leader>k :SlimuxSendKeysLast<CR>
+map <leader>sc :SlimuxGlobalConfigure<cr>
+map <leader>sb :SlimuxREPLSendBuffer<cr>
+map <Leader>sl :SlimuxREPLSendLine<CR>
+vmap <Leader>sl :SlimuxREPLSendSelection<CR>
+map <Leader>sa :SlimuxShellLast<CR>
+map <Leader>sk :SlimuxSendKeysLast<CR>
 "}}}
 
 ""easy-align {{{
