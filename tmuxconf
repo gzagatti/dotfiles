@@ -94,6 +94,6 @@ set-option -g status-interval 1
 # }}}
 
 # Clock {{{
-set-window-option -g clock-mode-colour yellow
+set-window-option -g clock-mode-colour "colour190"
 set-window-option -g clock-mode-style 24
 # }}}
