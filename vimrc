@@ -93,6 +93,9 @@ set tags=.git/tags,tags,./tags
 highlight SignColumn ctermbg=None guibg=None
 ""}}}
 
+"" Status line {{{
+set laststatus=2
+""}}}
 "}}}
 
 "Vundle: Plugin Manager {{{
@@ -159,9 +162,8 @@ call vundle#end()
 "}}}
 
 "Plugin Specific {{{
-set laststatus=2
 
-"" airline {{{
+""airline {{{
 " powerline symbols
 let g:airline_porwerline_fonts = 1
 if !exists('g:airline_symbols')
@@ -319,39 +321,35 @@ nnoremap [unite]y :Unite -quick-match register<cr>
 nnoremap [unite]s :Unite -quick-match buffer<cr>
 ""}}}
 
-"" easy tags {{{
-let g:easytags_file = '~/.vim/tags'
-let g:easytags_async = 1
-let g:easytags_resolve_links = 1
-let g:easytags_dynamic_files = 1
-""}}}
-
-"" tagbar {{{
+""tagbar {{{
 nnoremap <silent> <F9> :TagbarToggle<CR>
 let g:tagbar_compact = 1
 let g:tagbar_show_linenumbers = -1
 let g:tagbar_foldlevel = 2
 "" }}}
 
-""" tmux line {{{
-let g:tmuxline_preset = {
-      \'a'    : '#S',
-      \'win'  : ['#I', '#W'],
-      \'cwin' : ['#I', '#W', '#F'],
-      \'y'    : ['%R', '%a', '%Y'],
-      \'z'    : '#H'}
-""" }}}
-
-""" airline {{{
-let g:airline#extensions#tabline#enabled = 1
-let g:airline_porwerline_fonts = 1
-"""}}}
-
-"" quickfix signs {{{
-"autocmd VimEnter * call QuickfixsignsToggle()
-nnoremap <f7> :QuickfixsignsToggle<cr>
-nnoremap <f6> :QuickfixsignsSelect vcsdiff<cr>
+""easy tags {{{
+"let g:easytags_file = '~/.vim/tags'
+"let g:easytags_async = 1
+"let g:easytags_resolve_links = 1
+"let g:easytags_dynamic_files = 1
 ""}}}
+
+""quickfix signs {{{
+"autocmd VimEnter * call QuickfixsignsToggle()
+"nnoremap <f7> :QuickfixsignsToggle<cr>
+"nnoremap <f6> :QuickfixsignsSelect vcsdiff<cr>
+""}}}
+
+""tmux line {{{
+"let g:tmuxline_preset = {
+      "\'a'    : '#S',
+      "\'win'  : ['#I', '#W'],
+      "\'cwin' : ['#I', '#W', '#F'],
+      "\'y'    : ['%R', '%a', '%Y'],
+      "\'z'    : '#H'}
+""}}}
+
 "}}}
 
 "Key Mappings {{{
@@ -413,7 +411,7 @@ vnoremap <up> <esc>:set fdm=manual<cr>'<V'>:m '<-2<cr>:set fdm=marker<cr>gv
 nnoremap gV `[v`]
 ""}}}
 
-""Filter{{{
+""Line Filter{{{
 nnoremap <leader>= mxgg=Gg`x
 ""}}}
 
@@ -421,8 +419,9 @@ nnoremap <leader>= mxgg=Gg`x
 command! W w
 ""}}}
 
-"" Delete trailling whitespace {{{
+""Delete trailling whitespace {{{
 nnoremap <silent> <leader>dt :%s/\s\+$//g<cr>
+""}}}
 "}}}
 
 "FileType Specific {{{
@@ -439,7 +438,7 @@ augroup END
 ""Markdown{{{
 augroup markdown
   autocmd!
-  autocmd FileType pandoc :set shiftround shiftwidth=4 softtabstop=4
+  autocmd FileType pandoc,markdown,md :set shiftround shiftwidth=4 softtabstop=4
 ""}}}
 
 ""Json {{{
@@ -447,7 +446,6 @@ augroup json
   autocmd!
   autocmd FileType json :setlocal foldmethod=syntax
 ""}}}
-
 "}}}
 
 "Conditioning {{{
@@ -457,8 +455,6 @@ nnoremap <Right> <nop>
 inoremap <Left> <nop>
 inoremap <Right> <nop>
 "}}}
-"}}}
-
 "}}}
 
 "Clean Up {{{
