@@ -2,6 +2,9 @@ dotfiles := $(shell pwd)
 
 all: vim tmux bash
 
+sh:
+	sh $(dotfiles)/osx
+
 vim:
 	ln -fs $(dotfiles)/vimrc ${HOME}/.vimrc
 
