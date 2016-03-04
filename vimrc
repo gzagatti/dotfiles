@@ -33,7 +33,7 @@ endif
 set wildmenu "autocomplete feature when cycling through TAB
 ""}}}
 
-""Line ruler {{{$
+""Line ruler {{{
 set number numberwidth=4
 "}}}
 
@@ -95,6 +95,13 @@ highlight SignColumn ctermbg=None guibg=None
 
 "" Status line {{{
 set laststatus=2
+""}}}
+
+"" Auto save {{{
+augroup auto_save
+  autocmd!
+  au CursorHold,InsertLeave * silent! wall
+augroup END
 ""}}}
 "}}}
 
@@ -192,6 +199,9 @@ nmap <leader>8 <Plug>AirlineSelectTab8
 nmap <leader>9 <Plug>AirlineSelectTab9
 nmap <leader>- <Plug>AirlineSelectPrevTab
 nmap <leader>+ <Plug>AirlineSelectNextTab
+
+" turn off whitespace warnings
+let g:airline#extensions#whitespace#enabled = 0
 ""}}}
 
 ""nerdcommenter {{{
@@ -317,7 +327,7 @@ let g:unite_source_grep_recursive_opt = ''
 """ key mappings
 nnoremap [unite] <Nop>
 nmap <space> [unite]
-nnoremap [unite]p :Unite file_rec/async<cr>
+nnoremap [unite]p :Unite -start-insert file_rec/async<cr>
 nnoremap [unite]/ :Unite grep:.<cr>
 nnoremap [unite]y :Unite -quick-match register<cr>
 nnoremap [unite]s :Unite -quick-match buffer<cr>
