@@ -371,3 +371,9 @@ defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 
 #}}}
 
+# Time Machine {{{
+
+# Allows unsupported network volumes - Time machine default only accepts drvies formatted with Apple's HFS+J file system, and will eventuallu use all disk space on the drive
+defaults write com.apple.systempreferences TMShowUnsupportedNetworkVolumes 1
+
+#}}}
