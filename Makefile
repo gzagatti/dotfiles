@@ -1,6 +1,6 @@
 dotfiles := $(shell pwd)
 
-all: vim tmux bash
+all: vim tmux bash octave
 
 sh:
 	sh $(dotfiles)/osx
@@ -15,3 +15,6 @@ bash:
 	ln -fs $(dotfiles)/inputrc ${HOME}/.inputrc
 	ln -fs $(dotfiles)/bash_profile ${HOME}/.bash_profile
 	ln -fs $(dotfiles)/bashrc ${HOME}/.bashrc
+
+octave:
+	ln -fs $(dotfiles)/octaverc ${HOME}/.octaverc
