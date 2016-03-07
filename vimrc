@@ -222,12 +222,22 @@ let g:pad#open_in_split = 0
 ""}}}
 
 ""slimux {{{
-map <leader>sc :SlimuxGlobalConfigure<cr>
-map <leader>sb :SlimuxREPLSendBuffer<cr>
+""" only allow panes from current window
+let g:slimux_select_from_current_window = 1
+
+""" key mappings
 map <Leader>s :SlimuxREPLSendLine<CR>
 vmap <Leader>s :SlimuxREPLSendSelection<CR>
+map <leader>sc :SlimuxGlobalConfigure<cr>
+map <leader>sb :SlimuxREPLSendBuffer<cr>
 map <Leader>sa :SlimuxShellLast<CR>
 map <Leader>sk :SlimuxSendKeysLast<CR>
+
+""" slimux and python integration
+augroup python_slimux:
+  autocmd!
+  autocmd FileType python noremap <leader>sf :execute ':SlimuxShellRun %run -i '.@%<cr>
+augroup END
 "}}}
 
 ""easy-align {{{
