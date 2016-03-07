@@ -1,6 +1,6 @@
 dotfiles := $(shell pwd)
 
-all: vim tmux bash octave
+all: vim tmux bash octave python
 
 sh:
 	sh $(dotfiles)/osx
@@ -18,3 +18,7 @@ bash:
 
 octave:
 	ln -fs $(dotfiles)/octaverc ${HOME}/.octaverc
+
+python:
+	mkdir -p ${HOME}/.ipython/profile_default
+	ln -fs $(dotfiles)/ipython_config.py ${HOME}/.ipython/profile_default/ipython_config.py
