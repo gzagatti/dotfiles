@@ -1,6 +1,5 @@
 # Exported Variables {{{
 export R_PROFILE=~/.RProfile
-export PROMPT_COMMAND=""
 export GTK_PATH=/usr/local/lib/gtk-2.0
 export EDITOR=/usr/local/bin/vim
 export PATH=~/bin:$PATH
@@ -11,7 +10,7 @@ export PATH=~/bin:$PATH
 #prompt will be highlighted in red if previous command fails
 #command prompt text is always highlited in yellow
 export PS1="\$(if [[ \$? == 0 ]]; then echo \"\[\e[00;30m\]\"; else echo \"\[\e[00;31m\]\"; fi)[\A] \\u:\W \#\$\[\e[0m\] \[\e[33m\]"
-export PROMPT_COMMAND="echo -n $'\e[0m'; $PROMPT_COMMAND" #reset colours prior to printing output
+trap "echo -n $'\e[0m'" DEBUG #reset colours prior to printing output
 # }}}
 
 # History {{{
