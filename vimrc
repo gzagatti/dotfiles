@@ -348,6 +348,7 @@ nnoremap <silent> <F9> :TagbarToggle<CR>
 let g:tagbar_compact = 1
 let g:tagbar_show_linenumbers = -1
 let g:tagbar_foldlevel = 2
+let g:tagbar_autofocus = 1
 "" }}}
 
 ""easy tags {{{
@@ -404,8 +405,8 @@ noremap k gk
 ""Paste Mode Toggle {{{
 nnoremap <F4> :set invpaste paste?<cr>
 inoremap <F4> <c-o>:set invpaste paste?<cr>
-nnoremap <leader>p "*p
-nnoremap <leader>y "*y
+noremap <leader>p "*p
+noremap <leader>y "*y
 set pastetoggle=<F4>
 ""}}}
 
