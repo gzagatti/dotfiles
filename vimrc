@@ -160,6 +160,7 @@ Plugin 'hdima/python-syntax'            "python syntax
 Plugin 'suoto/vim-hdl'                  "hdl support
 Plugin 'elzr/vim-json'                  "json support
 Plugin 'jvirtanen/vim-octave'           "octave support
+"Plugin 'ervandew/eclim'                 "java support
 """}}}
 
 ""Clean up {{{
