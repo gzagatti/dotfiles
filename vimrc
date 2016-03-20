@@ -374,6 +374,21 @@ let g:tagbar_autofocus = 1
       "\'z'    : '#H'}
 ""}}}
 
+""eclim {{
+let g:EclimCompletionMethod = 'omnifunc'
+let g:EclimCValidate = 0
+let g:EclimHtmlValidate = 0
+let g:EclimJavascriptValidate = 0
+let g:EclimPhpValidate = 0
+let g:EclimPhpHtmlValidate = 0
+let g:EclimPythonValidate = 0
+let g:EclimRubyValidate = 0
+let g:EclimScalaValidate = 0
+let g:EclimXmlValidate  = 0
+let g:EclimDtdValidate = 0
+let g:EclimXsdValidate = 0
+""}}
+
 "}}}
 
 "Key Mappings {{{
