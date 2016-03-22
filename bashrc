@@ -30,6 +30,8 @@ shopt -s histappend histverify
 alias bashrc='source ~/.bashrc'
 # notational velocity with vim
 alias note='vim -c ":Pad ls"'
+# mongodb server
+alias mongod='mongod --config /usr/local/etc/mongod.conf'
 # }}}
 
 # Finder Specific {{{
