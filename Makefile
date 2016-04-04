@@ -22,3 +22,7 @@ octave:
 python:
 	mkdir -p ${HOME}/.ipython/profile_default
 	ln -fs $(dotfiles)/ipython_config.py ${HOME}/.ipython/profile_default/ipython_config.py
+
+eclim:
+	ln -fs $(dotfiles)/eclimrc ${HOME}/.eclimrc
+
