@@ -31,6 +31,8 @@ endif
 
 ""Autocompletion {{{
 set wildmenu "autocomplete feature when cycling through TAB
+set wildmode=longest:full,full
+set wildignorecase
 ""}}}
 
 ""Line ruler {{{
@@ -235,10 +237,13 @@ map <Leader>sa :SlimuxShellLast<CR>
 map <Leader>sk :SlimuxSendKeysLast<CR>
 
 """ slimux and python integration
-augroup python_slimux:
+augroup loadfile_slimux:
   autocmd!
   autocmd FileType python noremap <leader>sf :execute ':SlimuxShellRun %run -i '.@%<cr>
+  autocmd FileType matlab noremap <leader>sf :execute ':SlimuxShellRun run('''.@%.''')'<cr>
+  autocmd FileType ruby noremap <leader>sf :execute ':SlimuxShellRun load '''.@%.''''<cr>
 augroup END
+
 "}}}
 
 ""easy-align {{{
