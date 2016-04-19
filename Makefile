@@ -26,3 +26,5 @@ python:
 eclim:
 	ln -fs $(dotfiles)/eclimrc ${HOME}/.eclimrc
 
+ruby:
+	ln -fs $(dotfiles)/irbrc ${HOME}/.irbrc
