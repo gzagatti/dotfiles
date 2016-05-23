@@ -148,6 +148,7 @@ Plugin 'lambdalisue/vim-gista-unite'    " Gist source for unite.vim
 Plugin 'majutsushi/tagbar'              " Easy tags navigation
 Plugin 'tsukkee/unite-tag'              " Tag source for unite.vim
 Plugin 'vim-airline/vim-airline'        " lean & mean status/tabline for vim that's light as air
+Plugin 'vim-scripts/matchit.zip'        " extended % matching for HTML, Latex and many other languages
 "Plugin 'edkolev/tmuxline.vim'           " simple tmux statusline generator with support for powerline symbols and statusline / airline / lightline integration
 "Plugin 'xolox/vim-easytags'             " Automated tag file generation and syntax highlighting of tags
 "Plugin 'xolox/vim-misc'                 " Auxiliary functions for vim-easytags
