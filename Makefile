@@ -30,3 +30,6 @@ eclim:
 
 ruby:
 	ln -fs $(dotfiles)/irbrc ${HOME}/.irbrc
+
+git:
+	ln -fs $(dotfiles)/gitconfig ${HOME}/.gitconfig

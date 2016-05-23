@@ -1,0 +1,30 @@
+[user]
+        name = gzagatti
+        email = gzagatti@gmail.com
+[core]
+        editor = vim
+        autocrlf = input
+[ui]
+        color = true
+[push]
+        default = simple
+[pull]
+        rebase = true
+[rerere]
+        enabled = true
+[alias]
+        s = status -s
+        lg = log --oneline --decorate --all --graph
+[credential]
+        helper = osxkeychain
+[github]
+        user = gzagatti
+[hub]
+        protocol = https
+[filter "lfs"]
+        clean = git-lfs clean %f
+        smudge = git-lfs smudge %f
+        required = true
+[diff "pandoc"]
+        text = pandoc --to=markdown
+        prompt = false
