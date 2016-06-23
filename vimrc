@@ -70,7 +70,7 @@ endif
 "upon hitting escape to change modes,
 "send successive move-left and move-right
 "commands to immediately redraw the cursor
-inoremap <special> <Esc> <Esc>hl
+inoremap <special> <Esc><Esc> <Esc>hl
 "}}}
 
 ""Searching {{{
@@ -91,15 +91,15 @@ set directory=~/.vim/_swap/     "where to put swap files
 set tags=.git/tags,tags,./tags
 ""}}}
 
-"" Sign Column {{{
-highlight SignColumn ctermbg=None guibg=None
+""Sign Column {{{
+highlight SignColumn ctermbg=NONE guibg=NONE
 ""}}}
 
-"" Status line {{{
+""Status line {{{
 set laststatus=2
 ""}}}
 
-"" Auto save {{{
+""Auto save {{{
 augroup auto_save
   autocmd!
   au CursorHold,InsertLeave * silent! wall
@@ -127,43 +127,38 @@ Plugin 'itspriddle/vim-marked'          " to open markdown files in marked
 Plugin 'Valloric/YouCompleteMe'         " code completion engine
 Plugin 'terryma/vim-multiple-cursors'   " multiple cursors
 Plugin 'fmoralesc/vim-pad'              " notational velocity
-Plugin 'tommcdo/vim-exchange'           " easy text exchange operator in vim
 Plugin 'chrisbra/NrrwRgn'               " a narrow Region Plugin
 Plugin 'Yggdroot/indentLine'            " display the indention levels with thin vertical lines
-Plugin 'editorconfig/editorconfig-vim'  " EditorConfig plugin for Vim http://editorconfig.org
-Plugin 'mattn/emmet-vim'                " Improves HTML and CSS workflow
-Plugin 'reedes/vim-pencil'              " rethinking vim as a tool for writting
-Plugin 'reedes/vim-textobj-sentence'    " smart motions for sentences
+Plugin 'editorconfig/editorconfig-vim'  " editorConfig plugin for Vim http://editorconfig.org
+Plugin 'mattn/emmet-vim'                " improves HTML and CSS workflow
 Plugin 'kana/vim-textobj-user'          " create your own text objects
 Plugin 'junegunn/goyo.vim'              " distraction free vim
 Plugin 'danro/rename.vim'               " rename files in vim
 Plugin 'Shougo/unite.vim'               " unite and create user interfaces
 Plugin 'Shougo/vimproc.vim'             " interactive command execution
 Plugin 'rhysd/vim-grammarous'           " powerful grammar checker using LanguageTool
-Plugin 'christoomey/vim-tmux-navigator' " Seamless navigation between tmux panes and vim splits
-Plugin 'epeli/slimux'                   " Tmux/vim integration
-Plugin 'godlygeek/tabular'              " Easy alignment of text
-Plugin 'lambdalisue/vim-gista'          " Gist management
-Plugin 'lambdalisue/vim-gista-unite'    " Gist source for unite.vim
+Plugin 'christoomey/vim-tmux-navigator' " seamless navigation between tmux panes and vim splits
+Plugin 'epeli/slimux'                   " tmux/vim integration
+Plugin 'godlygeek/tabular'              " easy alignment of text
+Plugin 'lambdalisue/vim-gista'          " gist management
+Plugin 'lambdalisue/vim-gista-unite'    " gist source for unite.vim
 Plugin 'majutsushi/tagbar'              " Easy tags navigation
-Plugin 'tsukkee/unite-tag'              " Tag source for unite.vim
+Plugin 'tsukkee/unite-tag'              " tag source for unite.vim
 Plugin 'vim-airline/vim-airline'        " lean & mean status/tabline for vim that's light as air
 Plugin 'vim-scripts/matchit.zip'        " extended % matching for HTML, Latex and many other languages
-"Plugin 'edkolev/tmuxline.vim'           " simple tmux statusline generator with support for powerline symbols and statusline / airline / lightline integration
-"Plugin 'xolox/vim-easytags'             " Automated tag file generation and syntax highlighting of tags
-"Plugin 'xolox/vim-misc'                 " Auxiliary functions for vim-easytags
-"Plugin 'tomtom/quickfixsigns_vim'       " display signs at interesting lines
+"Plugin 'edkolev/tmuxline.vim'          " simple tmux statusline generator with support for powerline symbols and statusline / airline / lightline integration
+"Plugin 'xolox/vim-easytags'            " automated tag file generation and syntax highlighting of tags
+"Plugin 'xolox/vim-misc'                " auxiliary functions for vim-easytags
 ""}}}
 
 ""Languages {{{
-Plugin 'vim-pandoc/vim-pandoc'          "pandoc support
-Plugin 'vim-pandoc/vim-pandoc-syntax'   "pandoc syntax
-Plugin 'tmhedberg/SimpylFold'           "for easy python folding
-Plugin 'hdima/python-syntax'            "python syntax
-Plugin 'suoto/vim-hdl'                  "hdl support
-Plugin 'elzr/vim-json'                  "json support
-Plugin 'jvirtanen/vim-octave'           "octave support
-"Plugin 'ervandew/eclim'                 "java support
+Plugin 'vim-pandoc/vim-pandoc'          " pandoc support
+Plugin 'vim-pandoc/vim-pandoc-syntax'   " pandoc syntax
+Plugin 'tmhedberg/SimpylFold'           " for easy python folding
+Plugin 'hdima/python-syntax'            " python syntax
+Plugin 'elzr/vim-json'                  " json support
+Plugin 'jvirtanen/vim-octave'           " octave support
+"Plugin 'ervandew/eclim'                " java support
 """}}}
 
 ""Clean up {{{
@@ -268,14 +263,6 @@ let g:pandoc#syntax#codeblocks#embeds#use = 1
 let g:pandoc#syntax#codeblock#embeds#lang = ['python']
 ""}}}
 
-""pencil and textobj sentence {{{
-augroup pencil
-    autocmd!
-      autocmd FileType markdown,mkd,pandoc,txt call pencil#init({'wrap': 'soft', 'conceallevel': 0, 'concealcursor': ''})
-      autocmd FileType markdown,mkd,pandoc,txt call textobj#sentence#init()
-augroup END
-"""}}}
-
 ""you complete me{{{
 let g:ycm_autoclose_preview_window_after_insertion = 1
 let g:ycm_collect_identifiers_from_tags_files = 1
@@ -357,19 +344,6 @@ let g:tagbar_foldlevel = 2
 let g:tagbar_autofocus = 1
 "" }}}
 
-""easy tags {{{
-"let g:easytags_file = '~/.vim/tags'
-"let g:easytags_async = 1
-"let g:easytags_resolve_links = 1
-"let g:easytags_dynamic_files = 1
-""}}}
-
-""quickfix signs {{{
-"autocmd VimEnter * call QuickfixsignsToggle()
-"nnoremap <f7> :QuickfixsignsToggle<cr>
-"nnoremap <f6> :QuickfixsignsSelect vcsdiff<cr>
-""}}}
-
 ""tmux line {{{
 "let g:tmuxline_preset = {
       "\'a'    : '#S',
@@ -379,7 +353,7 @@ let g:tagbar_autofocus = 1
       "\'z'    : '#H'}
 ""}}}
 
-""eclim {{
+""eclim {{{
 let g:EclimCompletionMethod = 'omnifunc'
 let g:EclimCValidate = 0
 let g:EclimHtmlValidate = 0
@@ -392,7 +366,7 @@ let g:EclimScalaValidate = 0
 let g:EclimXmlValidate  = 0
 let g:EclimDtdValidate = 0
 let g:EclimXsdValidate = 0
-""}}
+"" }}}
 
 "}}}
 
@@ -449,6 +423,13 @@ inoremap <down> <esc>:set fdm=manual<cr>:m .+1<cr>:set fdm=marker<cr>i
 inoremap <up> <esc>:set fdm=manual<cr>:m .-2<cr>:set fdm=marker<cr>i
 vnoremap <down> <esc>:set fdm=manual<cr>'<V'>:m '>+1<cr>:set fdm=marker<cr>gv
 vnoremap <up> <esc>:set fdm=manual<cr>'<V'>:m '<-2<cr>:set fdm=marker<cr>gv
+function! ToggleFold()
+  if &clipboard == 'unnamed'
+    set clipboard& clipboard?
+  else
+    set clipboard=unnamed clipboard?
+  endif
+endfunction
 ""}}}
 
 ""Select last inserted text {{{
@@ -472,8 +453,6 @@ nnoremap <silent> <leader>dt :%s/\s\+$//g<cr>
 ""Vimscript {{{
 augroup filetype_vim
     autocmd!
-    "operator-pending mapping to go until previous heading section
-    autocmd FileType vim onoremap ih :<c-u>execute "normal! ?^\"\\+\\s\\+\r:nohlsearch\r"<cr>
     "folding
     autocmd FileType vim setlocal foldmethod=marker
 augroup END
