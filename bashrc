@@ -2,7 +2,7 @@
 export R_PROFILE=~/.RProfile
 export GTK_PATH=/usr/local/lib/gtk-2.0
 export EDITOR=/usr/local/bin/vim
-export PATH=~/bin:$PATH
+export PATH=~/bin:/usr/local/sbin:$PATH
 export ECLIPSE_HOME=/opt/homebrew-cask/Caskroom/eclipse-jee/4.5.2/Eclipse.app/Contents/Eclipse
 # }}}
 
