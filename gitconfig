@@ -26,5 +26,5 @@
         smudge = git-lfs smudge %f
         required = true
 [diff "pandoc"]
-        text = pandoc --to=markdown
+        textconv = pandoc --to=markdown
         prompt = false
