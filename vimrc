@@ -258,7 +258,6 @@ let g:python_highlight_all = 1
 ""vim-pandoc{{{
 let g:pandoc#modules#disabled = ["chdir"]
 let g:pandoc#formatting#equalprg = 'pandoc -t markdown --atx-headers --wrap=none'
-let g:pandoc#folding#mode = 'relative'
 """open current reference
 nmap <localleader>ro <Plug>(pandoc-keyboard-ref-goto)<Plug>(pandoc-keyboard-links-open)<Plug>(pandoc-keyboard-ref-backfrom)
 ""}}}
@@ -347,7 +346,7 @@ nmap <space> [unite]
 nnoremap [unite]p :Unite -start-insert file_rec/async<cr>
 nnoremap [unite]/ :Unite grep:.<cr>
 nnoremap [unite]y :Unite -quick-match register<cr>
-nnoremap [unite]s :Unite -quick-match buffer<cr>
+nnoremap [unite]s :Unite -start-insert buffer<cr>
 ""}}}
 
 ""tagbar {{{
