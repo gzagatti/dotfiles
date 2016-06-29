@@ -1,9 +1,5 @@
 # Exported Variables {{{
 export R_PROFILE=~/.RProfile
-export GTK_PATH=/usr/local/lib/gtk-2.0
-export EDITOR=/usr/local/bin/vim
-export PATH=$PATH:/usr/local/sbin:$HOME/anaconda3/bin
-export ECLIPSE_HOME=/opt/homebrew-cask/Caskroom/eclipse-jee/4.5.2/Eclipse.app/Contents/Eclipse
 # }}}
 
 # PS1 Customization {{{
@@ -36,6 +32,14 @@ alias mongod='mongod --config /usr/local/etc/mongod.conf'
 
 # Finder Specific {{{
 if [[ $OSTYPE == darwin* ]]; then
+
+  # environment
+  export GTK_PATH=/usr/local/lib/gtk-2.0
+  export EDITOR=/usr/local/bin/vim
+  export PATH=$PATH:/usr/local/sbin:$HOME/anaconda3/bin
+  export ECLIPSE_HOME=/opt/homebrew-cask/Caskroom/eclipse-jee/4.5.2/Eclipse.app/Contents/Eclipse
+
+
   # turn on/off hidden files visibility
   alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
   alias hideFiles='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app'
