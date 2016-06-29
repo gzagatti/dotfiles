@@ -24,10 +24,6 @@ shopt -s histappend histverify
 # Aliases {{{
 # source .bashrc
 alias bashrc='source ~/.bashrc'
-# notational velocity with vim
-alias note='vim -c ":Pad ls"'
-# mongodb server
-alias mongod='mongod --config /usr/local/etc/mongod.conf'
 # }}}
 
 # Finder Specific {{{
@@ -49,10 +45,11 @@ if [[ $OSTYPE == darwin* ]]; then
 
   # rm_DS_Store_files: removes all .DS_Store file from the current dir and below
   alias rm_DS='find . -name .DS_Store -exec rm {} \;'
-fi
 
   # bash completion
  [ -r $(brew --prefix)/etc/bash_completion ] && source $(brew --prefix)/etc/bash_completion
+
+fi
 
 # }}}
 
