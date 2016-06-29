@@ -6,7 +6,7 @@ export R_PROFILE=~/.RProfile
 #format: [time] username:directory_relative_path command_number$
 #prompt will be highlighted in red if previous command fails
 #command prompt text is always highlited in yellow
-export PS1="\$(if [[ \$? == 0 ]]; then echo \"\[\e[00;30m\]\"; else echo \"\[\e[00;31m\]\"; fi)[\A] \\u:\W \#\$\[\e[0m\] \[\e[33m\]"
+export PS1="\$(if [[ \$? == 0 ]]; then echo \"\[\e[00;30m\]\"; else echo \"\[\e[00;31m\]\"; fi)[\A] [\h \u]:\W \#\$\[\e[0m\] \[\e[33m\]"
 trap "echo -n $'\e[0m'" DEBUG #reset colours prior to printing output
 # }}}
 
