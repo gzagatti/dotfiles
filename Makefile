@@ -1,6 +1,6 @@
 dotfiles := $(shell pwd)
 
-all: vim tmux bash octave python
+all: vim tmux bash octave python git
 
 sh:
 	sh $(dotfiles)/osx
