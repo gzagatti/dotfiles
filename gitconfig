@@ -8,6 +8,8 @@
         color = true
 [push]
         default = simple
+[color]
+        ui = auto
 [pull]
         rebase = true
 [rerere]
