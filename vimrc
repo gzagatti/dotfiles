@@ -70,7 +70,7 @@ endif
 "upon hitting escape to change modes,
 "send successive move-left and move-right
 "commands to immediately redraw the cursor
-inoremap <special> <Esc><Esc> <Esc>hl
+inoremap <special> <Esc> <Esc>hl
 "}}}
 
 ""Searching {{{
@@ -126,7 +126,6 @@ Plugin 'scrooloose/syntastic'           " syntax checking hacks
 Plugin 'itspriddle/vim-marked'          " to open markdown files in marked
 Plugin 'Valloric/YouCompleteMe'         " code completion engine
 Plugin 'terryma/vim-multiple-cursors'   " multiple cursors
-Plugin 'fmoralesc/vim-pad'              " notational velocity
 Plugin 'chrisbra/NrrwRgn'               " a narrow Region Plugin
 Plugin 'Yggdroot/indentLine'            " display the indention levels with thin vertical lines
 Plugin 'editorconfig/editorconfig-vim'  " editorConfig plugin for Vim http://editorconfig.org
@@ -209,15 +208,6 @@ let NERDDefaultNesting=1
 
 ""nerdtree {{{
 nnoremap <f8> :NERDTreeToggle<cr>
-""}}}
-
-""vim-pad {{{
-let g:pad#dir="~/Dropbox/notes"
-let g:pad#search_backend="ag"
-let g:pad#default_file_extension=".md"
-let g:pad#default_format="markdown"
-let g:pad#window_height=12
-let g:pad#open_in_split = 0
 ""}}}
 
 ""slimux {{{
