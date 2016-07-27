@@ -17,8 +17,6 @@
 [alias]
         s = status -s
         lg = log --oneline --decorate --all --graph
-[credential]
-        helper = osxkeychain
 [github]
         user = gzagatti
 [hub]
