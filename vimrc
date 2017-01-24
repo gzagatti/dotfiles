@@ -41,9 +41,9 @@ set number numberwidth=4
 
 ""White Space {{{
 set wrap
-set shiftround shiftwidth=2
-set softtabstop=2
-set expandtab
+"set shiftround shiftwidth=2
+"set softtabstop=2
+"set expandtab
 set backspace=indent,eol,start
 set list
 set listchars=""
@@ -83,8 +83,8 @@ set autowriteall
 ""}}}
 
 ""Backup and swap files {{{
-set backupdir=~/.vim/_backup/   "where to put backup files
-set directory=~/.vim/_swap/     "where to put swap files
+set backupdir=~/.vim/_tmp/   "where to put backup files
+set directory=~/.vim/_tmp/     "where to put swap files
 ""}}}
 
 ""Tags {{{
@@ -115,50 +115,48 @@ Plugin 'VundleVim/Vundle.vim'
 ""}}}
 
 ""Tools {{{
-Plugin 'ZoomWin'                        " to zoom in and out of windowsf
-Plugin 'scrooloose/nerdtree'            " file management from within Vim
-Plugin 'scrooloose/nerdcommenter'       " wrangle code comments
-Plugin 'junegunn/vim-easy-align'        " for easy alignment
-Plugin 'tpope/vim-fugitive'             " git support
-Plugin 'tpope/vim-surround'             " surround text with pairs of elements
-Plugin 'easymotion/vim-easymotion'      " to make motion around vim easier
-Plugin 'scrooloose/syntastic'           " syntax checking hacks
-Plugin 'itspriddle/vim-marked'          " to open markdown files in marked
-Plugin 'Valloric/YouCompleteMe'         " code completion engine
-Plugin 'terryma/vim-multiple-cursors'   " multiple cursors
-Plugin 'chrisbra/NrrwRgn'               " a narrow Region Plugin
-Plugin 'Yggdroot/indentLine'            " display the indention levels with thin vertical lines
-Plugin 'editorconfig/editorconfig-vim'  " editorConfig plugin for Vim http://editorconfig.org
-Plugin 'mattn/emmet-vim'                " improves HTML and CSS workflow
-Plugin 'kana/vim-textobj-user'          " create your own text objects
-Plugin 'junegunn/goyo.vim'              " distraction free vim
-Plugin 'danro/rename.vim'               " rename files in vim
-Plugin 'Shougo/unite.vim'               " unite and create user interfaces
-Plugin 'Shougo/vimproc.vim'             " interactive command execution
-Plugin 'rhysd/vim-grammarous'           " powerful grammar checker using LanguageTool
-Plugin 'christoomey/vim-tmux-navigator' " seamless navigation between tmux panes and vim splits
-Plugin 'epeli/slimux'                   " tmux/vim integration
-Plugin 'godlygeek/tabular'              " easy alignment of text
-Plugin 'lambdalisue/vim-gista'          " gist management
-Plugin 'lambdalisue/vim-gista-unite'    " gist source for unite.vim
-Plugin 'majutsushi/tagbar'              " Easy tags navigation
-Plugin 'tsukkee/unite-tag'              " tag source for unite.vim
-Plugin 'vim-airline/vim-airline'        " lean & mean status/tabline for vim that's light as air
-Plugin 'vim-scripts/matchit.zip'        " extended % matching for HTML, Latex and many other languages
-"Plugin 'edkolev/tmuxline.vim'          " simple tmux statusline generator with support for powerline symbols and statusline / airline / lightline integration
-"Plugin 'xolox/vim-easytags'            " automated tag file generation and syntax highlighting of tags
-"Plugin 'xolox/vim-misc'                " auxiliary functions for vim-easytags
-""}}}
+" Most Used Functionalities
+Plugin 'scrooloose/nerdtree'              " file management from within Vim
+Plugin 'scrooloose/nerdcommenter'         " wrangle code comments
+Plugin 'scrooloose/syntastic'             " syntax checking hacks
+Plugin 'tpope/vim-fugitive'               " git support
+Plugin 'tpope/vim-surround'               " surround text with pairs of elements
+Plugin 'Shougo/vimproc.vim'               " interactive command execution
+Plugin 'Shougo/unite.vim'                 " unite and create user interfaces
+Plugin 'lambdalisue/vim-gista'            " gist management
+Plugin 'lambdalisue/vim-gista-unite'      " gist source for unite.vim
+Plugin 'christoomey/vim-tmux-navigator'   " seamless navigation between tmux panes and vim splits
+Plugin 'epeli/slimux'                     " tmux/vim integration
+Plugin 'itspriddle/vim-marked'            " to open markdown files in marked
+Plugin 'danro/rename.vim'                 " rename files in vim
+Plugin 'vim-airline/vim-airline'          " lean & mean status/tabline for vim that's light as air
+Plugin 'altercation/vim-colors-solarized' " solarized theme
+Plugin 'Valloric/YouCompleteMe'          " code completion engine
+Plugin  'Yggdroot/indentLine'
+"Plugin 'edkolev/tmuxline.vim'            " simple tmux statusline generator with support for powerline symbols and statusline / airline / lightline integration
 
-""Languages {{{
-Plugin 'vim-pandoc/vim-pandoc'          " pandoc support
-Plugin 'vim-pandoc/vim-pandoc-syntax'   " pandoc syntax
-Plugin 'tmhedberg/SimpylFold'           " for easy python folding
-Plugin 'hdima/python-syntax'            " python syntax
-Plugin 'elzr/vim-json'                  " json support
-Plugin 'jvirtanen/vim-octave'           " octave support
-"Plugin 'ervandew/eclim'                " java support
+" Least Used Functionalities
+Plugin 'majutsushi/tagbar'                " Easy tags navigation
+Plugin 'vim-scripts/matchit.zip'          " extended % matching for HTML, Latex and many other languages
+Plugin 'easymotion/vim-easymotion'        " to make motion around vim easier
+Plugin 'junegunn/vim-easy-align'          " for easy alignment
+Plugin 'terryma/vim-multiple-cursors'     " multiple cursors
+Plugin 'chrisbra/NrrwRgn'                 " a narrow Region Plugin
+Plugin 'godlygeek/tabular'                " easy alignment of text
+Plugin 'tpope/vim-sleuth'                 " Heuristically set indent options
+
 """}}}
+
+"""Languages {{{
+Plugin 'mattn/emmet-vim'                  " improves HTML and CSS workflow
+Plugin 'vim-pandoc/vim-pandoc'            " pandoc support
+Plugin 'vim-pandoc/vim-pandoc-syntax'     " pandoc syntax
+Plugin 'tmhedberg/SimpylFold'             " for easy python folding
+Plugin 'hdima/python-syntax'              " python syntax
+Plugin 'elzr/vim-json'                    " json support
+Plugin 'jvirtanen/vim-octave'             " octave support
+""Plugin 'ervandew/eclim'                  " java support
+""""}}}
 
 ""Clean up {{{
 call vundle#end()
@@ -228,6 +226,7 @@ augroup loadfile_slimux:
   autocmd FileType python noremap <leader>sf :execute ':SlimuxShellRun %run -i '.@%<cr>
   autocmd FileType matlab noremap <leader>sf :execute ':SlimuxShellRun run('''.@%.''')'<cr>
   autocmd FileType ruby noremap <leader>sf :execute ':SlimuxShellRun load '''.@%.''''<cr>
+  autocmd FileType sql noremap <leader>sf :execute ':SlimuxShellRun \\i '.@%<cr>
 augroup END
 
 "}}}
@@ -235,10 +234,6 @@ augroup END
 ""easy-align {{{
 vmap <Enter> <Plug>(EasyAlign)
 ""}}}
-
-""python-syntax{{{
-let g:python_highlight_all = 1
-"""}}}
 
 ""vim-pandoc{{{
 let g:pandoc#modules#disabled = ["chdir"]
@@ -261,8 +256,6 @@ nnoremap <leader>jh :YcmCompleter GetDoc<cr>'
 ""}}}
 
 ""narrow negion {{{
-let g:nrrw_custom_options={}
-let g:nrrw_custom_options['filetype'] = ''
 let g_nrrw_rgn_nohl = 3
 let g:nrrw_rgn_resize_window = 'percentage'
 let g:nrrw_rgn_rel_min = 20
@@ -270,41 +263,6 @@ let g:nrrw_rgn_rel_min = 20
 command! -nargs=* -bang -range -complete=filetype NN
             \ :<line1>,<line2> call nrrwrgn#NrrwRgn('',<q-bang>)
             \ | set filetype=<args>
-""}}}
-
-""indent line {{{
-let g:indentLine_loaded = 0
-let g:identLine_fileType = ['python', 'json']
-let g:indentLine_concealcursor=''
-""}}}
-
-""editor conf {{{
-let g:EditorConfig_exclude_patterns = ['fugitive://.*']
-""}}}
-
-""goyo {{{
-let g:check_foldcolumn = 0
-function! s:goyo_enter()
-    silent !tmux set status off
-    silent !tmux resize-pane -Z
-    if &foldcolumn
-        set foldcolumn=0
-        let g:check_foldcolumn = 1
-    endif
-    set number
-endfunction
-
-function! s:goyo_leave()
-    silent !tmux set status on
-    silent !tmux resize-pane -Z
-    if g:check_foldcolumn
-        set foldcolumn=1
-        let g:check_foldcolumn
-    endif
-endfunction
-
-autocmd! User GoyoEnter nested call <SID>goyo_enter()
-autocmd! User GoyoLeave nested call <SID>goyo_leave()
 ""}}}
 
 ""unite {{{
@@ -323,7 +281,8 @@ nmap <space> [unite]
 nnoremap [unite]p :Unite -start-insert file_rec/async<cr>
 nnoremap [unite]/ :Unite grep:.<cr>
 nnoremap [unite]y :Unite -quick-match register<cr>
-nnoremap [unite]s :Unite -start-insert buffer<cr>
+nnoremap [unite]b :Unite -start-insert buffer<cr>
+nnoremap [unite]g :Unite -start-insert gista<cr>
 ""}}}
 
 ""tagbar {{{
@@ -342,6 +301,7 @@ let g:tagbar_autofocus = 1
       "\'y'    : ['%R', '%a', '%Y'],
       "\'z'    : '#H'}
 ""}}}
+"" }}}
 
 ""eclim {{{
 let g:EclimCompletionMethod = 'omnifunc'
@@ -356,6 +316,7 @@ let g:EclimScalaValidate = 0
 let g:EclimXmlValidate  = 0
 let g:EclimDtdValidate = 0
 let g:EclimXsdValidate = 0
+"" }}}
 "" }}}
 
 "}}}
@@ -407,12 +368,10 @@ endfunction
 ""}}}
 
 ""Line Transposition {{{
-nnoremap <down> :set fdm=manual<cr>:m .+1<cr>:set fdm=marker<cr>
-nnoremap <up> :set fdm=manual<cr>:m .-2<cr>:set fdm=marker<cr>
-inoremap <down> <esc>:set fdm=manual<cr>:m .+1<cr>:set fdm=marker<cr>i
-inoremap <up> <esc>:set fdm=manual<cr>:m .-2<cr>:set fdm=marker<cr>i
-vnoremap <down> <esc>:set fdm=manual<cr>'<V'>:m '>+1<cr>:set fdm=marker<cr>gv
-vnoremap <up> <esc>:set fdm=manual<cr>'<V'>:m '<-2<cr>:set fdm=marker<cr>gv
+nnoremap <s-down> :set fdm=manual<cr>:m .+1<cr>:set fdm=marker<cr>
+nnoremap <s-up> :set fdm=manual<cr>:m .-2<cr>:set fdm=marker<cr>
+vnoremap <s-down> <esc>:set fdm=manual<cr>'<V'>:m '>+1<cr>:set fdm=marker<cr>gv
+vnoremap <s-up> <esc>:set fdm=manual<cr>'<V'>:m '<-2<cr>:set fdm=marker<cr>gv
 function! ToggleFold()
   if &clipboard == 'unnamed'
     set clipboard& clipboard?
@@ -459,6 +418,12 @@ augroup json
   autocmd!
   autocmd FileType json :setlocal foldmethod=syntax
 ""}}}
+
+""Python {{{
+augroup python
+  autocmd!
+  autocmd FileType python :set equalprg=yapf\ --style='pep8'
+""}}}
 "}}}
 
 "Conditioning {{{
@@ -470,8 +435,13 @@ inoremap <Right> <nop>
 "}}}
 "}}}
 
+"Color Scheme {{{
+syntax enable
+set background=dark
+colorscheme solarized
+"" }}}
+
 "Clean Up {{{
 filetype plugin indent on
 set nohlsearch
 "}}}
-
