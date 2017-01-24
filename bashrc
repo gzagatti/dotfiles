@@ -13,6 +13,11 @@ if [[ $- == *i* ]]; then
   trap "echo -n $'\e[0m'" DEBUG #reset colours prior to printing output
   # }}}
 
+  # Color `ls` output {{{
+  export CLICOLOR=1
+  export LSCOLORS=excxhxDxbxhxhxhxhxfxfx
+  # }}}
+
   # History {{{
   export HISTFILE=~/.bash_history
   export HISTSIZE=5000
@@ -41,14 +46,13 @@ if [[ $- == *i* ]]; then
   if [[ $OSTYPE == darwin* ]]; then
 
     # environment
+    export PATH=$HOME/anaconda3/bin:/usr/local/sbin:$PATH
     export GTK_PATH=/usr/local/lib/gtk-2.0
     export EDITOR=/usr/local/bin/vim
-    export PATH=$PATH:/usr/local/sbin:$HOME/anaconda3/bin
     export ECLIPSE_HOME=/opt/homebrew-cask/Caskroom/eclipse-jee/4.5.2/Eclipse.app/Contents/Eclipse
     # magic environments in order to make slimux work in tmux
     export EVENT_NOKQUEUE=1
     export EVENT_NOPOLL=1
-
 
     # turn on/off hidden files visibility
     alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
@@ -56,6 +60,9 @@ if [[ $- == *i* ]]; then
 
     # ql: show a "Quick Look" view of files
     ql () { /usr/bin/qlmanage -p "$@" >& /dev/null & }
+
+    # marked: open document in Marked 2
+    marked() { if [ $1 ]; then open -a "Marked 2" $1; else open -a "Marked 2"; fi }
 
     # rm_DS_Store_files: removes all .DS_Store file from the current dir and below
     alias rm_DS='find . -name .DS_Store -exec rm {} \;'
