@@ -5,6 +5,10 @@ if [[ $- == *i* ]]; then
   export R_PROFILE=~/.RProfile
   # }}}
 
+  # Terminal {{{
+  export TERM=xterm-256color
+  # }}}
+
   # PS1 Customization {{{
   #format: [time] username:directory_relative_path command_number$
   #prompt will be highlighted in red if previous command fails
