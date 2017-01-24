@@ -14,7 +14,6 @@ set completion-ignore-case on
 
 # VI editing mode {{{
 set editing-mode vi
-set show-mode-in-prompt on
 
 # insert mode key bindings
 set keymap vi-insert
