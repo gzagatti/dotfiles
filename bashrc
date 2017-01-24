@@ -39,6 +39,8 @@ if [[ $- == *i* ]]; then
   if [[ $OSTYPE == linux* ]]; then
     # magic envrionments in order to make slimux work in tmux
     export EVENT_NOEPOLL=1
+    # adjusting python path
+    export PATH=$HOME/anaconda3/bin:$PATH
   fi
   # }}}
 
