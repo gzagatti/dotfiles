@@ -21,9 +21,7 @@ octave:
 
 python:
 	mkdir -p ${HOME}/.ipython/profile_default
-	mkdir -p ${HOME}/.matplotlib
-	ln -fs $(dotfiles)/ipython_config.py ${HOME}/.ipython/profile_default/ipython_config.py
-	ln -fs $(dotfiles)/matplotlibrc ${HOME}/.matplotlib/matplotlibrc
+	ln -fs $(dotfiles)/ipython_config.py ${HOME}/.jupyter/jupyter_console_config.py
 
 eclim:
 	ln -fs $(dotfiles)/eclimrc ${HOME}/.eclimrc
