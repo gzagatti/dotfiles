@@ -300,7 +300,6 @@ let g:tagbar_autofocus = 1
       "\'cwin' : ['#I', '#W', '#F'],
       "\'y'    : ['%R', '%a', '%Y'],
       "\'z'    : '#H'}
-""}}}
 "" }}}
 
 ""eclim {{{
@@ -316,7 +315,6 @@ let g:EclimScalaValidate = 0
 let g:EclimXmlValidate  = 0
 let g:EclimDtdValidate = 0
 let g:EclimXsdValidate = 0
-"" }}}
 "" }}}
 
 "}}}
@@ -353,7 +351,25 @@ nnoremap <F4> :set invpaste paste?<cr>
 inoremap <F4> <c-o>:set invpaste paste?<cr>
 noremap <leader>p "*p
 noremap <leader>y "*y
-set pastetoggle=<F4>
+
+" 'bracketed paste mode' support: programs that support it send the terminal
+" an escape sequence to enable this mode, in which the terminal surrounds
+" pasted text with a pair of escape sequences that identify the start and end.
+" http://stackoverflow.com/questions/5585129/pasting-code-into-terminal-window-into-vim-on-mac-os-x
+if &term =~ "xterm.*"
+    let &t_ti = &t_ti . "\e[?2004h"
+    let &t_te = "\e[?2004l" . &t_te
+    function XTermPasteBegin(ret)
+        set pastetoggle=<Esc>[201~
+        set paste
+        return a:ret
+    endfunction
+    map <expr> <Esc>[200~ XTermPasteBegin("i")
+    imap <expr> <Esc>[200~ XTermPasteBegin("")
+    vmap <expr> <Esc>[200~ XTermPasteBegin("c")
+    cmap <Esc>[200~ <nop>
+    cmap <Esc>[201~ <nop>
+  endif
 ""}}}
 
 ""Clipboard Toogle{{{
@@ -445,3 +461,4 @@ colorscheme solarized
 filetype plugin indent on
 set nohlsearch
 "}}}
+
