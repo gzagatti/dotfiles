@@ -203,6 +203,10 @@ let g:airline#extensions#whitespace#enabled = 0
 ""nerdcommenter {{{
 let NERDDefaultNesting=1
 ""}}}
+"
+""nerdtree {{{
+let NERDTreeIgnore=['__pycache__']
+""}}}
 
 ""nerdtree {{{
 nnoremap <f8> :NERDTreeToggle<cr>
