@@ -1,6 +1,6 @@
 dotfiles := $(shell pwd)
 
-all: vim tmux bash octave python git
+all: vim tmux bash octave jupyter git
 
 sh:
 	sh $(dotfiles)/osx
@@ -19,9 +19,9 @@ bash:
 octave:
 	ln -fs $(dotfiles)/octaverc ${HOME}/.octaverc
 
-python:
-	mkdir -p ${HOME}/.ipython/profile_default
-	ln -fs $(dotfiles)/ipython_config.py ${HOME}/.jupyter/jupyter_console_config.py
+jupyter:
+	mkdir -p ${HOME}/.jupyter/
+	ln -fs $(dotfiles)/jupyter_console_config.py ${HOME}/.jupyter/jupyter_console_config.py
 
 eclim:
 	ln -fs $(dotfiles)/eclimrc ${HOME}/.eclimrc
