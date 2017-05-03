@@ -55,7 +55,6 @@ if [[ $- == *i* ]]; then
     export PATH=$HOME/anaconda3/bin:/usr/local/sbin:$PATH
     export GTK_PATH=/usr/local/lib/gtk-2.0
     export EDITOR=/usr/local/bin/vim
-    export ECLIPSE_HOME=/opt/homebrew-cask/Caskroom/eclipse-jee/4.5.2/Eclipse.app/Contents/Eclipse
     # magic environments in order to make slimux work in tmux
     export EVENT_NOKQUEUE=1
     export EVENT_NOPOLL=1
