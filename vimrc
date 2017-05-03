@@ -131,23 +131,24 @@ Plugin 'itspriddle/vim-marked'            " to open markdown files in marked
 Plugin 'danro/rename.vim'                 " rename files in vim
 Plugin 'vim-airline/vim-airline'          " lean & mean status/tabline for vim that's light as air
 Plugin 'altercation/vim-colors-solarized' " solarized theme
-Plugin 'Valloric/YouCompleteMe'          " code completion engine
-Plugin  'Yggdroot/indentLine'
-"Plugin 'edkolev/tmuxline.vim'            " simple tmux statusline generator with support for powerline symbols and statusline / airline / lightline integration
+Plugin 'Valloric/YouCompleteMe'           " code completion engine
+Plugin  'Yggdroot/indentLine'             " displays thin vertical lines at each indentation level for code indented with spaces
+" Plugin 'edkolev/tmuxline.vim'           " simple tmux statusline generator with support for powerline symbols and statusline / airline / lightline integration
 
 " Least Used Functionalities
-Plugin 'majutsushi/tagbar'                " Easy tags navigation
+Plugin 'majutsushi/tagbar'                " easy tags navigation
 Plugin 'vim-scripts/matchit.zip'          " extended % matching for HTML, Latex and many other languages
 Plugin 'easymotion/vim-easymotion'        " to make motion around vim easier
 Plugin 'junegunn/vim-easy-align'          " for easy alignment
 Plugin 'terryma/vim-multiple-cursors'     " multiple cursors
 Plugin 'chrisbra/NrrwRgn'                 " a narrow Region Plugin
 Plugin 'godlygeek/tabular'                " easy alignment of text
-Plugin 'tpope/vim-sleuth'                 " Heuristically set indent options
+Plugin 'tpope/vim-sleuth'                 " heuristically set indent/tab options
+Plugin 'jamessan/vim-gnupg'               " easy gpg handling
 
-"""}}}
+""" }}}
 
-"""Languages {{{
+""" Languages {{{
 Plugin 'mattn/emmet-vim'                  " improves HTML and CSS workflow
 Plugin 'vim-pandoc/vim-pandoc'            " pandoc support
 Plugin 'vim-pandoc/vim-pandoc-syntax'     " pandoc syntax
@@ -155,7 +156,7 @@ Plugin 'tmhedberg/SimpylFold'             " for easy python folding
 Plugin 'hdima/python-syntax'              " python syntax
 Plugin 'elzr/vim-json'                    " json support
 Plugin 'jvirtanen/vim-octave'             " octave support
-""Plugin 'ervandew/eclim'                  " java support
+Plugin 'ervandew/eclim'                   " java support
 """"}}}
 
 ""Clean up {{{
