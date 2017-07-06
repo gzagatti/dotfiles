@@ -1,4 +1,5 @@
 dotfiles := $(shell pwd)
+workspace := ${HOME}
 
 all: vim tmux bash octave jupyter git
 
@@ -6,28 +7,28 @@ sh:
 	sh $(dotfiles)/osx
 
 vim:
-	ln -fs $(dotfiles)/vimrc ${HOME}/.vimrc
+	ln -fs $(dotfiles)/vimrc ${workspace}/.vimrc
 
 tmux:
-	ln -fs $(dotfiles)/tmux.conf ${HOME}/.tmux.conf
+	ln -fs $(dotfiles)/tmux.conf ${workspace}/.tmux.conf
 
 bash:
-	ln -fs $(dotfiles)/inputrc ${HOME}/.inputrc
-	ln -fs $(dotfiles)/bash_profile ${HOME}/.bash_profile
-	ln -fs $(dotfiles)/bashrc ${HOME}/.bashrc
+	ln -fs $(dotfiles)/inputrc ${workspace}/.inputrc
+	ln -fs $(dotfiles)/bash_profile ${workspace}/.bash_profile
+	ln -fs $(dotfiles)/bashrc ${workspace}/.bashrc
 
 octave:
-	ln -fs $(dotfiles)/octaverc ${HOME}/.octaverc
+	ln -fs $(dotfiles)/octaverc ${workspace}/.octaverc
 
 jupyter:
-	mkdir -p ${HOME}/.jupyter/
-	ln -fs $(dotfiles)/jupyter_console_config.py ${HOME}/.jupyter/jupyter_console_config.py
+	mkdir -p ${workspace}/.jupyter/
+	ln -fs $(dotfiles)/jupyter_console_config.py ${workspace}/.jupyter/jupyter_console_config.py
 
 eclim:
-	ln -fs $(dotfiles)/eclimrc ${HOME}/.eclimrc
+	ln -fs $(dotfiles)/eclimrc ${workspace}/.eclimrc
 
 ruby:
-	ln -fs $(dotfiles)/irbrc ${HOME}/.irbrc
+	ln -fs $(dotfiles)/irbrc ${workspace}/.irbrc
 
 git:
-	ln -fs $(dotfiles)/gitconfig ${HOME}/.gitconfig
+	ln -fs $(dotfiles)/gitconfig ${workspace}/.gitconfig
