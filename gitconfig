@@ -25,6 +25,16 @@
         clean = git-lfs clean %f
         smudge = git-lfs smudge %f
         required = true
+[difftool "nbdime"]
+        cmd = git-nbdifftool diff \"$LOCAL\" \"$REMOTE\"
+[mergetool "nbdime"]
+        cmd = git-nbmergetool merge \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"
 [diff "pandoc"]
         textconv = pandoc --to=markdown
         prompt = false
+[diff "jupyternotebook"]
+        command = git-nbdiffdriver diff
+        prompt = false
+[merge "jupyternotebook"]
+        driver = git-nbmergedriver merge %O %A %B %L %P
+        name = jupyter notebook merge driver
