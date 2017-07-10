@@ -1,7 +1,7 @@
 dotfiles := $(shell pwd)
 workspace := ${HOME}
 
-all: vim tmux bash octave jupyter git
+all: vim tmux bash octave jupyter git r
 
 sh:
 	sh $(dotfiles)/osx
@@ -32,3 +32,6 @@ ruby:
 
 git:
 	ln -fs $(dotfiles)/gitconfig ${workspace}/.gitconfig
+
+r:
+	ln -fs $(dotfiles)/Rprofile ${workspace}/.Rprofile
