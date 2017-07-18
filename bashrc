@@ -52,7 +52,10 @@ if [[ $- == *i* ]]; then
   if [[ $OSTYPE == darwin* ]]; then
 
     # environment
-    export PATH=$HOME/anaconda3/bin:/usr/local/sbin:$PATH
+    # sets the preferred PATH order
+    export PATH=/usr/local/sbin:/usr/local/bin:$HOME/miniconda3/bin:$PATH
+    # removes duplicates from the PATH, given that the above can introduce duplicates
+    PATH=`printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}'`
     export GTK_PATH=/usr/local/lib/gtk-2.0
     export EDITOR=/usr/local/bin/vim
     # magic environments in order to make slimux work in tmux
@@ -73,7 +76,7 @@ if [[ $- == *i* ]]; then
     alias rm_DS='find . -name .DS_Store -exec rm {} \;'
 
     # bash completion
-  [ -r $(brew --prefix)/etc/bash_completion ] && source $(brew --prefix)/etc/bash_completion
+    [ -r $(brew --prefix)/etc/bash_completion ] && source $(brew --prefix)/etc/bash_completion
 
   fi
   # }}}

@@ -2,14 +2,26 @@
 
 System configuration for OSX implemented through Makefile script. Currently it establishes configuration for:
 
--   bash
--   vim
--   tmux
 -   osx
+-   vim
+-   bash
+-   tmux
+-   jupyter
+-   r
+-   eclim
+-   ruby
+-   git
 
 ### Todo
 
--   create .env and .alias out of .bahsrc
 -   study other forms of deployment <https://dotfiles.github.io/>
 -   place Vundle plugins in a separate file as the list grows larger
 -   place Vundle plugins into themes
+
+### Patching CONDA PS1
+
+-   in order to patch conda's PS1, run the following:
+    ```
+    patch -d $(conda info --root)/bin -N < conda_activate.patch
+    ```
+

@@ -1,9 +1,9 @@
 dotfiles := $(shell pwd)
 workspace := ${HOME}
 
-all: vim tmux bash octave jupyter git r
+all: vim tmux bash jupyter git r python
 
-sh:
+osx:
 	sh $(dotfiles)/osx
 
 vim:
@@ -17,12 +17,15 @@ bash:
 	ln -fs $(dotfiles)/bash_profile ${workspace}/.bash_profile
 	ln -fs $(dotfiles)/bashrc ${workspace}/.bashrc
 
-octave:
-	ln -fs $(dotfiles)/octaverc ${workspace}/.octaverc
-
 jupyter:
 	mkdir -p ${workspace}/.jupyter/
 	ln -fs $(dotfiles)/jupyter_console_config.py ${workspace}/.jupyter/jupyter_console_config.py
+
+python:
+	mkdir -p ${workspace}/.ipython/profile_default
+	ln -fs $(dotfiles)/ipython_config.py ${workspace}/.ipython/profile_default
+	mkdir -p ${workspace}/.matplotlib
+	ln -fs ${dotfiles}/matplotlibrc ${workspace}/.matplotlib/matplotlibrc
 
 eclim:
 	ln -fs $(dotfiles)/eclimrc ${workspace}/.eclimrc

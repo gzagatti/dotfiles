@@ -1,0 +1,4 @@
+# In order to run matplotlib we need to define the backend
+# https://stackoverflow.com/questions/34977388/matplotlib-runtimeerror-python-is-not-installed-as-a-framework
+backend : Qt5Agg
+backend.qt5: PyQt5
