@@ -9,7 +9,7 @@
 #------------------------------------------------------------------------------
 
 # A parent class for Configurables that log.
-# 
+#
 # Subclasses have a log trait, and the default behavior is to get the logger
 # from the currently running Application.
 
@@ -20,7 +20,7 @@
 # Mixin for configurable classes that work with connection files
 
 # JSON file in which to store connection info [default: kernel-<pid>.json]
-# 
+#
 # This file will contain the IP, ports, and authentication key needed to connect
 # clients to this kernel. By default, this file will be created in the security
 # dir of the current profile, but can be specified by absolute path.
@@ -46,7 +46,7 @@
 # set the stdin (ROUTER) port [default: random]
 # c.ConnectionFileMixin.stdin_port = 0
 
-# 
+#
 # c.ConnectionFileMixin.transport = 'tcp'
 
 #------------------------------------------------------------------------------
@@ -55,7 +55,7 @@
 
 # Set to display confirmation dialog on exit. You can always use 'exit' or
 # 'quit', to force a direct exit without any confirmation.
-# c.JupyterConsoleApp.confirm_exit = True
+c.JupyterConsoleApp.confirm_exit = False
 
 # Connect to an already running kernel
 # c.JupyterConsoleApp.existing = ''
@@ -74,7 +74,7 @@
 #------------------------------------------------------------------------------
 
 # A configurable that only allows one instance.
-# 
+#
 # This class is for classes that should only have one instance of itself or
 # *any* subclass. To create and retrieve such a class use the
 # :meth:`SingletonConfigurable.instance` method.
@@ -157,19 +157,19 @@
 
 # Whether to include output from clients other than this one sharing the same
 # kernel.
-# 
+#
 # Outputs are not displayed until enter is pressed.
 # c.ZMQTerminalInteractiveShell.include_other_output = False
 
 # Timeout (in seconds) for giving up on a kernel's is_complete response.
-# 
+#
 # If the kernel does not respond at any point within this time, the kernel will
 # no longer be asked if code is complete, and the console will default to the
 # built-in is_complete test.
 # c.ZMQTerminalInteractiveShell.kernel_is_complete_timeout = 1
 
 # Timeout for giving up on a kernel (in seconds).
-# 
+#
 # On first connect and restart, the console tests whether the kernel is running
 # and responsive by sending kernel_info_requests. This sets the timeout in
 # seconds for how long the kernel can take before being presumed dead.
@@ -180,7 +180,7 @@
 # c.ZMQTerminalInteractiveShell.mime_preference = ['image/png', 'image/jpeg', 'image/svg+xml']
 
 # Prefix to add to outputs coming from clients other than this one.
-# 
+#
 # Only relevant if include_other_output is True.
 # c.ZMQTerminalInteractiveShell.other_output_prefix = '[remote] '
 
@@ -206,14 +206,14 @@
 #------------------------------------------------------------------------------
 
 # Manages a single kernel in a subprocess on this host.
-# 
+#
 # This version starts kernels with Popen.
 
 # Should we autorestart the kernel if it dies.
 # c.KernelManager.autorestart = True
 
 # DEPRECATED: Use kernel_name instead.
-# 
+#
 # The Popen Command to launch the kernel. Override this if you have a custom
 # kernel. If kernel_cmd is specified in a configuration file, Jupyter does not
 # pass any arguments to the kernel, because it cannot make any assumptions about
@@ -229,7 +229,7 @@
 # Monitor and autorestart a kernel.
 
 # Whether to include every poll event in debugging output.
-# 
+#
 # Has to be set explicitly, because there will be *a lot* of output.
 # c.KernelRestarter.debug = False
 
@@ -244,27 +244,27 @@
 #------------------------------------------------------------------------------
 
 # Object for handling serialization and sending of messages.
-# 
+#
 # The Session object handles building messages and sending them with ZMQ sockets
 # or ZMQStream objects.  Objects can communicate with each other over the
 # network via Session objects, and only need to work with the dict-based IPython
 # message spec. The Session will handle serialization/deserialization, security,
 # and metadata.
-# 
+#
 # Sessions support configurable serialization via packer/unpacker traits, and
 # signing with HMAC digests via the key/keyfile traits.
-# 
+#
 # Parameters ----------
-# 
+#
 # debug : bool
 #     whether to trigger extra debugging statements
 # packer/unpacker : str : 'json', 'pickle' or import_string
 #     importstrings for methods to serialize message parts.  If just
 #     'json' or 'pickle', predefined JSON and pickle packers will be used.
 #     Otherwise, the entire importstring must be used.
-# 
+#
 #     The functions must accept at least valid JSON input, and output *bytes*.
-# 
+#
 #     For example, to use msgpack:
 #     packer = 'msgpack.packb', unpacker='msgpack.unpackb'
 # pack/unpack : callables
@@ -285,7 +285,7 @@
 # c.Session.buffer_threshold = 1024
 
 # Whether to check PID to protect against calls after fork.
-# 
+#
 # This check can be disabled if fork-safety is handled elsewhere.
 # c.Session.check_pid = True
 
@@ -296,7 +296,7 @@
 # c.Session.debug = False
 
 # The maximum number of digests to remember.
-# 
+#
 # The digest history will be culled when it exceeds this value.
 # c.Session.digest_history_size = 65536
 

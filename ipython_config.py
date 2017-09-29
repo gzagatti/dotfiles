@@ -15,7 +15,7 @@ c.TerminalIPythonApp.display_banner = True
 c.TerminalIPythonApp.force_interact = False
 
 # Autoindent IPython code entered interactively.
-c.InteractiveShell.autoindent = False
+c.TerminalInteractiveShell.autoindent = False
 
 # Set to confirm when you try to exit IPython with an EOF (Control-D in Unix,
 #  Control-Z/Enter in Windows). By typing 'exit' or 'quit', you can force a
