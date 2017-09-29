@@ -36,6 +36,8 @@ if [[ $- == *i* ]]; then
   # Aliases {{{
   # source .bashrc
   alias bashrc='source ~/.bashrc'
+  # activate conda environment
+  alias so='source activate'
   # }}}
 
 
@@ -67,7 +69,7 @@ if [[ $- == *i* ]]; then
     alias hideFiles='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app'
 
     # ql: show a "Quick Look" view of files
-    ql () { /usr/bin/qlmanage -p "$@" >& /dev/null & }
+    ql() { /usr/bin/qlmanage -p "$@" >& /dev/null & }
 
     # marked: open document in Marked 2
     marked() { if [ $1 ]; then open -a "Marked 2" $1; else open -a "Marked 2"; fi }
