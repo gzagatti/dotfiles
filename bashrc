@@ -53,7 +53,7 @@ if [[ $- == *i* ]]; then
 
     # environment
     # sets the preferred PATH order
-    export PATH=/usr/local/sbin:/usr/local/bin:$HOME/miniconda3/bin:$PATH
+    export PATH=/usr/local/bin:/usr/local/sbin:$HOME/miniconda3/bin:$PATH
     # removes duplicates from the PATH, given that the above can introduce duplicates
     PATH=`printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}'`
     export GTK_PATH=/usr/local/lib/gtk-2.0
