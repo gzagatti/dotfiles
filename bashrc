@@ -39,7 +39,7 @@ if [[ $- == *i* ]]; then
   # https://geoff.greer.fm/lscolors/
   export CLICOLOR=1
   export LSCOLORS="excxhxDxbxhxhxhxhxfxfx"
-  export LS_COLORS="di=34:ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
+  export LS_COLORS="no=00:fi=00:di=34::ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
   # }}}
 
   # History {{{
