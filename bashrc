@@ -13,20 +13,40 @@ if [[ $- == *i* ]]; then
   #format: [time] username:directory_relative_path command_number$
   #prompt will be highlighted in red if previous command fails
   #command prompt text is always highlited in yellow
+  function PreCommand() {
+    if [ -z "$AT_PROMPT" ]; then
+      return
+    fi
+    unset AT_PROMPT
+    echo -en '\e[0m'
+  }
+  trap "PreCommand" DEBUG #reset colours prior to printing output
+
+  FIRST_PROMPT=1
+  function PostCommand() {
+    AT_PROMPT=1
+    if [ -n "$FIRST_PROMPT" ]; then
+      unset FIRST_PROMPT
+      return
+    fi
+  }
+  PROMPT_COMMAND="PostCommand"
+
   export PS1="\$(if [[ \$? == 0 ]]; then echo \"\[\e[00;30m\]\"; else echo \"\[\e[00;31m\]\"; fi)[\A] [\h \u]:\W \#\$\[\e[0m\] \[\e[33m\]"
-  trap "echo -n $'\e[0m'" DEBUG #reset colours prior to printing output
   # }}}
 
-  # Color `ls` output {{{
+  # Coloring output {{{
+  # https://geoff.greer.fm/lscolors/
   export CLICOLOR=1
-  export LSCOLORS=excxhxDxbxhxhxhxhxfxfx
+  export LSCOLORS="excxhxDxbxhxhxhxhxfxfx"
+  export LS_COLORS="di=34:ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
   # }}}
 
   # History {{{
   export HISTFILE=~/.bash_history
   export HISTSIZE=5000
   export HISTFILESIZE=10000
-  export HISTIGNORE="&:[ ]*:exit"
+  export HISTIGNORE="&:[ ]*:exit:sudo*"
   export HISTCONTROL=ignoreboth
   export HISTTIMEFORMAT="%F %T %Z "
   #export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND" #turn on to update bash history across terminals

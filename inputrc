@@ -10,6 +10,9 @@ set skip-completed-text on
 
 # ignore case
 set completion-ignore-case on
+
+# colored completion
+set colored-stats on
 # }}}
 
 # VI editing mode {{{
