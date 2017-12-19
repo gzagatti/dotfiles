@@ -16,3 +16,10 @@ utils::assignInNamespace(
   },
   "base"
 )
+
+# only load in interactive sessions
+if (interactive()) {
+  suppressMessages(require(devtools))
+  suppressMessages(require(usethis))
+  suppressMessages(require(testthat))
+}
