@@ -132,12 +132,12 @@ Plugin 'danro/rename.vim'                 " rename files in vim
 Plugin 'vim-airline/vim-airline'          " lean & mean status/tabline for vim that's light as air
 Plugin 'altercation/vim-colors-solarized' " solarized theme
 Plugin 'Valloric/YouCompleteMe'           " code completion engine
-Plugin  'Yggdroot/indentLine'             " displays thin vertical lines at each indentation level for code indented with spaces
+Plugin 'Yggdroot/indentLine'             " displays thin vertical lines at each indentation level for code indented with spaces
 " Plugin 'edkolev/tmuxline.vim'           " simple tmux statusline generator with support for powerline symbols and statusline / airline / lightline integration
 
 " Least Used Functionalities
 Plugin 'majutsushi/tagbar'                " easy tags navigation
-Plugin 'vim-scripts/matchit.zip'          " extended % matching for HTML, Latex and many other languages
+"Plugin 'vim-scripts/matchit.zip'          " extended % matching for HTML, Latex and many other languages
 Plugin 'easymotion/vim-easymotion'        " to make motion around vim easier
 Plugin 'junegunn/vim-easy-align'          " for easy alignment
 Plugin 'terryma/vim-multiple-cursors'     " multiple cursors
@@ -148,7 +148,7 @@ Plugin 'jamessan/vim-gnupg'               " easy gpg handling
 
 """ }}}
 
-""" Languages {{{
+"""Languages {{{
 Plugin 'mattn/emmet-vim'                  " improves HTML and CSS workflow
 Plugin 'vim-pandoc/vim-pandoc'            " pandoc support
 Plugin 'vim-pandoc/vim-pandoc-syntax'     " pandoc syntax
@@ -156,7 +156,9 @@ Plugin 'tmhedberg/SimpylFold'             " for easy python folding
 Plugin 'hdima/python-syntax'              " python syntax
 Plugin 'elzr/vim-json'                    " json support
 Plugin 'jvirtanen/vim-octave'             " octave support
-Plugin 'ervandew/eclim'                   " java support
+"Plugin 'ervandew/eclim'                   " java support
+"Plugin 'lervag/vimtex'                    " latex support
+Plugin 'LaTeX-Box-Team/LaTeX-Box'
 """"}}}
 
 ""Clean up {{{
@@ -218,8 +220,8 @@ nnoremap <f8> :NERDTreeToggle<cr>
 let g:slimux_select_from_current_window = 1
 
 """ key mappings
-map <Leader>s :SlimuxREPLSendLine<CR>
-vmap <Leader>s :SlimuxREPLSendSelection<CR>
+map <Leader>sl :SlimuxREPLSendLine<CR>
+vmap <Leader>sl :SlimuxREPLSendSelection<CR>
 map <leader>sc :SlimuxGlobalConfigure<cr>
 map <leader>sb :SlimuxREPLSendBuffer<cr>
 map <Leader>sa :SlimuxShellLast<CR>
@@ -232,6 +234,8 @@ augroup loadfile_slimux:
   autocmd FileType matlab noremap <leader>sf :execute ':SlimuxShellRun run('''.@%.''')'<cr>
   autocmd FileType ruby noremap <leader>sf :execute ':SlimuxShellRun load '''.@%.''''<cr>
   autocmd FileType sql noremap <leader>sf :execute ':SlimuxShellRun \\i '.@%<cr>
+  autocmd FileType rmd noremap <leader>sf :execute ':SlimuxShellRun library(rmarkdown); render('''.@%.''', output_dir=''out'', output_format=''html_notebook'', quiet=TRUE)'<cr>
+  autocmd FileType r noremap <leader>sf :execute ':SlimuxShellRun source('''.@%.''', echo=TRUE)'<cr>
 augroup END
 
 "}}}
