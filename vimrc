@@ -158,20 +158,17 @@ Plug 'junegunn/goyo.vim'
 ""Languages {{{
 Plug 'mattn/emmet-vim'                  " improves HTML and CSS workflow
 Plug 'plasticboy/vim-markdown'          " markdown vim mode
-"Plug 'vim-pandoc/vim-pandoc'            " pandoc support
-"Plug 'vim-pandoc/vim-pandoc-syntax'     " pandoc syntax
+Plug 'lervag/vimtex'                    " latex support
 Plug 'zchee/deoplete-jedi'              " python autocomplete
 Plug 'tmhedberg/SimpylFold'             " for easy python folding
 Plug 'hdima/python-syntax'              " python syntax
 Plug 'elzr/vim-json'                    " json support
 Plug 'jvirtanen/vim-octave'             " octave support
-Plug 'LaTeX-Box-Team/LaTeX-Box'
 ""}}}
 
 ""Archive {{{
 "Plug 'edkolev/tmuxline.vim'           " simple tmux statusline generator with support for powerline symbols and statusline / airline / lightline integration
 "Plug 'ervandew/eclim'                   " java support
-"Plug 'lervag/vimtex'                    " latex support
 ""}}}
 
 ""Clean up {{{
@@ -180,7 +177,7 @@ call plug#end()
 
 "}}}
 
-"Plugin Specific {{{
+"Plugin Specific 
 
 ""airline {{{
 " powerline symbols
@@ -276,6 +273,7 @@ let g:pandoc#syntax#codeblock#embeds#lang = ['python']
 
 ""deoplete{{{
 let g:deoplete#enable_at_startup = 1
+autocmd CompleteDone * silent! pclose!
 ""}}}
 
 ""narrow negion {{{
@@ -361,7 +359,16 @@ autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
 ""}}}
 
-"}}}
+""vimtex{{
+let g:vimtex_fold_enabled=1
+let g:vimtex_complete_enabled=1
+if !exists('g:deoplete#omni#input_patterns')
+    let g:deoplete#omni#input_patterns = {}
+endif
+let g:deoplete#omni#input_patterns.tex = g:vimtex#re#deoplete
+""}}
+
+
 
 "Key Mappings {{{
 
