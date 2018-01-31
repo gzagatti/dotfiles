@@ -5,7 +5,7 @@ set encoding=utf-8
 set lazyredraw
 filetype off
 syntax on
-"}}}
+""}}}
 
 ""Leaders {{{
 let mapleader = ";"
@@ -13,18 +13,20 @@ let maplocalleader = "\\"
 "}}}
 
 ""Mouse {{{
-set mouse=a
-if has('mouse')
+if !has('nvim')
   set mouse=a
-  if &term =~ "xterm" || &term =~ "screen"
-    " for some reason, doing this directly with 'set ttymouse=xterm2'
-    " doesn't work -- 'set ttymouse?' returns xterm2 but the mouse
-    " makes tmux enter copy mode instead of selecting or scrolling
-    " inside Vim -- but luckily, setting it up from within autocmds
-    " works
-    autocmd VimEnter * set ttymouse=xterm2
-    autocmd FocusGained * set ttymouse=xterm2
-    autocmd BufEnter * set ttymouse=xterm2
+  if has('mouse')
+    set mouse=a
+    if &term =~ "xterm" || &term =~ "screen"
+      " for some reason, doing this directly with 'set ttymouse=xterm2'
+      " doesn't work -- 'set ttymouse?' returns xterm2 but the mouse
+      " makes tmux enter copy mode instead of selecting or scrolling
+      " inside Vim -- but luckily, setting it up from within autocmds
+      " works
+      autocmd VimEnter * set ttymouse=xterm2
+      autocmd FocusGained * set ttymouse=xterm2
+      autocmd BufEnter * set ttymouse=xterm2
+    endif
   endif
 endif
 ""}}}
@@ -107,62 +109,73 @@ augroup END
 ""}}}
 "}}}
 
-"Vundle: Plugin Manager {{{
+"Plugin Manager {{{
 ""Set Up {{{
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
+call plug#begin('~/.vim/plugged')
 ""}}}
 
 ""Tools {{{
 " Most Used Functionalities
-Plugin 'scrooloose/nerdtree'              " file management from within Vim
-Plugin 'scrooloose/nerdcommenter'         " wrangle code comments
-Plugin 'scrooloose/syntastic'             " syntax checking hacks
-Plugin 'tpope/vim-fugitive'               " git support
-Plugin 'tpope/vim-surround'               " surround text with pairs of elements
-Plugin 'Shougo/vimproc.vim'               " interactive command execution
-Plugin 'Shougo/unite.vim'                 " unite and create user interfaces
-Plugin 'lambdalisue/vim-gista'            " gist management
-Plugin 'lambdalisue/vim-gista-unite'      " gist source for unite.vim
-Plugin 'christoomey/vim-tmux-navigator'   " seamless navigation between tmux panes and vim splits
-Plugin 'epeli/slimux'                     " tmux/vim integration
-Plugin 'itspriddle/vim-marked'            " to open markdown files in marked
-Plugin 'danro/rename.vim'                 " rename files in vim
-Plugin 'vim-airline/vim-airline'          " lean & mean status/tabline for vim that's light as air
-Plugin 'altercation/vim-colors-solarized' " solarized theme
-Plugin 'Valloric/YouCompleteMe'           " code completion engine
-Plugin 'Yggdroot/indentLine'             " displays thin vertical lines at each indentation level for code indented with spaces
-" Plugin 'edkolev/tmuxline.vim'           " simple tmux statusline generator with support for powerline symbols and statusline / airline / lightline integration
+Plug 'scrooloose/nerdtree'              " file management from within Vim
+Plug 'scrooloose/nerdcommenter'         " wrangle code comments
+Plug 'scrooloose/syntastic'             " syntax checking hacks
+Plug 'tpope/vim-fugitive'               " git support
+Plug 'tpope/vim-surround'               " surround text with pairs of elements
+Plug 'Shougo/vimproc.vim', {'do' : 'make'} " interactive command execution
+Plug 'Shougo/unite.vim'                 " unite and create user interfaces
+Plug 'lambdalisue/vim-gista'            " gist management
+Plug 'lambdalisue/vim-gista-unite'      " gist source for unite.vim
+Plug 'christoomey/vim-tmux-navigator'   " seamless navigation between tmux panes and vim splits
+Plug 'epeli/slimux'                     " tmux/vim integration
+Plug 'itspriddle/vim-marked'            " to open markdown files in marked
+Plug 'danro/rename.vim'                 " rename files in vim
+Plug 'vim-airline/vim-airline'          " lean & mean status/tabline for vim that's light as air
+Plug 'altercation/vim-colors-solarized' " solarized theme
+Plug 'Yggdroot/indentLine'             " displays thin vertical lines at each indentation level for code indented with spaces
+
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
 
 " Least Used Functionalities
-Plugin 'majutsushi/tagbar'                " easy tags navigation
-"Plugin 'vim-scripts/matchit.zip'          " extended % matching for HTML, Latex and many other languages
-Plugin 'easymotion/vim-easymotion'        " to make motion around vim easier
-Plugin 'junegunn/vim-easy-align'          " for easy alignment
-Plugin 'terryma/vim-multiple-cursors'     " multiple cursors
-Plugin 'chrisbra/NrrwRgn'                 " a narrow Region Plugin
-Plugin 'godlygeek/tabular'                " easy alignment of text
-Plugin 'tpope/vim-sleuth'                 " heuristically set indent/tab options
-Plugin 'jamessan/vim-gnupg'               " easy gpg handling
+Plug 'majutsushi/tagbar'                " easy tags navigation
+Plug 'vim-scripts/matchit.zip'          " extended % matching for HTML, Latex and many other languages
+Plug 'easymotion/vim-easymotion'        " to make motion around vim easier
+Plug 'junegunn/vim-easy-align'          " for easy alignment
+Plug 'terryma/vim-multiple-cursors'     " multiple cursors
+Plug 'chrisbra/NrrwRgn'                 " a narrow Region Plugin
+Plug 'godlygeek/tabular'                " easy alignment of text
+Plug 'tpope/vim-sleuth'                 " heuristically set indent/tab options
+Plug 'jamessan/vim-gnupg'               " easy gpg handling
+Plug 'reedes/vim-pencil'                " rethinking Vim as a tool for writing 
+Plug 'junegunn/goyo.vim'
+""}}}
 
-""" }}}
+""Languages {{{
+Plug 'mattn/emmet-vim'                  " improves HTML and CSS workflow
+Plug 'plasticboy/vim-markdown'          " markdown vim mode
+"Plug 'vim-pandoc/vim-pandoc'            " pandoc support
+"Plug 'vim-pandoc/vim-pandoc-syntax'     " pandoc syntax
+Plug 'zchee/deoplete-jedi'              " python autocomplete
+Plug 'tmhedberg/SimpylFold'             " for easy python folding
+Plug 'hdima/python-syntax'              " python syntax
+Plug 'elzr/vim-json'                    " json support
+Plug 'jvirtanen/vim-octave'             " octave support
+Plug 'LaTeX-Box-Team/LaTeX-Box'
+""}}}
 
-"""Languages {{{
-Plugin 'mattn/emmet-vim'                  " improves HTML and CSS workflow
-Plugin 'vim-pandoc/vim-pandoc'            " pandoc support
-Plugin 'vim-pandoc/vim-pandoc-syntax'     " pandoc syntax
-Plugin 'tmhedberg/SimpylFold'             " for easy python folding
-Plugin 'hdima/python-syntax'              " python syntax
-Plugin 'elzr/vim-json'                    " json support
-Plugin 'jvirtanen/vim-octave'             " octave support
-"Plugin 'ervandew/eclim'                   " java support
-"Plugin 'lervag/vimtex'                    " latex support
-Plugin 'LaTeX-Box-Team/LaTeX-Box'
-""""}}}
+""Archive {{{
+"Plug 'edkolev/tmuxline.vim'           " simple tmux statusline generator with support for powerline symbols and statusline / airline / lightline integration
+"Plug 'ervandew/eclim'                   " java support
+"Plug 'lervag/vimtex'                    " latex support
+""}}}
 
 ""Clean up {{{
-call vundle#end()
+call plug#end()
 "}}}
 
 "}}}
@@ -208,7 +221,11 @@ let NERDDefaultNesting=1
 ""}}}
 "
 ""nerdtree {{{
+"ignore certain files from NERDTree
 let NERDTreeIgnore=['__pycache__']
+"open NERDTree automatically when vim starts up on opening a directory
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
 ""}}}
 
 ""nerdtree {{{
@@ -257,11 +274,8 @@ let g:pandoc#syntax#codeblocks#embeds#use = 1
 let g:pandoc#syntax#codeblock#embeds#lang = ['python']
 ""}}}
 
-""you complete me{{{
-let g:ycm_autoclose_preview_window_after_insertion = 1
-let g:ycm_collect_identifiers_from_tags_files = 1
-nnoremap <leader>jd :YcmCompleter GoTo<cr>'
-nnoremap <leader>jh :YcmCompleter GetDoc<cr>'
+""deoplete{{{
+let g:deoplete#enable_at_startup = 1
 ""}}}
 
 ""narrow negion {{{
@@ -326,13 +340,40 @@ let g:EclimDtdValidate = 0
 let g:EclimXsdValidate = 0
 "" }}}
 
+""goyo{{{
+function! s:goyo_enter()
+  silent !tmux set status off
+  silent !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
+  autocmd VimResized * exe "normal \<c-w>="
+  set noshowmode
+  set noshowcmd
+endfunction
+
+
+function! s:goyo_leave()
+  silent !tmux set status on
+  silent !tmux list-panes -F '\#F' | grep -q Z && tmux resize-pane -Z
+  set showmode
+  set showcmd
+endfunction
+
+autocmd! User GoyoEnter nested call <SID>goyo_enter()
+autocmd! User GoyoLeave nested call <SID>goyo_leave()
+""}}}
+
 "}}}
 
 "Key Mappings {{{
 
 "".vimrc {{{
 """Open .vimrc in an horizantal split$
-nnoremap <leader>ev :split $MYVIMRC<cr>
+if has('nvim')
+  nnoremap <leader>ev :split ~/.vimrc<cr>
+  nnoremap <leader>sv :source ~/.vimrc<cr>
+else
+  nnoremap <leader>ev :split $MYVIMRC<cr>
+endif
+
 """Source .vimrc
 nnoremap <leader>sv :source $MYVIMRC<cr>
 "}}}
@@ -368,7 +409,7 @@ noremap <leader>y "*y
 if &term =~ "xterm.*"
     let &t_ti = &t_ti . "\e[?2004h"
     let &t_te = "\e[?2004l" . &t_te
-    function XTermPasteBegin(ret)
+    function! XTermPasteBegin(ret)
         set pastetoggle=<Esc>[201~
         set paste
         return a:ret
@@ -419,8 +460,20 @@ command! W w
 ""}}}
 
 ""Delete trailling whitespace {{{
-nnoremap <silent> <leader>dt :%s/\s\+$//g<cr>
+nnoremap <silent> <leader>dt :execute "normal! mq" ':%s/\s\+$//g' "\r`q"<cr>
 ""}}}
+
+""Starts very magic regex {{{
+nnoremap / /\v
+nnoremap ? ?\v
+""}}}
+
+""Pop up navigation{{{
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
+inoremap <expr> <tab> pumvisible() ? "\<C-n>" : "\<tab>"
+inoremap <expr> <s-tab>       pumvisible() ? "\<C-p>" : "\<s-tab>"
+""}}}
+
 "}}}
 
 "FileType Specific {{{
@@ -430,12 +483,6 @@ augroup filetype_vim
     "folding
     autocmd FileType vim setlocal foldmethod=marker
 augroup END
-""}}}
-
-""Markdown{{{
-augroup markdown
-  autocmd!
-  autocmd FileType pandoc,markdown,md :set shiftround shiftwidth=4 softtabstop=4
 ""}}}
 
 ""Json {{{
@@ -449,6 +496,7 @@ augroup python
   autocmd!
   autocmd FileType python :set equalprg=yapf\ --style='pep8'
 ""}}}
+
 "}}}
 
 "Conditioning {{{
