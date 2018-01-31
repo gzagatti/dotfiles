@@ -342,7 +342,7 @@ let g:EclimXsdValidate = 0
 
 ""goyo{{{
 function! s:goyo_enter()
-  silent !tmux set status off
+  silent !tmux set -w status off
   silent !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
   autocmd VimResized * exe "normal \<c-w>="
   set noshowmode
@@ -351,7 +351,7 @@ endfunction
 
 
 function! s:goyo_leave()
-  silent !tmux set status on
+  silent !tmux set -w status on
   silent !tmux list-panes -F '\#F' | grep -q Z && tmux resize-pane -Z
   set showmode
   set showcmd
