@@ -8,6 +8,8 @@ osx:
 
 vim:
 	ln -fs $(dotfiles)/vimrc ${workspace}/.vimrc
+	mkdir -p ${workspace}/.config/nvim/
+	ln -fs $(dotfiles)/init.vim ${workspace}/.config/nvim/init.vim
 
 tmux:
 	ln -fs $(dotfiles)/tmux.conf ${workspace}/.tmux.conf
