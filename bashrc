@@ -10,9 +10,9 @@ if [[ $- == *i* ]]; then
   # }}}
 
   # PS1 Customization {{{
-  #format: [time] username:directory_relative_path command_number$
-  #prompt will be highlighted in red if previous command fails
-  #command prompt text is always highlited in yellow
+  # format: [time] username:directory_relative_path command_number$
+  # prompt will be highlighted in red if previous command fails
+  # command prompt text is always highlited in yellow
   function PreCommand() {
     if [ -z "$AT_PROMPT" ]; then
       return
@@ -20,7 +20,8 @@ if [[ $- == *i* ]]; then
     unset AT_PROMPT
     echo -en '\e[0m'
   }
-  trap "PreCommand" DEBUG #reset colours prior to printing output
+  # reset colours prior to printing output
+  trap "PreCommand" DEBUG
 
   FIRST_PROMPT=1
   function PostCommand() {
@@ -57,7 +58,8 @@ if [[ $- == *i* ]]; then
   # source .bashrc
   alias bashrc='source ~/.bashrc'
   # activate conda environment
-  alias so='source activate'
+  alias workon='source activate'
+  alias deactivate='source deactivate'
   # }}}
 
 
@@ -70,16 +72,21 @@ if [[ $- == *i* ]]; then
   fi
   # }}}
 
-  # Finder Specific {{{
+  # Mac Specific {{{
   if [[ $OSTYPE == darwin* ]]; then
 
-    # environment
     # sets the preferred PATH order
-    export PATH=/usr/local/bin:/usr/local/sbin:$HOME/miniconda3/bin:$PATH
+    if [ -r $(brew --prefix) ]; then
+      export PATH=$(brew --prefix)/bin:$(brew --prefix)/sbin:$PATH
+   fi
+
     # removes duplicates from the PATH, given that the above can introduce duplicates
     PATH=`printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}'`
+
+    # set editor preferences
     export GTK_PATH=/usr/local/lib/gtk-2.0
     export EDITOR=/usr/local/bin/vim
+
     # magic environments in order to make slimux work in tmux
     export EVENT_NOKQUEUE=1
     export EVENT_NOPOLL=1
@@ -99,6 +106,10 @@ if [[ $- == *i* ]]; then
 
     # bash completion
     [ -r $(brew --prefix)/etc/bash_completion ] && source $(brew --prefix)/etc/bash_completion
+
+    # load pyenv
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
 
   fi
   # }}}
