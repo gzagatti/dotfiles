@@ -7,7 +7,7 @@ options(repos = r)
 })
 
 # custom prompt
-options(prompt="R > ", digits=4, show.signif.start=FALSE)
+options(prompt="R > ", digits=7, show.signif.start=TRUE)
 
 # do not prompt to save workspace when quitting
 utils::assignInNamespace(
