@@ -226,6 +226,16 @@ omap <leader>c  <Plug>Commentary
 nmap <leader>cc <Plug>CommentaryLine
 ""}}}
 
+""context comment string {{{
+let g:context#commentstring#table = {}
+let g:context#commentstring#table.markdown = {
+  \ 'mkdSnippetR': '# %s',
+  \ 'mkdSnippetPYTHON': '# %s',
+  \ 'mkdSnippetSH': '# %s',
+  \}
+let g:context#commentstring#table.rmd = g:context#commentstring#table.markdown
+""}}}
+
 ""syntastic {{{
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_check_on_open = 1
