@@ -13,10 +13,9 @@ let maplocalleader = "\\"
 "}}}
 
 ""Mouse {{{
-if !has('nvim')
+if has('mouse')
   set mouse=a
-  if has('mouse')
-    set mouse=a
+  if !has('nvim')
     if &term =~ "xterm" || &term =~ "screen"
       " for some reason, doing this directly with 'set ttymouse=xterm2'
       " doesn't work -- 'set ttymouse?' returns xterm2 but the mouse
@@ -107,6 +106,10 @@ augroup auto_save
   au CursorHold,InsertLeave * silent! wall
 augroup END
 ""}}}
+
+""Conceal {{{
+set conceallevel=0
+""}}}
 "}}}
 
 "Plugin Manager {{{
@@ -117,7 +120,8 @@ call plug#begin('~/.vim/plugged')
 ""Tools {{{
 " Most Used Functionalities
 Plug 'scrooloose/nerdtree'              " file management from within Vim
-Plug 'scrooloose/nerdcommenter'         " wrangle code comments
+Plug 'tpope/vim-commentary'             " comment stuff out
+Plug 'suy/vim-context-commentstring'    " set commentstring value dynamically
 Plug 'scrooloose/syntastic'             " syntax checking hacks
 Plug 'tpope/vim-fugitive'               " git support
 Plug 'tpope/vim-surround'               " surround text with pairs of elements
@@ -131,7 +135,7 @@ Plug 'itspriddle/vim-marked'            " to open markdown files in marked
 Plug 'danro/rename.vim'                 " rename files in vim
 Plug 'vim-airline/vim-airline'          " lean & mean status/tabline for vim that's light as air
 Plug 'altercation/vim-colors-solarized' " solarized theme
-Plug 'Yggdroot/indentLine'             " displays thin vertical lines at each indentation level for code indented with spaces
+Plug 'Yggdroot/indentLine'              " displays thin vertical lines at each indentation level for code indented with spaces
 
 if has('nvim')
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -144,6 +148,8 @@ endif
 " Least Used Functionalities
 Plug 'majutsushi/tagbar'                " easy tags navigation
 Plug 'vim-scripts/matchit.zip'          " extended % matching for HTML, Latex and many other languages
+"Plug 'inkarkat/SyntaxAttr.vim'         " show syntax highlighing attributes under cursor; for debugging
+
 Plug 'easymotion/vim-easymotion'        " to make motion around vim easier
 Plug 'junegunn/vim-easy-align'          " for easy alignment
 Plug 'terryma/vim-multiple-cursors'     " multiple cursors
@@ -151,7 +157,7 @@ Plug 'chrisbra/NrrwRgn'                 " a narrow Region Plugin
 Plug 'godlygeek/tabular'                " easy alignment of text
 Plug 'tpope/vim-sleuth'                 " heuristically set indent/tab options
 Plug 'jamessan/vim-gnupg'               " easy gpg handling
-Plug 'reedes/vim-pencil'                " rethinking Vim as a tool for writing 
+Plug 'reedes/vim-pencil'                " rethinking Vim as a tool for writing
 Plug 'junegunn/goyo.vim'
 ""}}}
 
@@ -177,7 +183,7 @@ call plug#end()
 
 "}}}
 
-"Plugin Specific 
+"Plugin Specific {{{
 
 ""airline {{{
 " powerline symbols
@@ -213,10 +219,24 @@ nmap <leader>+ <Plug>AirlineSelectNextTab
 let g:airline#extensions#whitespace#enabled = 0
 ""}}}
 
-""nerdcommenter {{{
-let NERDDefaultNesting=1
+""commentary {{{
+xmap <leader>c  <Plug>Commentary
+nmap <leader>c  <Plug>Commentary
+omap <leader>c  <Plug>Commentary
+nmap <leader>cc <Plug>CommentaryLine
 ""}}}
-"
+
+""syntastic {{{
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_mode_map = { "mode": "passive" }
+
+" checkers
+" r
+let g:syntastic_enable_r_lintr_checker = 1
+let g:syntastic_r_checkers = ['lintr']
+""}}}
+
 ""nerdtree {{{
 "ignore certain files from NERDTree
 let NERDTreeIgnore=['__pycache__']
@@ -241,16 +261,28 @@ map <leader>sb :SlimuxREPLSendBuffer<cr>
 map <Leader>sa :SlimuxShellLast<CR>
 map <Leader>sk :SlimuxSendKeysLast<CR>
 
-""" slimux and python integration
 augroup loadfile_slimux:
   autocmd!
-  autocmd FileType python noremap <leader>sf :execute ':SlimuxShellRun %run -i '.@%<cr>
-  autocmd FileType matlab noremap <leader>sf :execute ':SlimuxShellRun run('''.@%.''')'<cr>
-  autocmd FileType ruby noremap <leader>sf :execute ':SlimuxShellRun load '''.@%.''''<cr>
-  autocmd FileType sql noremap <leader>sf :execute ':SlimuxShellRun \\i '.@%<cr>
-  autocmd FileType rmd noremap <leader>sf :execute ':SlimuxShellRun library(rmarkdown); render('''.@%.''', output_dir=''out'', output_format=''html_notebook'', quiet=TRUE)'<cr>
-  autocmd FileType r noremap <leader>sf :execute ':SlimuxShellRun source('''.@%.''', echo=TRUE)'<cr>
+  autocmd FileType python noremap <buffer> <silent> <leader>sf
+    \ :execute ":silent SlimuxShellRun %run -i " . @% <cr>
+  autocmd FileType matlab noremap <buffer> <silent> <leader>sf
+    \ :execute ":silent SlimuxShellRun run('".@% . "')" <cr>
+  autocmd FileType ruby noremap <buffer> <silent> <leader>sf
+    \ :execute ":silent SlimuxShellRun load '" . @% . "'" <cr>
+  autocmd FileType sql noremap <buffer> <silent> <leader>sf
+    \ :execute ":silent SlimuxShellRun \\i " . @% <cr>
+  autocmd FileType r noremap <buffer> <silent> <leader>sf
+    \ :execute ":silent SlimuxShellRun source('" . @% . "', echo=TRUE)" <cr>
+  autocmd FileType rmd noremap <buffer> <silent> <leader>sf
+    \ :execute ":silent SlimuxShellRun rmarkdown::render('" . @% . "', output_format='all', quiet=TRUE)" <cr>
 augroup END
+
+function! SlimuxEscape_r(text)
+  " clear console line
+  let text = "" . a:text
+  " eval(parse(text=readLines()))
+  return text
+endfunction
 
 "}}}
 
@@ -258,17 +290,11 @@ augroup END
 vmap <Enter> <Plug>(EasyAlign)
 ""}}}
 
-""vim-pandoc{{{
-let g:pandoc#modules#disabled = ["chdir"]
-let g:pandoc#formatting#equalprg = 'pandoc -t markdown --atx-headers --wrap=none'
-"""open current reference
-nmap <localleader>ro <Plug>(pandoc-keyboard-ref-goto)<Plug>(pandoc-keyboard-links-open)<Plug>(pandoc-keyboard-ref-backfrom)
-""}}}
-
-""vim-pandoc-syntax{{{
-let g:pandoc#syntax#conceal#blacklist = ['codeblock_start', 'codeblock_delim', 'list', 'atx']
-let g:pandoc#syntax#codeblocks#embeds#use = 1
-let g:pandoc#syntax#codeblock#embeds#lang = ['python']
+""vim-markdown {{{
+let g:vim_markdown_math = 1
+let g:vim_markdown_conceal = 0
+let g:vim_markdown_frontmatter = 1
+let g:vim_markdown_folding_style_pythonic = 1
 ""}}}
 
 ""deoplete{{{
@@ -280,6 +306,8 @@ autocmd CompleteDone * silent! pclose!
 let g_nrrw_rgn_nohl = 3
 let g:nrrw_rgn_resize_window = 'percentage'
 let g:nrrw_rgn_rel_min = 20
+let g:nrrw_topbot_leftright = 'leftabove'
+
 """allows to set the filetype of the region to be narrowed
 command! -nargs=* -bang -range -complete=filetype NN
             \ :<line1>,<line2> call nrrwrgn#NrrwRgn('',<q-bang>)
@@ -359,16 +387,19 @@ autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
 ""}}}
 
-""vimtex{{
+""vimtex {{{
 let g:vimtex_fold_enabled=1
 let g:vimtex_complete_enabled=1
+"let g:vimtex_view_method = 'zathura'
+let g:vimtex_view_general_viewer = 'zathura'
+let g:vimtex_view_general_options = '@pdf'
 if !exists('g:deoplete#omni#input_patterns')
     let g:deoplete#omni#input_patterns = {}
 endif
 let g:deoplete#omni#input_patterns.tex = g:vimtex#re#deoplete
-""}}
+""}}}
 
-
+"" }}}
 
 "Key Mappings {{{
 
@@ -467,7 +498,7 @@ command! W w
 ""}}}
 
 ""Delete trailling whitespace {{{
-nnoremap <silent> <leader>dt :execute "normal! mq" ':%s/\s\+$//g' "\r`q"<cr>
+nnoremap <silent> <leader>dt :execute "silent normal! mq" ':%s/\s\+$//ge' "\r`q"<cr>
 ""}}}
 
 ""Starts very magic regex {{{
@@ -484,27 +515,31 @@ inoremap <expr> <s-tab>       pumvisible() ? "\<C-p>" : "\<s-tab>"
 "}}}
 
 "FileType Specific {{{
+augroup vimrc_filetypes
+  autocmd!
+
 ""Vimscript {{{
-augroup filetype_vim
-    autocmd!
-    "folding
-    autocmd FileType vim setlocal foldmethod=marker
-augroup END
+  "folding
+  autocmd FileType vim setlocal foldmethod=marker
 ""}}}
 
 ""Json {{{
-augroup json
-  autocmd!
-  autocmd FileType json :setlocal foldmethod=syntax
+  autocmd FileType json setlocal foldmethod=syntax
 ""}}}
 
 ""Python {{{
-augroup python
-  autocmd!
-  autocmd FileType python :set equalprg=yapf\ --style='pep8'
+  autocmd FileType python set equalprg=yapf\ --style='pep8'
 ""}}}
 
-"}}}
+""Rmd {{{
+  " adds vim-markdown as a filetype plugin in order to allow
+  " for syntax highlighing and folding.
+  autocmd FileType rmd runtime ftplugin/markdown.vim
+  autocmd FileType rmd runtime after/ftplugin/markdown.vim
+""}}}
+
+augroup END
+""}}}
 
 "Conditioning {{{
 ""Avoid using arrow keys in normal and insert mode {{{
@@ -519,6 +554,9 @@ inoremap <Right> <nop>
 syntax enable
 set background=dark
 colorscheme solarized
+" overrides solarized overrides
+exe "hi! def link javaScript Ignore"
+exe "hi! def link htmlSpecialTagName PreProc"
 "" }}}
 
 "Clean Up {{{
