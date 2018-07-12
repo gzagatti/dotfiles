@@ -9,33 +9,6 @@ if [[ $- == *i* ]]; then
   export TERM=xterm-256color
   # }}}
 
-  # PS1 Customization {{{
-  # format: [time] username:directory_relative_path command_number$
-  # prompt will be highlighted in red if previous command fails
-  # command prompt text is always highlited in yellow
-  function PreCommand() {
-    if [ -z "$AT_PROMPT" ]; then
-      return
-    fi
-    unset AT_PROMPT
-    echo -en '\e[0m'
-  }
-  # reset colours prior to printing output
-  trap "PreCommand" DEBUG
-
-  FIRST_PROMPT=1
-  function PostCommand() {
-    AT_PROMPT=1
-    if [ -n "$FIRST_PROMPT" ]; then
-      unset FIRST_PROMPT
-      return
-    fi
-  }
-  PROMPT_COMMAND="PostCommand"
-
-  export PS1="\$(if [[ \$? == 0 ]]; then echo \"\[\e[00;30m\]\"; else echo \"\[\e[00;31m\]\"; fi)[\A] [\h \u]:\W \#\$\[\e[0m\] \[\e[33m\]"
-  # }}}
-
   # Coloring output {{{
   # https://geoff.greer.fm/lscolors/
   export CLICOLOR=1
@@ -57,9 +30,6 @@ if [[ $- == *i* ]]; then
   # Aliases {{{
   # source .bashrc
   alias bashrc='source ~/.bashrc'
-  # activate conda environment
-  alias workon='source activate'
-  alias deactivate='source deactivate'
   # }}}
 
 
@@ -110,8 +80,68 @@ if [[ $- == *i* ]]; then
     # load pyenv
     eval "$(pyenv init -)"
     eval "$(pyenv virtualenv-init -)"
+    export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+    export WORKON_HOME=$(pyenv prefix)/envs
+    # activate virtualenvs
+    function workon() {
+      source activate $1
+    }
+    function _deactivate() {
+      source deactivate
+    }
+    # it is not possible to declarea a function called
+    # deactivate as it clashes with the pyenv shim of same name,
+    # thus we create an internal function and alias to deactivate
+    alias deactivate=_deactivate
 
   fi
+  # }}}
+
+  # PS1 Customization {{{
+  # [host user]:~ 99$
+
+  function _pyenv_ps1() {
+    if [ -n "$(type -t pyenv)" ]; then
+      local venv=$(pyenv version-name)
+      if [ -n "$venv" ] && [ $venv != system ]; then
+        printf "(py $venv) "
+      fi
+    fi
+    return
+  }
+
+  function _ps1() {
+    local color='$(if [[ $? == 0 ]]; then echo "\[\e[00;30m\]";else echo "\[\e[00;31m\]"; fi)'
+    local info='[\h \u]:\W \#\$'
+    local reset_color='\[\e[0m\] \[\e[33m\]'
+    printf %s "$color$(_pyenv_ps1)$info$reset_color"
+    return 0
+  }
+
+  # prompt will be highlighted in red if previous command fails
+  # command prompt text is always highlited in yellow
+  function PreCommand() {
+    if [ -z "$AT_PROMPT" ]; then
+      return
+    fi
+    unset AT_PROMPT
+    echo -en '\e[0m'
+  }
+  # reset colours prior to printing output
+  trap "PreCommand" DEBUG
+
+  FIRST_PROMPT=1
+  function PostCommand() {
+    AT_PROMPT=1
+    PS1=$(_ps1)
+    if [ -n "$FIRST_PROMPT" ]; then
+      unset FIRST_PROMPT
+      return
+    fi
+  }
+  PROMPT_COMMAND="PostCommand"
+
+  export PS1=$(_ps1)
   # }}}
 
 fi
