@@ -227,13 +227,16 @@ nmap <leader>cc <Plug>CommentaryLine
 ""}}}
 
 ""context comment string {{{
-let g:context#commentstring#table = {}
-let g:context#commentstring#table.markdown = {
-  \ 'mkdSnippetR': '# %s',
-  \ 'mkdSnippetPYTHON': '# %s',
-  \ 'mkdSnippetSH': '# %s',
-  \}
-let g:context#commentstring#table.rmd = g:context#commentstring#table.markdown
+" load the autoloaded variable first
+silent! echo g:context#commentstring#table
+if exists("g:context#commentstring#table")
+  let g:context#commentstring#table.markdown = {
+    \ 'mkdSnippetR': '# %s',
+    \ 'mkdSnippetPYTHON': '# %s',
+    \ 'mkdSnippetSH': '# %s',
+    \}
+  let g:context#commentstring#table.rmd = g:context#commentstring#table.markdown
+endif
 ""}}}
 
 ""syntastic {{{
@@ -245,6 +248,8 @@ let g:syntastic_mode_map = { "mode": "passive" }
 " r
 let g:syntastic_enable_r_lintr_checker = 1
 let g:syntastic_r_checkers = ['lintr']
+let g:syntastic_r_lintr_quiet_messages = { "regex": "Variable and function names should be all lowercase." }
+
 ""}}}
 
 ""nerdtree {{{
