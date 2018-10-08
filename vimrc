@@ -136,6 +136,7 @@ Plug 'danro/rename.vim'                 " rename files in vim
 Plug 'vim-airline/vim-airline'          " lean & mean status/tabline for vim that's light as air
 Plug 'altercation/vim-colors-solarized' " solarized theme
 Plug 'Yggdroot/indentLine'              " displays thin vertical lines at each indentation level for code indented with spaces
+Plug 'previm/previm'                    " realtime preview
 
 if has('nvim')
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -147,6 +148,8 @@ endif
 
 " Least Used Functionalities
 Plug 'majutsushi/tagbar'                " easy tags navigation
+Plug 'ludovicchabant/vim-gutentags'     " tag management
+Plug 'tsukkee/unite-tag'                " tag for unite.vim
 Plug 'vim-scripts/matchit.zip'          " extended % matching for HTML, Latex and many other languages
 "Plug 'inkarkat/SyntaxAttr.vim'         " show syntax highlighing attributes under cursor; for debugging
 
@@ -170,6 +173,7 @@ Plug 'tmhedberg/SimpylFold'             " for easy python folding
 Plug 'hdima/python-syntax'              " python syntax
 Plug 'elzr/vim-json'                    " json support
 Plug 'jvirtanen/vim-octave'             " octave support
+Plug 'pedrohdz/vim-yaml-folds'          " YAML folding
 ""}}}
 
 ""Archive {{{
@@ -203,6 +207,7 @@ let g:airline_symbols.linenr = ''
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#buffer_idx_mode = 1
 let g:airline#extensions#tabline#buffers_label = 'b'
+let airline#extensions#tabline#disable_refresh = 1
 nmap <leader>1 <Plug>AirlineSelectTab1
 nmap <leader>2 <Plug>AirlineSelectTab2
 nmap <leader>3 <Plug>AirlineSelectTab3
@@ -385,6 +390,7 @@ let g:EclimXsdValidate = 0
 function! s:goyo_enter()
   silent !tmux set -w status off
   silent !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
+  nnoremap <f8> :NERDTreeToggle<cr>:Goyo x<cr>
   autocmd VimResized * exe "normal \<c-w>="
   set noshowmode
   set noshowcmd
@@ -394,6 +400,7 @@ endfunction
 function! s:goyo_leave()
   silent !tmux set -w status on
   silent !tmux list-panes -F '\#F' | grep -q Z && tmux resize-pane -Z
+  nnoremap <f8> :NERDTreeToggle<cr>
   set showmode
   set showcmd
 endfunction
@@ -403,8 +410,8 @@ autocmd! User GoyoLeave nested call <SID>goyo_leave()
 ""}}}
 
 ""vimtex {{{
-let g:vimtex_fold_enabled=1
-let g:vimtex_complete_enabled=1
+let g:vimtex_fold_enabled = 1
+let g:vimtex_complete_enabled = 1
 "let g:vimtex_view_method = 'zathura'
 let g:vimtex_view_general_viewer = 'zathura'
 let g:vimtex_view_general_options = '@pdf'
@@ -412,6 +419,14 @@ if !exists('g:deoplete#omni#input_patterns')
     let g:deoplete#omni#input_patterns = {}
 endif
 let g:deoplete#omni#input_patterns.tex = g:vimtex#re#deoplete
+""}}}
+
+""gutentags {{{
+let g:gutentags_enabled = 0
+""}}}
+
+""previm {{{
+let g:previm_open_cmd = 'open -a "Google Chrome"'
 ""}}}
 
 "" }}}
@@ -529,13 +544,12 @@ inoremap <expr> <s-tab>       pumvisible() ? "\<C-p>" : "\<s-tab>"
 
 "}}}
 
-"FileType Specific {{{
-augroup vimrc_filetypes
+" FileType Specific {{{
+augroup vimrctweaks
   autocmd!
 
-""Vimscript {{{
-  "folding
-  autocmd FileType vim setlocal foldmethod=marker
+""Configuration files {{{
+  autocmd BufNewFile,BufRead *.*rc setlocal foldmethod=marker
 ""}}}
 
 ""Json {{{
