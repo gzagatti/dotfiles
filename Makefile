@@ -1,7 +1,7 @@
 dotfiles := $(shell pwd)
 workspace := ${HOME}
 
-all: vim tmux bash jupyter git r python
+all: vim tmux bash jupyter git r python ctags
 
 osx:
 	sh $(dotfiles)/osx
@@ -40,3 +40,6 @@ git:
 
 r:
 	ln -fs $(dotfiles)/Rprofile ${workspace}/.Rprofile
+
+ctags:
+	ln -fs $(dotfiles)/ctags ${workspace}/.ctags

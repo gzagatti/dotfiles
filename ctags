@@ -1,0 +1,2 @@
+--exclude=.git
+--python-kinds=-i
