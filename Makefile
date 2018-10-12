@@ -1,8 +1,6 @@
 dotfiles := $(shell pwd)
 workspace := ${HOME}
 
-all: vim tmux bash jupyter git r python ctags
-
 osx:
 	sh $(dotfiles)/osx
 
@@ -24,10 +22,8 @@ jupyter:
 	ln -fs $(dotfiles)/jupyter_console_config.py ${workspace}/.jupyter/jupyter_console_config.py
 
 python:
-	mkdir -p ${workspace}/.ipython/profile_default
-	ln -fs $(dotfiles)/ipython_config.py ${workspace}/.ipython/profile_default
-	mkdir -p ${workspace}/.matplotlib
-	ln -fs ${dotfiles}/matplotlibrc ${workspace}/.matplotlib/matplotlibrc
+	mkdir -p ${workspace}/.config/matplotlib
+	ln -fs ${dotfiles}/matplotlibrc ${workspace}/.config/matplotlib/matplotlibrc
 
 eclim:
 	ln -fs $(dotfiles)/eclimrc ${workspace}/.eclimrc
