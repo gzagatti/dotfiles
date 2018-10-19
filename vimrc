@@ -206,7 +206,7 @@ let g:airline_symbols.linenr = ''
 " tabline
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#buffer_idx_mode = 1
-let g:airline#extensions#tabline#buffers_label = 'b'
+let g:airline#extensions#tabline#overflow_marker = '…'
 let airline#extensions#tabline#disable_refresh = 1
 nmap <leader>1 <Plug>AirlineSelectTab1
 nmap <leader>2 <Plug>AirlineSelectTab2
@@ -259,14 +259,26 @@ let g:syntastic_r_lintr_quiet_messages = { "regex": "Variable and function names
 
 ""nerdtree {{{
 "ignore certain files from NERDTree
-let NERDTreeIgnore=['__pycache__']
+let NERDTreeIgnore=['__pycache__', '\.egg-info$']
 "open NERDTree automatically when vim starts up on opening a directory
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
-""}}}
 
-""nerdtree {{{
-nnoremap <f8> :NERDTreeToggle<cr>
+function! s:NERDTreeCustomToggle(pathStr)
+  if g:NERDTree.ExistsForTab()
+    if !g:NERDTree.IsOpen()
+      execute "NERDTreeFind" a:pathStr
+    else
+      NERDTreeClose
+    endif
+  else
+    execute "NERDTreeFind" a:pathStr
+  endif
+endfunction
+
+command! -n=? -complete=file -bar NERDTreeCustomToggle call s:NERDTreeCustomToggle('<args>')
+
+nnoremap <f8> :NERDTreeCustomToggle<cr>
 ""}}}
 
 ""slimux {{{
@@ -295,6 +307,8 @@ augroup loadfile_slimux:
     \ :execute ":silent SlimuxShellRun source('" . @% . "', echo=TRUE)" <cr>
   autocmd FileType rmd noremap <buffer> <silent> <leader>sf
     \ :execute ":silent SlimuxShellRun rmarkdown::render('" . @% . "', output_format='all', quiet=TRUE)" <cr>
+  autocmd FileType hdl noremap <buffer> <silent> <leader>sf
+    \ :execute ":silent SlimuxShellRun sh tools/HardwareSimulator.sh " . expand("%:r") . ".tst" <cr>
 augroup END
 
 function! SlimuxEscape_r(text)
@@ -427,6 +441,10 @@ let g:gutentags_enabled = 0
 
 ""previm {{{
 let g:previm_open_cmd = 'open -a "Google Chrome"'
+""}}}
+
+"" gnupg {{{
+let g:GPGPreferSymmetric = 1
 ""}}}
 
 "" }}}
