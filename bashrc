@@ -32,7 +32,6 @@ if [[ $- == *i* ]]; then
   alias bashrc='source ~/.bashrc'
   # }}}
 
-
   # Linux Specific {{{
   if [[ $OSTYPE == linux* ]]; then
     # magic envrionments in order to make slimux work in tmux
@@ -81,7 +80,7 @@ if [[ $- == *i* ]]; then
     eval "$(pyenv init -)"
     eval "$(pyenv virtualenv-init -)"
     export PYENV_VIRTUALENV_DISABLE_PROMPT=1
-    export WORKON_HOME=$(pyenv prefix)/envs
+    # export WORKON_HOME=$(pyenv root)/versions
     # activate virtualenvs
     function workon() {
       source activate $1
@@ -89,7 +88,7 @@ if [[ $- == *i* ]]; then
     function _deactivate() {
       source deactivate
     }
-    # it is not possible to declarea a function called
+    # it is not possible to declare a a function called
     # deactivate as it clashes with the pyenv shim of same name,
     # thus we create an internal function and alias to deactivate
     alias deactivate=_deactivate
