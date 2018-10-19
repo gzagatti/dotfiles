@@ -265,14 +265,23 @@ autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
 
 function! s:NERDTreeCustomToggle(pathStr)
+  let l:pathStr = !empty(a:pathStr) ? a:pathStr : expand('%:p')
   if g:NERDTree.ExistsForTab()
     if !g:NERDTree.IsOpen()
-      execute "NERDTreeFind" a:pathStr
+      if empty(l:pathStr)
+        execute "NERDTree ."
+      else
+        execute "NERDTreeFind" l:pathStr
+      endif
     else
       NERDTreeClose
     endif
   else
-    execute "NERDTreeFind" a:pathStr
+    if empty(l:pathStr)
+      execute "NERDTree ."
+    else
+      execute "NERDTreeFind" l:pathStr
+    endif
   endif
 endfunction
 
