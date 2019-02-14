@@ -81,6 +81,8 @@ set incsearch ignorecase smartcase
 ""Buffers {{{
 set switchbuf=useopen
 set autowriteall
+set autoread
+autocmd FocusGained,CursorHold * if getcmdwintype() == '' | checktime | endif
 ""}}}
 
 ""Backup and swap files {{{
@@ -110,6 +112,7 @@ augroup END
 ""Conceal {{{
 set conceallevel=0
 ""}}}
+
 "}}}
 
 "Plugin Manager {{{
@@ -250,9 +253,12 @@ let g:syntastic_check_on_open = 1
 let g:syntastic_mode_map = { "mode": "passive" }
 
 " checkers
+" python
+let g:syntastic_python_checkers = ['pylint']
+
 " r
-let g:syntastic_enable_r_lintr_checker = 1
 let g:syntastic_r_checkers = ['lintr']
+let g:syntastic_enable_r_lintr_checker = 1
 let g:syntastic_r_lintr_quiet_messages = { "regex": "Variable and function names should be all lowercase." }
 
 ""}}}
@@ -318,6 +324,8 @@ augroup loadfile_slimux:
     \ :execute ":silent SlimuxShellRun rmarkdown::render('" . @% . "', output_format='all', quiet=TRUE)" <cr>
   autocmd FileType hdl noremap <buffer> <silent> <leader>sf
     \ :execute ":silent SlimuxShellRun sh tools/HardwareSimulator.sh " . expand("%:r") . ".tst" <cr>
+  autocmd FileType asm noremap <buffer> <silent> <leader>sf
+    \ :execute ":silent SlimuxShellRun sh tools/Assembler.sh " . @% . " && sh tools/CPUEmulator.sh " . expand("%:r") . ".tst"  <cr>
 augroup END
 
 function! SlimuxEscape_r(text)
@@ -431,6 +439,10 @@ endfunction
 autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
 ""}}}
+
+"pencil {{{
+let g:pencil#conceallevel = 0
+"}}}
 
 ""vimtex {{{
 let g:vimtex_fold_enabled = 1
