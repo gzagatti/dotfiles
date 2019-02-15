@@ -36,8 +36,8 @@ if [[ $- == *i* ]]; then
   if [[ $OSTYPE == linux* ]]; then
     # magic envrionments in order to make slimux work in tmux
     export EVENT_NOEPOLL=1
-    # adjusting python path
-    export PATH=$HOME/anaconda3/bin:$PATH
+    # add ~/bin to PATH
+    export PATH=$HOME/bin:$PATH
   fi
   # }}}
 
@@ -76,24 +76,26 @@ if [[ $- == *i* ]]; then
     # bash completion
     [ -r $(brew --prefix)/etc/bash_completion ] && source $(brew --prefix)/etc/bash_completion
 
-    # load pyenv
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
-    export PYENV_VIRTUALENV_DISABLE_PROMPT=1
-    # export WORKON_HOME=$(pyenv root)/versions
-    # activate virtualenvs
-    function workon() {
-      source activate $1
-    }
-    function _deactivate() {
-      source deactivate
-    }
-    # it is not possible to declare a a function called
-    # deactivate as it clashes with the pyenv shim of same name,
-    # thus we create an internal function and alias to deactivate
-    alias deactivate=_deactivate
-
   fi
+  # }}}
+
+  # Python configuration {{{
+  # load pyenv
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
+  export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+  # export WORKON_HOME=$(pyenv root)/versions
+  # activate virtualenvs
+  function workon() {
+    source activate $1
+  }
+  function _deactivate() {
+    source deactivate
+  }
+  # it is not possible to declare a a function called
+  # deactivate as it clashes with the pyenv shim of same name,
+  # thus we create an internal function and alias to deactivate
+  alias deactivate=_deactivate
   # }}}
 
   # PS1 Customization {{{
