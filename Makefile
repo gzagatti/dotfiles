@@ -1,6 +1,10 @@
 dotfiles := $(shell pwd)
 workspace := ${HOME}
 
+.PHONY: all
+
+all: osx vim tmux bash jupyter python eclim git r ctags
+
 osx:
 	sh $(dotfiles)/osx
 
@@ -28,9 +32,6 @@ python:
 eclim:
 	ln -fs $(dotfiles)/eclimrc ${workspace}/.eclimrc
 
-ruby:
-	ln -fs $(dotfiles)/irbrc ${workspace}/.irbrc
-
 git:
 	ln -fs $(dotfiles)/gitconfig ${workspace}/.gitconfig
 
@@ -39,3 +40,4 @@ r:
 
 ctags:
 	ln -fs $(dotfiles)/ctags ${workspace}/.ctags
+

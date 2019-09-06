@@ -137,7 +137,7 @@ Plug 'epeli/slimux'                     " tmux/vim integration
 Plug 'itspriddle/vim-marked'            " to open markdown files in marked
 Plug 'danro/rename.vim'                 " rename files in vim
 Plug 'vim-airline/vim-airline'          " lean & mean status/tabline for vim that's light as air
-Plug 'altercation/vim-colors-solarized' " solarized theme
+Plug 'dracula/vim'                      " dracula theme
 Plug 'Yggdroot/indentLine'              " displays thin vertical lines at each indentation level for code indented with spaces
 Plug 'previm/previm'                    " realtime preview
 
@@ -394,12 +394,14 @@ let g:tagbar_autofocus = 1
 "" }}}
 
 ""tmux line {{{
-"let g:tmuxline_preset = {
-      "\'a'    : '#S',
-      "\'win'  : ['#I', '#W'],
-      "\'cwin' : ['#I', '#W', '#F'],
-      "\'y'    : ['%R', '%a', '%Y'],
-      "\'z'    : '#H'}
+let g:airline#extensions#tmuxline#enabled = 1
+let g:airline#extensions#tmuxline#enabled = 1
+let g:tmuxline_preset = {
+      \'a'    : '#S',
+      \'win'  : ['#I', '#W'],
+      \'cwin' : ['#I', '#W', '#F'],
+      \'y'    : ['%R', '%a', '%Y'],
+      \'z'    : '#H'}
 "" }}}
 
 ""eclim {{{
@@ -620,8 +622,8 @@ inoremap <Right> <nop>
 
 "Color Scheme {{{
 syntax enable
-set background=dark
-colorscheme solarized
+colorscheme dracula
+highlight Normal ctermfg=253 ctermbg='NONE' 
 " overrides solarized overrides
 exe "hi! def link javaScript Ignore"
 exe "hi! def link htmlSpecialTagName PreProc"

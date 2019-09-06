@@ -19,7 +19,7 @@ if [[ $- == *i* ]]; then
   # History {{{
   export HISTFILE=~/.bash_history
   export HISTSIZE=5000
-  export HISTFILESIZE=10000
+  export HISTFILESIZE=-1
   export HISTIGNORE="&:[ ]*:exit:sudo*"
   export HISTCONTROL=ignoreboth
   export HISTTIMEFORMAT="%F %T %Z "
@@ -126,7 +126,7 @@ if [[ $- == *i* ]]; then
       return
     fi
     unset AT_PROMPT
-    echo -en '\e[0m'
+    echo -en '\033[0m'
   }
   # reset colours prior to printing output
   trap "PreCommand" DEBUG
