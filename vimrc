@@ -134,7 +134,6 @@ Plug 'lambdalisue/vim-gista'            " gist management
 Plug 'lambdalisue/vim-gista-unite'      " gist source for unite.vim
 Plug 'christoomey/vim-tmux-navigator'   " seamless navigation between tmux panes and vim splits
 Plug 'epeli/slimux'                     " tmux/vim integration
-Plug 'itspriddle/vim-marked'            " to open markdown files in marked
 Plug 'danro/rename.vim'                 " rename files in vim
 Plug 'vim-airline/vim-airline'          " lean & mean status/tabline for vim that's light as air
 Plug 'dracula/vim'                      " dracula theme
@@ -163,7 +162,7 @@ Plug 'chrisbra/NrrwRgn'                 " a narrow Region Plugin
 Plug 'godlygeek/tabular'                " easy alignment of text
 Plug 'tpope/vim-sleuth'                 " heuristically set indent/tab options
 Plug 'jamessan/vim-gnupg'               " easy gpg handling
-Plug 'reedes/vim-pencil'                " rethinking Vim as a tool for writing
+Plug 'gzagatti/vim-pencil'                " rethinking Vim as a tool for writing
 Plug 'junegunn/goyo.vim'
 ""}}}
 
@@ -177,6 +176,8 @@ Plug 'hdima/python-syntax'              " python syntax
 Plug 'elzr/vim-json'                    " json support
 Plug 'jvirtanen/vim-octave'             " octave support
 Plug 'pedrohdz/vim-yaml-folds'          " YAML folding
+Plug 'coyotebush/vim-pweave'            " Pweave files
+
 ""}}}
 
 ""Archive {{{
@@ -342,10 +343,12 @@ vmap <Enter> <Plug>(EasyAlign)
 ""}}}
 
 ""vim-markdown {{{
-let g:vim_markdown_math = 1
 let g:vim_markdown_conceal = 0
+let g:tex_conceal = ""
+let g:vim_markdown_math = 1
 let g:vim_markdown_frontmatter = 1
 let g:vim_markdown_folding_style_pythonic = 1
+let g:vim_markdown_conceal_code_blocks = 0
 ""}}}
 
 ""deoplete{{{
@@ -449,8 +452,8 @@ let g:pencil#conceallevel = 0
 ""vimtex {{{
 let g:vimtex_fold_enabled = 1
 let g:vimtex_complete_enabled = 1
-"let g:vimtex_view_method = 'zathura'
-let g:vimtex_view_general_viewer = 'zathura'
+let g:vimtex_quickfix_mode= 0
+let g:vimtex_view_method = 'general'
 let g:vimtex_view_general_options = '@pdf'
 if !exists('g:deoplete#omni#input_patterns')
     let g:deoplete#omni#input_patterns = {}
@@ -633,4 +636,3 @@ exe "hi! def link htmlSpecialTagName PreProc"
 filetype plugin indent on
 set nohlsearch
 "}}}
-
