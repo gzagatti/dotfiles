@@ -44,6 +44,9 @@ if [[ $- == *i* ]]; then
   # Mac Specific {{{
   if [[ $OSTYPE == darwin* ]]; then
 
+    # hides bash deprecation warning
+    export BASH_SILENCE_DEPRECATION_WARNING=1
+
     # sets the preferred PATH order
     if [ -r $(brew --prefix) ]; then
       export PATH=$(brew --prefix)/bin:$(brew --prefix)/sbin:$PATH
