@@ -3,8 +3,6 @@ workspace := ${HOME}
 
 .PHONY: all
 
-all: osx vim tmux bash jupyter python eclim git r ctags
-
 osx:
 	sh $(dotfiles)/osx
 
@@ -20,6 +18,9 @@ bash:
 	ln -fs $(dotfiles)/inputrc ${workspace}/.inputrc
 	ln -fs $(dotfiles)/bash_profile ${workspace}/.bash_profile
 	ln -fs $(dotfiles)/bashrc ${workspace}/.bashrc
+
+zsh:
+	ln -fs $(dotfiles)/zshrc ${workspace}/.zshrc
 
 jupyter:
 	mkdir -p ${workspace}/.jupyter/
@@ -41,3 +42,5 @@ r:
 ctags:
 	ln -fs $(dotfiles)/ctags ${workspace}/.ctags
 
+zathura:
+	ln -fs $(dotfiles)/zathurarc ${workspace}/.config/zathura/zathurarc
