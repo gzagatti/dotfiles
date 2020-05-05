@@ -80,10 +80,10 @@ if [[ $- == *i* ]]; then
   # magic environments in order to make slimux work in tmux
   if [ -d $HOME/.vim/plugged/slimux ]; then
     case $OSTYPE in
-      "linux*")
+      linux*)
         export EVENT_NOEPOLL=1
         ;;
-      "darwin*")
+      darwin*)
         export EVENT_NOKQUEUE=1
         export EVENT_NOPOLL=1
         ;;
@@ -95,10 +95,29 @@ if [[ $- == *i* ]]; then
 
   # PS1 {{{
   # (py env)[host user]:~ 99$
+  # manual http://zsh.sourceforge.net/Doc/Release/User-Contributions.html#Version-Control-Information
   autoload -Uz vcs_info
   setopt prompt_subst
-  zstyle ':vcs_info:git:*' formats ' %b'
   zstyle ':vcs_info:*' enable git
+  zstyle ':vcs_info:git*+set-message:*' hooks git-changes
+  # see https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples#L159
+  +vi-git-changes(){
+    if [[ $(git rev-parse --is-inside-work-tree 2> /dev/null) == 'true' ]]; then
+      local git_status=`git status --porcelain`
+      if [[ -z $git_status ]]; then
+        hook_com[staged]+=''
+      elif echo "${git_status}" | grep -q "^[MADRCU]"; then
+        hook_com[staged]+='+'
+      elif echo "${git_status}" | grep -q "^ [MADRCU]"; then
+        hook_com[staged]+='*'
+      elif echo "${git_status}" | grep -q "^??"; then
+        hook_com[staged]+='?'
+      elif echo "${git_status}" | grep -q "^!!"; then
+        hook_com[staged]+='!'
+      fi
+    fi
+  }
+  zstyle ':vcs_info:git:*' formats ' %b%c'
   precmd_ps1() {
     # inspired by
     # https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples#L51
