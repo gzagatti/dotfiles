@@ -1,0 +1,8 @@
+# increase the font of the status bar
+set font "monospace normal 11"
+
+# use the actual clipboard, not x11
+set selection-clipboard clipboard
+
+# scroll
+set scroll-step 1
