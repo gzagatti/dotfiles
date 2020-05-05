@@ -71,10 +71,10 @@ if [[ $- == *i* ]]; then
   # magic environments in order to make slimux work in tmux
   if [ -d $HOME/.vim/plugged/slimux ]; then
     case $OSTYPE in
-      "linux*")
+      linux*)
         export EVENT_NOEPOLL=1
         ;;
-      "darwin*")
+      darwin*)
         export EVENT_NOKQUEUE=1
         export EVENT_NOPOLL=1
         ;;
