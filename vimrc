@@ -122,23 +122,24 @@ call plug#begin('~/.vim/plugged')
 
 ""Tools {{{
 " Most Used Functionalities
-Plug 'scrooloose/nerdtree'              " file management from within Vim
-Plug 'tpope/vim-commentary'             " comment stuff out
-Plug 'suy/vim-context-commentstring'    " set commentstring value dynamically
-Plug 'scrooloose/syntastic'             " syntax checking hacks
-Plug 'tpope/vim-fugitive'               " git support
-Plug 'tpope/vim-surround'               " surround text with pairs of elements
-Plug 'Shougo/vimproc.vim', {'do' : 'make'} " interactive command execution
-Plug 'Shougo/unite.vim'                 " unite and create user interfaces
-Plug 'lambdalisue/vim-gista'            " gist management
-Plug 'lambdalisue/vim-gista-unite'      " gist source for unite.vim
-Plug 'christoomey/vim-tmux-navigator'   " seamless navigation between tmux panes and vim splits
-Plug 'epeli/slimux'                     " tmux/vim integration
-Plug 'danro/rename.vim'                 " rename files in vim
-Plug 'vim-airline/vim-airline'          " lean & mean status/tabline for vim that's light as air
-Plug 'dracula/vim'                      " dracula theme
-Plug 'Yggdroot/indentLine'              " displays thin vertical lines at each indentation level for code indented with spaces
-Plug 'previm/previm'                    " realtime preview
+Plug 'scrooloose/nerdtree'                  "  file management from within Vim
+Plug 'tpope/vim-commentary'                 "  comment stuff out
+Plug 'suy/vim-context-commentstring'        "  set commentstring value dynamically
+Plug 'scrooloose/syntastic'                 "  syntax checking hacks
+Plug 'tpope/vim-fugitive'                   "  git support
+Plug 'tpope/vim-surround'                   "  surround text with pairs of elements
+Plug 'Shougo/vimproc.vim', {'do' : 'make'}  "  interactive command execution
+Plug 'Shougo/unite.vim'                     "  unite and create user interfaces
+Plug 'lambdalisue/vim-gista'                "  gist management
+Plug 'lambdalisue/vim-gista-unite'          "  gist source for unite.vim
+Plug 'christoomey/vim-tmux-navigator'       "  seamless navigation between tmux panes and vim splits
+Plug 'epeli/slimux'                         "  tmux/vim integration
+Plug 'danro/rename.vim'                     "  rename files in vim
+Plug 'vim-airline/vim-airline'              "  lean & mean status/tabline for vim that's light as air
+Plug 'dracula/vim'                          "  dracula theme
+Plug 'Yggdroot/indentLine'                  "  displays thin vertical lines at each indentation level for code indented with spaces
+Plug 'previm/previm'                        "  realtime preview
+Plug 'dpelle/vim-LanguageTool'              "  LanguageTool grammar checker
 
 if has('nvim')
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -162,8 +163,8 @@ Plug 'chrisbra/NrrwRgn'                 " a narrow Region Plugin
 Plug 'godlygeek/tabular'                " easy alignment of text
 Plug 'tpope/vim-sleuth'                 " heuristically set indent/tab options
 Plug 'jamessan/vim-gnupg'               " easy gpg handling
-Plug 'gzagatti/vim-pencil'                " rethinking Vim as a tool for writing
-Plug 'junegunn/goyo.vim'
+Plug 'gzagatti/vim-pencil'              " rethinking Vim as a tool for writing
+Plug 'junegunn/goyo.vim'                " distraction free-writing in Vim
 ""}}}
 
 ""Languages {{{
@@ -453,8 +454,7 @@ let g:pencil#conceallevel = 0
 let g:vimtex_fold_enabled = 1
 let g:vimtex_complete_enabled = 1
 let g:vimtex_quickfix_mode= 0
-let g:vimtex_view_method = 'general'
-let g:vimtex_view_general_options = '@pdf'
+let g:vimtex_view_enabled=0
 if !exists('g:deoplete#omni#input_patterns')
     let g:deoplete#omni#input_patterns = {}
 endif
@@ -473,6 +473,10 @@ let g:previm_open_cmd = 'open -a "Google Chrome"'
 let g:GPGPreferSymmetric = 1
 ""}}}
 
+"" language tool {{{
+let g:languagetool_jar="/usr/local/Cellar/languagetool/4.8/libexec/languagetool-commandline.jar"
+""}}}
+"
 "" }}}
 
 "Key Mappings {{{
