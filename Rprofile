@@ -12,6 +12,12 @@ options(prompt="R > ", digits=7, show.signif.start=TRUE)
 # show menu in text mode
 options(menu.graphics = FALSE)
 
+# store packages in user space
+if (!dir.exists("~/.local/lib/R/library")) {
+  dir.create("~/.local/lib/R/library", recursive=TRUE)
+}
+.libPaths(c("~/.local/lib/R/library", .libPaths()))
+
 # do not prompt to save workspace when quitting
 utils::assignInNamespace(
   "q", function(save = "no", status = 0, runLast = TRUE) {
