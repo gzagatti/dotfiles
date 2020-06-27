@@ -1,0 +1,54 @@
+# colors after the Dracula theme with minor modifications
+colors:
+  primary:
+    background: '0x282a36'
+    foreground: '0xbbbbbb'
+
+  cursor:
+    text: '0x44475a'
+    cursor: '0xf8f8f2'
+
+  normal:
+    black:   '0x656b73'
+    red:     '0xff6f6b'
+    green:   '0x62f591'
+    yellow:  '0xf3f7a2'
+    blue:    '0xc9abf8'
+    magenta: '0xff94d0'
+    cyan:    '0x9dedfc'
+    white:   '0xbbbbbb'
+
+  bright:
+    black:   '0x444759'
+    red:     '0xff867d'
+    green:   '0x6cf3a2'
+    yellow:  '0xf3f7a2'
+    blue:    '0xd4bcf9'
+    magenta: '0xffa9d8'
+    cyan:    '0xaaf0fd'
+    white:   '0xf6f6f0'
+
+  dim:
+    black:   '0x14151b'
+    red:     '0xff2222'
+    green:   '0x1ef956'
+    yellow:  '0xebf85b'
+    blue:    '0x4d5b86'
+    magenta: '0xff46b0'
+    cyan:    '0x59dffc'
+    white:   '0xe6e6d1'
+
+font:
+
+  normal:
+    family: monospace
+
+  spacing:
+    line: 0.0
+    letter: 0.0
+
+  size: 12
+
+key_bindings:
+  - { key: V, mods: Control, action: Paste }
+  - { key: C, mods: Control, action: Copy }
