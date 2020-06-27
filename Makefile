@@ -43,4 +43,9 @@ ctags:
 	ln -fs $(dotfiles)/ctags ${workspace}/.ctags
 
 zathura:
+	mkdir -p ${workspace}/.config/zathura
 	ln -fs $(dotfiles)/zathurarc ${workspace}/.config/zathura/zathurarc
+
+alacritty:
+	mkdir -p ${workspace}/.config/alacritty/
+	ln -fs $(dotfiles)/alacritty.yml ${workspace}/.config/alacritty/alacritty.yml
