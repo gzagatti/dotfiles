@@ -53,3 +53,7 @@ alacritty:
 rofi:
 	mkdir -p ${workspace}/.config/rofi
 	ln -fs $(dotfiles)/rofi.rasi ${workspace}/.config/rofi/config.rasi
+
+latex:
+	mkdir -p ${workspace}/.config/latexmk
+	ln -fs $(dotfiles)/latexmkrc ${workspace}/.config/latexmk/latexmkrc
