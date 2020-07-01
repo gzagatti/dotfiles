@@ -133,7 +133,7 @@ if [[ $- == *i* ]]; then
     # inspired by
     # https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples#L51
     local color='%(?.%F{black}.%F{red})'
-    local host_info_msg="[%m %n]:%1~ %h%#"
+    local host_info_msg="[%m %n]:%1~ %#"
     local dev_info_msg
 
     local pyenv_info_msg=`_pyenv_info`

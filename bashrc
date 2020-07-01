@@ -89,7 +89,7 @@ if [[ $- == *i* ]]; then
 
   function _ps1() {
     local color='$(if [[ $? == 0 ]]; then echo "\[\e[00;30m\]";else echo "\[\e[00;31m\]"; fi)'
-    local info='[\h \u]:\W \#\$'
+    local info='[\h \u]:\W \$'
     local reset_color='\[\e[0m\] \[\e[33m\]'
     printf %s "$color$(_pyenv_info)$info$reset_color"
     return 0

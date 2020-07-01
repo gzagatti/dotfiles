@@ -48,7 +48,7 @@ set wrap
 set backspace=indent,eol,start
 set list
 set listchars=""
-set listchars=tab:>\ 
+set listchars=tab:>\
 set listchars+=trail:.
 set listchars+=extends:>
 set listchars+=precedes:>
@@ -448,6 +448,10 @@ autocmd! User GoyoLeave nested call <SID>goyo_leave()
 
 "pencil {{{
 let g:pencil#conceallevel = 0
+augroup pencil
+  autocmd!
+  autocmd FileType tex call pencil#init({'wrap': 'soft'})
+augroup END
 "}}}
 
 ""vimtex {{{
@@ -458,6 +462,10 @@ let g:vimtex_view_enabled=0
 call deoplete#custom#var('omni', 'input_patterns', {
     \ 'tex': g:vimtex#re#deoplete
   \})
+augroup vimtex
+  au!
+  au User VimtexEventQuit call vimtex#compiler#clean(0)
+augroup END
 ""}}}
 
 ""gutentags {{{
@@ -475,7 +483,7 @@ let g:GPGPreferSymmetric = 1
 "" language tool {{{
 let g:languagetool_jar="/usr/local/Cellar/languagetool/4.8/libexec/languagetool-commandline.jar"
 ""}}}
-"
+
 "" }}}
 
 "Key Mappings {{{
@@ -631,14 +639,11 @@ inoremap <Right> <nop>
 "}}}
 "}}}
 
-"Color Scheme {{{
+" Color Scheme {{{
 syntax enable
+au ColorScheme dracula highlight Normal ctermfg=253 ctermbg='NONE'
 colorscheme dracula
-highlight Normal ctermfg=253 ctermbg='NONE' 
-" overrides solarized overrides
-exe "hi! def link javaScript Ignore"
-exe "hi! def link htmlSpecialTagName PreProc"
-"" }}}
+"}}}
 
 "Clean Up {{{
 filetype plugin indent on
