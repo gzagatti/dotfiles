@@ -49,3 +49,7 @@ zathura:
 alacritty:
 	mkdir -p ${workspace}/.config/alacritty/
 	ln -fs $(dotfiles)/alacritty.yml ${workspace}/.config/alacritty/alacritty.yml
+
+rofi:
+	mkdir -p ${workspace}/.config/rofi
+	ln -fs $(dotfiles)/rofi.rasi ${workspace}/.config/rofi/config.rasi
