@@ -1,5 +1,5 @@
-# colors after the Dracula theme with minor modifications
 colors:
+# colors after the Dracula theme with minor modifications
   primary:
     background: '0x282a36'
     foreground: '0xbbbbbb'
@@ -47,8 +47,8 @@ font:
     line: 0.0
     letter: 0.0
 
-  size: 12
+  size: 10
 
 key_bindings:
-  - { key: V, mods: Control, action: Paste }
-  - { key: C, mods: Control, action: Copy }
+  - { key: V, mods: Alt, action: Paste }
+  - { key: C, mods: Alt, action: Copy }
