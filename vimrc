@@ -455,10 +455,9 @@ let g:vimtex_fold_enabled = 1
 let g:vimtex_complete_enabled = 1
 let g:vimtex_quickfix_mode= 0
 let g:vimtex_view_enabled=0
-if !exists('g:deoplete#omni#input_patterns')
-    let g:deoplete#omni#input_patterns = {}
-endif
-let g:deoplete#omni#input_patterns.tex = g:vimtex#re#deoplete
+call deoplete#custom#var('omni', 'input_patterns', {
+    \ 'tex': g:vimtex#re#deoplete
+  \})
 ""}}}
 
 ""gutentags {{{
@@ -512,11 +511,16 @@ noremap j gj
 noremap k gk
 ""}}}
 
-""Paste Mode Toggle {{{
+""Copy/Paste mode toggle and shortcuts {{{
 nnoremap <F4> :set invpaste paste?<cr>
 inoremap <F4> <c-o>:set invpaste paste?<cr>
-noremap <leader>p "*p
-noremap <leader>y "*y
+if has("mac")
+  noremap <leader>p "*p
+  noremap <leader>y "*y
+elseif has("unix")
+  noremap <leader>p "+p
+  noremap <leader>y "+y
+endif
 
 " 'bracketed paste mode' support: programs that support it send the terminal
 " an escape sequence to enable this mode, in which the terminal surrounds
