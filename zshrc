@@ -1,6 +1,10 @@
 # Avoid breaking non-interactive logins (eg sftp)
 if [[ $- == *i* ]]; then
 
+  # Determine OS type {{{
+  export OSTYPE="$(uname -s)"
+  # }}}
+
   # Shell options {{{
   setopt NO_CASE_GLOB
   setopt AUTO_CD
@@ -14,7 +18,9 @@ if [[ $- == *i* ]]; then
   setopt HIST_IGNORE_DUPS
   setopt HIST_REDUCE_BLANKS
   setopt HIST_VERIFY
-  HISTFILE=${ZDOTDIR:-$HOME}/.zsh_history
+  export HISTFILE=${ZDOTDIR:-$HOME}/.zsh_history
+  export SAVEHIST=100000
+  export HISTSIZE=$SAVEHIST
   # }}}
 
   # Program specific {{{
@@ -31,14 +37,18 @@ if [[ $- == *i* ]]; then
   if hash brew &>/dev/null; then
     export PATH=$(brew --prefix)/bin:$(brew --prefix)/sbin:$PATH
     FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+  elif [ -d /home/linuxbrew/.linuxbrew ]; then
+    eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
   fi
   ## }}}
 
   ## text editor {{{
   if hash nvim 2>/dev/null; then
-    export EDITOR=/usr/local/bin/nvim
+    export EDITOR=$(which nvim)
+  elif hash vim 2>/dev/null; then
+    export EDITOR=$(which vim)
   else
-    export EDITOR=/usr/local/bin/vim
+    export EDITOR=$(which vi)
   fi
   ## }}}
 
@@ -55,6 +65,7 @@ if [[ $- == *i* ]]; then
     eval "$(pyenv init -)"
     eval "$(pyenv virtualenv-init -)"
     export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+    export PYENV_ROOT="$(pyenv root)"
 
     function _pyenv_info() {
       if hash pyenv 2>/dev/null; then
@@ -153,7 +164,7 @@ if [[ $- == *i* ]]; then
 
   # PATH {{{
   # add ~/bin to PATH
-  export PATH=$HOME/dev/bin:$PATH
+  export PATH=$HOME/.local/bin:$PATH
   # removes duplicates from the PATH, given that the above can introduce duplicates
   PATH=`printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}'`
   # }}}
@@ -173,16 +184,24 @@ if [[ $- == *i* ]]; then
   compinit -u
   # }}}
 
-  # Alias {{{
+  # Alias and functions {{{
 
-  ## Source bashrc {{{
+  ## Source zshrc {{{
   alias zshrc='source ~/.zshrc'
   ## }}}
 
-  # }}}
+  ## List with colors by default {{{
+  alias ls='ls --color=auto'
+  ## }}}
 
-  # Mac specific {{{
-  if  [[ $OSTYPE == darwin* ]]; then
+  if [[ $OSTYPE == Linux* ]]; then
+
+    # More convenient xdg-open
+    alias open='xdg-open'
+
+  fi
+
+  if  [[ $OSTYPE == Darwin* ]]; then
 
     # turn on/off hidden files visibility
     alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
