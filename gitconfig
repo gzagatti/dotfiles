@@ -2,7 +2,7 @@
         name = gzagatti
         email = gzagatti@gmail.com
 [core]
-        editor = vim
+        editor = nvim
         autocrlf = input
 [ui]
         color = true
