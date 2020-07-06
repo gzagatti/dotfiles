@@ -194,6 +194,11 @@ if [[ $- == *i* ]]; then
   alias ls='ls --color=auto'
   ## }}}
 
+  ## Simple calculator {{{
+  # https://lukasmestan.com/simple-zsh-calculator/
+  function = { echo "$@" | bc -l }
+  ## }}}
+
   if [[ $OSTYPE == Linux* ]]; then
 
     # More convenient xdg-open
