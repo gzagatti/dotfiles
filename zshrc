@@ -9,6 +9,8 @@ if [[ $- == *i* ]]; then
   setopt NO_CASE_GLOB
   setopt AUTO_CD
   bindkey -v
+  bindkey "^?" backward-delete-char
+  bindkey "^R" history-incremental-search-backward
   # }}}
 
   # History {{{
