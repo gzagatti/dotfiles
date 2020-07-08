@@ -49,6 +49,12 @@ font:
 
   size: 10
 
+scrolling:
+
+  history: 10000
+
+  multiplier: 3
+
 key_bindings:
-  - { key: V, mods: Alt, action: Paste }
-  - { key: C, mods: Alt, action: Copy }
+  - { key: V, mods: Shift|Control, action: Paste }
+  - { key: C, mods: Shift|Control, action: Copy }
