@@ -39,8 +39,8 @@ if [[ $- == *i* ]]; then
   if hash brew &>/dev/null; then
     export PATH=$(brew --prefix)/bin:$(brew --prefix)/sbin:$PATH
     FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
-  elif [ -d /home/linuxbrew/.linuxbrew ]; then
-    eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+  elif [ -d $HOME/.linuxbrew ]; then
+    eval $(${HOME}/.linuxbrew/bin/brew shellenv)
   fi
   ## }}}
 
@@ -62,8 +62,7 @@ if [[ $- == *i* ]]; then
   fi
   ## }}}
 
-  ## python {{{
-  # load pyenv
+  ## pyenv {{{
   if hash pyenv 2>/dev/null; then
 
     eval "$(pyenv init -)"
@@ -71,15 +70,12 @@ if [[ $- == *i* ]]; then
     export PYENV_VIRTUALENV_DISABLE_PROMPT=1
     export PYENV_ROOT="$(pyenv root)"
 
-    function _pyenv_info() {
-      if hash pyenv 2>/dev/null; then
-        local venv=$(pyenv version-name)
-        if [ -n "$venv" ] && [ $venv != system ]; then
-          printf "py $venv"
-        fi
-      fi
-      return
-    }
+  fi
+  ## }}}
+
+  ## rvm {{{
+  if [ -d $HOME/.rvm ]; then
+    export PATH=$PATH:$HOME/.rvm/bin
   fi
   ## }}}
 
@@ -133,16 +129,27 @@ if [[ $- == *i* ]]; then
     fi
   }
   zstyle ':vcs_info:git:*' formats ' %b%c'
+  # information about the current python environment
+  _pyenv_info() {
+    if hash pyenv 2>/dev/null; then
+      local venv=$(pyenv version-name)
+      if [ -n "$venv" ] && [ $venv != system ]; then
+        printf "py $venv"
+      fi
+    fi
+    return
+  }
+  # inspired by
+  # https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples#L51
   precmd_ps1() {
-    # inspired by
-    # https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples#L51
     local color='%(?.%F{black}.%F{red})'
     local host_info_msg="[%m %n]:%1~ %#"
     local dev_info_msg
 
+
     local pyenv_info_msg=`_pyenv_info`
     if [[ -n $pyenv_info_msg ]]; then
-      dev_info_msg="${pyenv_info_msg}"
+        dev_info_msg="${pyenv_info_msg}"
     fi
 
     vcs_info
@@ -198,29 +205,33 @@ if [[ $- == *i* ]]; then
   alias ls='ls --color=auto'
   ## }}}
 
-  ## Simple calculator {{{
+  ## simple calculator {{{
   # https://lukasmestan.com/simple-zsh-calculator/
   function = { echo "$@" | bc -l }
   ## }}}
 
   if [[ $OSTYPE == Linux* ]]; then
 
-    # More convenient xdg-open
+    ## More convenient xdg-open {{{
     alias open='xdg-open'
+    ## }}}
 
   fi
 
   if  [[ $OSTYPE == Darwin* ]]; then
 
-    # turn on/off hidden files visibility
+    ## turn on/off hidden files visibility {{{
     alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
     alias hideFiles='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app'
+    ## }}}
 
-    # ql: show a "Quick Look" view of files
+    ## ql: show a "Quick Look" view of files {{{
     ql() { /usr/bin/qlmanage -p "$@" >& /dev/null & }
+    ## }}}
 
-    # firefox: open document in Firefox
+    ## firefox: open document in Firefox {{{
     firefox() { if [ $1 ]; then open -a Firefox $1; else open -a "Firefox"; fi }
+    ## }}}
 
   fi
   # }}}
