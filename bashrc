@@ -1,6 +1,10 @@
 # Avoid breaking non-interactive logins (eg sftp)
 if [[ $- == *i* ]]; then
 
+  # Determine OS type {{{
+  export OSTYPE="$(uname -s)"
+  # }}}
+
   # History {{{
   export HISTFILE=~/.bash_history
   export HISTFILESIZE=-1
@@ -23,40 +27,44 @@ if [[ $- == *i* ]]; then
   ## brew {{{
   if hash brew &>/dev/null; then
     export PATH=$(brew --prefix)/bin:$(brew --prefix)/sbin:$PATH
+    FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+  elif [ -d $HOME/.linuxbrew ]; then
+    eval $(${HOME}/.linuxbrew/bin/brew shellenv)
   fi
   ## }}}
 
   ## text editor {{{
   if hash nvim 2>/dev/null; then
-    export EDITOR=/usr/local/bin/nvim
+    export EDITOR=$(which nvim)
+  elif hash vim 2>/dev/null; then
+    export EDITOR=$(which vim)
   else
-    export EDITOR=/usr/local/bin/vim
+    export EDITOR=$(which vi)
   fi
   ## }}}
 
   ## tex {{{
   if hash tex 2>/dev/null; then
-    export TEXMFHOME=$HOME/.texmf
+    export TEXMFCONFIG=$HOME/.local/share/texlive/texmf-config
+    export TEXMFVAR=$HOME/.local/share/texlive/texmf-var
+    export TEXMFHOME=$HOME/.local/share/texlive/texmf
   fi
   ## }}}
 
-  ## python {{{
-  # load pyenv
+  ## pyenv {{{
   if hash pyenv 2>/dev/null; then
 
     eval "$(pyenv init -)"
     eval "$(pyenv virtualenv-init -)"
     export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+    export PYENV_ROOT="$(pyenv root)"
 
-    function _pyenv_info() {
-      if hash pyenv 2>/dev/null; then
-        local venv=$(pyenv version-name)
-        if [ -n "$venv" ] && [ $venv != system ]; then
-          printf "(py $venv)"
-        fi
-      fi
-      return
-    }
+  fi
+  ## }}}
+
+  ## rvm {{{
+  if [ -d $HOME/.rvm ]; then
+    export PATH=$PATH:$HOME/.rvm/bin
   fi
   ## }}}
 
@@ -64,6 +72,7 @@ if [[ $- == *i* ]]; then
   if hash R 2>/dev/null; then
     export R_PROFILE=$HOME/.RProfile
     alias R='R --no-save --no-restore'
+    alias r='R --no-save --no-restore'
   fi
   ## }}}
 
@@ -86,7 +95,16 @@ if [[ $- == *i* ]]; then
 
   # PS1 {{{
   # (py env)[host user]:~ 99$
-
+  # information about the current python environment
+  function _pyenv_info() {
+    if hash pyenv 2>/dev/null; then
+      local venv=$(pyenv version-name)
+      if [ -n "$venv" ] && [ $venv != system ]; then
+        printf "py $venv"
+      fi
+    fi
+    return
+  }
   function _ps1() {
     local color='$(if [[ $? == 0 ]]; then echo "\[\e[00;30m\]";else echo "\[\e[00;31m\]"; fi)'
     local info='[\h \u]:\W \$'
@@ -123,7 +141,7 @@ if [[ $- == *i* ]]; then
 
   # PATH {{{
   # add ~/bin to PATH
-  export PATH=$HOME/dev/bin:$PATH
+  export PATH=$HOME/.local/bin:$PATH
   # removes duplicates from the PATH, given that the above can introduce duplicates
   PATH=`printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}'`
   # }}}
@@ -134,24 +152,35 @@ if [[ $- == *i* ]]; then
   alias bashrc='source ~/.bashrc'
   ## }}}
 
-  # }}}
+  ## List with colors by default {{{
+  alias ls='ls --color=auto'
+  ## }}}
 
-  # Mac specific {{{
-  if  [[ $OSTYPE == darwin* ]]; then
+  if [[ $OSTYPE == Linux* ]]; then
 
-    # turn on/off hidden files visibility
-    alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
-    alias hideFiles='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app'
-
-    # ql: show a "Quick Look" view of files
-    ql() { /usr/bin/qlmanage -p "$@" >& /dev/null & }
-
-    # firefox: open document in Firefox
-    firefox() { if [ $1 ]; then open -a Firefox $1; else open -a "Firefox"; fi }
+    ## More convenient xdg-open {{{
+    alias open='xdg-open'
+    ## }}}
 
   fi
+
   # }}}
 
+  if  [[ $OSTYPE == Darwin* ]]; then
+
+    ## turn on/off hidden files visibility {{{
+    alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
+    alias hideFiles='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app'
+    ## }}}
+
+    ## ql: show a "Quick Look" view of files {{{
+    ql() { /usr/bin/qlmanage -p "$@" >& /dev/null & }
+    ## }}}
+
+    ## firefox: open document in Firefox {{{
+    firefox() { if [ $1 ]; then open -a Firefox $1; else open -a "Firefox"; fi }
+    ## }}}
+
+  fi
+
 fi
-
-
