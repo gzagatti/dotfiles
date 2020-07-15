@@ -56,7 +56,9 @@ if [[ $- == *i* ]]; then
 
   ## tex {{{
   if hash tex 2>/dev/null; then
-    export TEXMFHOME=$HOME/.texmf
+    export TEXMFCONFIG=$HOME/.local/share/texlive/texmf-config
+    export TEXMFVAR=$HOME/.local/share/texlive/texmf-var
+    export TEXMFHOME=$HOME/.local/share/texlive/texmf
   fi
   ## }}}
 

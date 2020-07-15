@@ -1,6 +1,7 @@
-latexmk
-biber
-tuf
+tufte-latex
+xkeyval
+ragged2e
+ms
 xifthen
 hardwrap
 ifmtarg
@@ -23,3 +24,10 @@ biblatex
 logreq
 appendix
 doublestroke
+textcase
+setspace
+xcolor
+fancyvrb
+lineno
+float
+booktabs
