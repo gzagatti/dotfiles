@@ -62,9 +62,13 @@ if [[ $- == *i* ]]; then
   fi
   ## }}}
 
-  ## rvm {{{
-  if [ -d $HOME/.rvm ]; then
-    export PATH=$PATH:$HOME/.rvm/bin
+  ## rbenv {{{
+  if hash rbenv 2>/dev/null; then
+
+    eval "$(rbenv init -)"
+    export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
+    export RBENV_ROOT="$(rbenv root)"
+
   fi
   ## }}}
 
@@ -95,21 +99,43 @@ if [[ $- == *i* ]]; then
 
   # PS1 {{{
   # (py env)[host user]:~ 99$
-  # information about the current python environment
-  function _pyenv_info() {
-    if hash pyenv 2>/dev/null; then
-      local venv=$(pyenv version-name)
+  # information about the current dev environment
+  function _devenv_info() {
+    if hash $1 2>/dev/null; then
+      local venv=$($1 version-name)
       if [ -n "$venv" ] && [ $venv != system ]; then
-        printf "py $venv"
+        printf "$2 $venv"
       fi
     fi
     return
+  }
+  function _precmd_ps1() {
+    local dev_info_msg
+
+    local pyenv_info_msg=`_devenv_info pyenv py`
+    if [[ -n $pyenv_info_msg ]]; then
+        dev_info_msg="${pyenv_info_msg}"
+    fi
+
+    local rbenv_info_msg=`_devenv_info rbenv rb`
+    if [[ -n $rbenv_info_msg ]]; then
+      if [[ -n $dev_info_msg ]]; then
+        dev_info_msg="${dev_info_msg}, "
+      fi
+      dev_info_msg="${dev_info_msg}${rbenv_info_msg}"
+    fi
+
+    if [[ -n $dev_info_msg ]]; then
+      dev_info_msg="(${dev_info_msg})"
+    fi
+
+    echo "$dev_info_msg"
   }
   function _ps1() {
     local color='$(if [[ $? == 0 ]]; then echo "\[\e[00;30m\]";else echo "\[\e[00;31m\]"; fi)'
     local info='[\h \u]:\W \$'
     local reset_color='\[\e[0m\] \[\e[33m\]'
-    printf %s "$color$(_pyenv_info)$info$reset_color"
+    printf %s "$color$(_precmd_ps1)$info$reset_color"
     return 0
   }
 

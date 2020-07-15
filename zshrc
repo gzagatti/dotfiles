@@ -73,9 +73,13 @@ if [[ $- == *i* ]]; then
   fi
   ## }}}
 
-  ## rvm {{{
-  if [ -d $HOME/.rvm ]; then
-    export PATH=$PATH:$HOME/.rvm/bin
+  ## rbenv {{{
+  if hash rbenv 2>/dev/null; then
+
+    eval "$(rbenv init -)"
+    export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
+    export RBENV_ROOT="$(rbenv root)"
+
   fi
   ## }}}
 
@@ -129,12 +133,12 @@ if [[ $- == *i* ]]; then
     fi
   }
   zstyle ':vcs_info:git:*' formats ' %b%c'
-  # information about the current python environment
-  _pyenv_info() {
-    if hash pyenv 2>/dev/null; then
-      local venv=$(pyenv version-name)
+  # information about the current dev environment
+  _devenv_info() {
+    if hash $1 2>/dev/null; then
+      local venv=$($1 version-name)
       if [ -n "$venv" ] && [ $venv != system ]; then
-        printf "py $venv"
+        printf "$2 $venv"
       fi
     fi
     return
@@ -146,10 +150,17 @@ if [[ $- == *i* ]]; then
     local host_info_msg="[%m %n]:%1~ %#"
     local dev_info_msg
 
-
-    local pyenv_info_msg=`_pyenv_info`
+    local pyenv_info_msg=`_devenv_info pyenv py`
     if [[ -n $pyenv_info_msg ]]; then
         dev_info_msg="${pyenv_info_msg}"
+    fi
+
+    local rbenv_info_msg=`_devenv_info rbenv rb`
+    if [[ -n $rbenv_info_msg ]]; then
+      if [[ -n $dev_info_msg ]]; then
+        dev_info_msg="${dev_info_msg}, "
+      fi
+      dev_info_msg="${dev_info_msg}${rbenv_info_msg}"
     fi
 
     vcs_info
