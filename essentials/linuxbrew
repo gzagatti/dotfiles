@@ -7,3 +7,4 @@ pygments
 pyenv
 pyenv-virtualenv
 pyenv-which-ext
+rbenv

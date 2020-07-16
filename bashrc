@@ -29,7 +29,14 @@ if [[ $- == *i* ]]; then
     export PATH=$(brew --prefix)/bin:$(brew --prefix)/sbin:$PATH
     FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
   elif [ -d $HOME/.linuxbrew ]; then
-    eval $(${HOME}/.linuxbrew/bin/brew shellenv)
+    export HOMEBREW_PREFIX=$HOME/.linuxbrew
+    export HOMEBREW_CELLAR=$HOME/.linuxbrew/Cellar
+    export HOMEBREW_REPOSITORY=$HOME/.linuxbrew/Homebrew
+    export MANPATH=$HOME/.linuxbrew/share/man::
+    export INFOPATH=$HOME/.linuxbrew/share/info:
+    # exporting the PATH slows the initialization quite significantly, would be
+    # good to figure an efficient way to do so.
+    export PATH=$HOME/.linuxbrew/bin:$HOME/.linuxbrew/sbin:$PATH
   fi
   ## }}}
 
