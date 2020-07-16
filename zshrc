@@ -45,8 +45,6 @@ if [[ $- == *i* ]]; then
     export HOMEBREW_REPOSITORY=$HOME/.linuxbrew/Homebrew
     export MANPATH=$HOME/.linuxbrew/share/man::
     export INFOPATH=$HOME/.linuxbrew/share/info:
-    # exporting the PATH slows the initialization quite significantly, would be
-    # good to figure an efficient way to do so.
     export PATH=$HOME/.linuxbrew/bin:$HOME/.linuxbrew/sbin:$PATH
   fi
   ## }}}
@@ -84,7 +82,6 @@ if [[ $- == *i* ]]; then
   if hash rbenv 2>/dev/null; then
 
     eval "$(rbenv init -)"
-    export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
     export RBENV_ROOT="$(rbenv root)"
 
   fi
@@ -102,10 +99,10 @@ if [[ $- == *i* ]]; then
   # magic environments in order to make slimux work in tmux
   if [ -d $HOME/.vim/plugged/slimux ]; then
     case $OSTYPE in
-      linux*)
+      Linux*)
         export EVENT_NOEPOLL=1
         ;;
-      darwin*)
+      Darwin*)
         export EVENT_NOKQUEUE=1
         export EVENT_NOPOLL=1
         ;;
