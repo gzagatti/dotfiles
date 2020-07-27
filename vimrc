@@ -178,6 +178,7 @@ Plug 'elzr/vim-json'                    " json support
 Plug 'jvirtanen/vim-octave'             " octave support
 Plug 'pedrohdz/vim-yaml-folds'          " YAML folding
 Plug 'coyotebush/vim-pweave'            " Pweave files
+Plug 'JuliaEditorSupport/julia-vim'     " julia support
 
 ""}}}
 
