@@ -1,8 +1,20 @@
 # increase the font of the status bar
-set font "monospace normal 11"
+set font "monospace normal 10"
 
 # use the actual clipboard, not x11
 set selection-clipboard clipboard
 
 # scroll
-set scroll-step 1
+set scroll-step 40
+set scroll-hstep 20
+
+# window size
+set window-height 1200
+set window-width 900
+
+# open with best-fit
+set adjust-open best-fit
+
+# misc
+set window-title-home-tilde true
+set statusbar-title-home-tilde true
