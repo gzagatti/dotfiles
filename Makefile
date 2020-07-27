@@ -23,7 +23,8 @@ zsh:
 	ln -fs $(dotfiles)/zshrc ${workspace}/.zshrc
 
 jupyter:
-	mkdir -p ${workspace}/.jupyter/
+	mkdir -p ${workspace}/.jupyter/kernels
+	mkdir -p ${workspace}/.local/share/jupyter/kernels
 	ln -fs $(dotfiles)/jupyter_console_config.py ${workspace}/.jupyter/jupyter_console_config.py
 
 python:
