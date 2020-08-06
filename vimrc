@@ -143,6 +143,8 @@ Plug 'dpelle/vim-LanguageTool'              "  LanguageTool grammar checker
 
 if has('nvim')
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+  Plug 'neovim/nvim-lsp'                   " neovim built-in language server
+  Plug 'Shougo/deoplete-lsp'               " deoplete support for lsp
 else
   Plug 'Shougo/deoplete.nvim'
   Plug 'roxma/nvim-yarp'
@@ -177,8 +179,11 @@ Plug 'hdima/python-syntax'              " python syntax
 Plug 'elzr/vim-json'                    " json support
 Plug 'jvirtanen/vim-octave'             " octave support
 Plug 'pedrohdz/vim-yaml-folds'          " YAML folding
-Plug 'coyotebush/vim-pweave'            " Pweave files
+Plug 'coyotebush/vim-pweave'            " pweave files
 Plug 'JuliaEditorSupport/julia-vim'     " julia support
+Plug 'habamax/vim-asciidoctor'          " asciidoctor support
+
+
 
 ""}}}
 
@@ -300,16 +305,50 @@ nnoremap <f8> :NERDTreeCustomToggle<cr>
 ""}}}
 
 ""slimux {{{
+function! SlimuxSendFenced()
+  let view = winsaveview()
+  let line = line('.')
+  let start = search('^\s*[`~]\{3,}\s*\%({\s*\.\?\)\?\a\+', 'bnW')
+
+  if !start
+      echohl WarningMsg
+      echom "Not inside fenced code block."
+      echohl None
+      return
+  endif
+
+  call cursor(start, 1)
+  let [fence, lang] = matchlist(getline(start),
+              \ '^\s*\([`~]\{3,}\)\s*\%({\s*\.\?\)\?\(\a\+\)\?')[1:2]
+  let end = search('^\s*' . fence . '\s*$', 'nW')
+
+  if end < line
+      call winrestview(view)
+      echohl WarningMsg
+      echom "Not inside fenced code block."
+      echohl None
+      return
+    endif
+
+  let block = getline(start + 1, end - 1)
+  call add(block, "\n")
+
+  call winrestview(view)
+ call SlimuxSendCode(block)
+
+endfunction
+
 """ only allow panes from current window
 let g:slimux_select_from_current_window = 1
 
 """ key mappings
-map <Leader>sl :SlimuxREPLSendLine<CR>
-vmap <Leader>sl :SlimuxREPLSendSelection<CR>
+map <leader>sl :SlimuxREPLSendLine<CR>
+vmap <leader>sl :SlimuxREPLSendSelection<CR>
+map <leader>sd :call SlimuxSendFenced()<CR>
 map <leader>sc :SlimuxGlobalConfigure<cr>
 map <leader>sb :SlimuxREPLSendBuffer<cr>
-map <Leader>sa :SlimuxShellLast<CR>
-map <Leader>sk :SlimuxSendKeysLast<CR>
+map <leader>sr :SlimuxShellLast<CR>
+map <leader>sk :SlimuxSendKeysLast<CR>
 
 augroup loadfile_slimux:
   autocmd!
@@ -329,6 +368,8 @@ augroup loadfile_slimux:
     \ :execute ":silent SlimuxShellRun sh tools/HardwareSimulator.sh " . expand("%:r") . ".tst" <cr>
   autocmd FileType asm noremap <buffer> <silent> <leader>sf
     \ :execute ":silent SlimuxShellRun sh tools/Assembler.sh " . @% . " && sh tools/CPUEmulator.sh " . expand("%:r") . ".tst"  <cr>
+  autocmd FileType markdown noremap <buffer> <silent> <leader>sd
+    \ :call SlimuxSendFenced()<cr>
 augroup END
 
 function! SlimuxEscape_r(text)
@@ -351,6 +392,7 @@ let g:vim_markdown_math = 1
 let g:vim_markdown_frontmatter = 1
 let g:vim_markdown_folding_style_pythonic = 1
 let g:vim_markdown_conceal_code_blocks = 0
+let g:vim_markdown_fenced_languages = ['julia=julia']
 ""}}}
 
 ""deoplete{{{
@@ -447,7 +489,7 @@ autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
 ""}}}
 
-"pencil {{{
+""pencil {{{
 let g:pencil#conceallevel = 0
 augroup pencil
   autocmd!
@@ -477,15 +519,34 @@ let g:gutentags_enabled = 0
 let g:previm_open_cmd = 'open -a "Google Chrome"'
 ""}}}
 
-"" gnupg {{{
+""gnupg {{{
 let g:GPGPreferSymmetric = 1
 ""}}}
 
-"" language tool {{{
+""language tool {{{
 let g:languagetool_jar="/usr/local/Cellar/languagetool/4.8/libexec/languagetool-commandline.jar"
 ""}}}
 
+""julia {{{
+let g:latex_to_unicode_file_types = ["julia", "lisp", "jmd"]
 "" }}}
+
+""language server {{{
+lua << EOF
+    local nvim_lsp = require'nvim_lsp'
+    nvim_lsp.julials.setup({
+      filetypes = {'julia', 'jmd'}
+    })
+EOF
+""}}}
+
+""aasciidoctor {{{
+let g:asciidoctor_folding = 1
+let g:asciidoctor_fold_options = 1
+let g:asciidoctor_fenced_languages = ['sh', 'css']
+""}}}
+
+"}}}
 
 "Key Mappings {{{
 
@@ -599,8 +660,12 @@ nnoremap ? ?\v
 
 ""Pop up navigation{{{
 inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
-inoremap <expr> <tab> pumvisible() ? "\<C-n>" : "\<tab>"
+inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : deoplete#manual_complete()
 inoremap <expr> <s-tab>       pumvisible() ? "\<C-p>" : "\<s-tab>"
+" Set completeopt to have a better completion experience
+set completeopt=menuone,noinsert,noselect
+" Avoid showing message extra message when using completion
+set shortmess+=c
 ""}}}
 
 "}}}
@@ -613,19 +678,31 @@ augroup vimrctweaks
   autocmd BufNewFile,BufRead *.*rc setlocal foldmethod=marker
 ""}}}
 
-""Json {{{
+""json {{{
   autocmd FileType json setlocal foldmethod=syntax
 ""}}}
 
-""Python {{{
+""python {{{
   autocmd FileType python set equalprg=yapf\ --style='pep8'
 ""}}}
 
-""Rmd {{{
+""rmd {{{
   " adds vim-markdown as a filetype plugin in order to allow
   " for syntax highlighing and folding.
   autocmd FileType rmd runtime ftplugin/markdown.vim
   autocmd FileType rmd runtime after/ftplugin/markdown.vim
+""}}}
+
+""julia {{{
+  autocmd BufNewFile,BufRead *.jmd set filetype=jmd
+  autocmd BufNewFile,BufRead *.jmd runtime! syntax/markdown.vim
+  autocmd FileType jmd runtime ftplugin/markdown.vim
+  autocmd FileType jmd runtime after/ftplugin/markdown.vim
+  autocmd Filetype julia nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<CR>
+""}}}
+
+""asciidoctor {{{
+  autocmd BufWritePost *.adoc :execute "silent normal! mq" ':Asciidoctor2HTML' "\r`q"
 ""}}}
 
 augroup END
