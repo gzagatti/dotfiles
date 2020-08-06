@@ -17,4 +17,4 @@ set adjust-open best-fit
 
 # misc
 set window-title-home-tilde true
-set statusbar-title-home-tilde true
+set statusbar-home-tilde true
