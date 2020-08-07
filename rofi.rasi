@@ -2,20 +2,18 @@
 configuration {
     show-icons: true;
     drun-show-actions: true;
-    cache-dir: "~/.local/share/rofi";
     display-window: "(window)" ;
     display-windowcd: "(windowcd)" ;
     display-run: "(run)";
     display-ssh: "(ssh)";
     display-drun: "(drun)";
-    display-combi: "(combi)";
+    display-combi: "combi";
     display-keys: "(keys)";
-
-
 
 }
 * {
-    font: "Jetbrains Mono 12";
+    /* font: "Jetbrains Mono 12"; */
+    font: "Cousine for Powerline 12";
     foreground: #f8f8f2;
     background-color: #282a36;
     active-background: #6272a4;
@@ -25,6 +23,7 @@ configuration {
     selected-active-background: @active-background;
     separatorcolor: @active-background;
     bordercolor: @active-background;
+    text-color: #656b73;
 }
 #window {
     background-color: @background;

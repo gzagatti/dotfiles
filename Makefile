@@ -54,6 +54,7 @@ alacritty:
 rofi:
 	mkdir -p ${workspace}/.config/rofi
 	ln -fs $(dotfiles)/rofi.rasi ${workspace}/.config/rofi/config.rasi
+	ln -fs $(dotfiles)/rofi-trans ${workspace}/.config/rofi/trans
 
 texlive:
 	mkdir -p ${workspace}/.config/latexmk
