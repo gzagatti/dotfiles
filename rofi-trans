@@ -1,0 +1,15 @@
+#!/bin/zsh
+echo -en "\0prompt\x1ftrans\n"
+# echo -en "\x00prompt\x1ftesting\n"
+if [ -z "$@" ]; then
+else
+
+    cmd="~/.local/bin/trans $@"
+    out="$(eval $cmd)"
+    out="$(echo $out | sed -E 's:\x1b\[1m([^\x1b]*)\x1b\[22m:<b>\1</b>:g')"
+    out="$(echo $out | sed -E 's:\x1b\[4m([^\x1b]*)\x1b\[24m:<u>\1</u>:g')"
+
+    echo -en "\0markup-rows\x1ftrue\n"
+    echo -en "$out"
+
+fi
