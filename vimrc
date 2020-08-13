@@ -660,7 +660,7 @@ nnoremap ? ?\v
 
 ""Pop up navigation{{{
 inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
-inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : deoplete#manual_complete()
+inoremap <expr> <tab> pumvisible() ? "\<C-n>" : "\<tab>"
 inoremap <expr> <s-tab>       pumvisible() ? "\<C-p>" : "\<s-tab>"
 " Set completeopt to have a better completion experience
 set completeopt=menuone,noinsert,noselect
