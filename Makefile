@@ -26,6 +26,7 @@ jupyter:
 	mkdir -p ${workspace}/.jupyter/kernels
 	mkdir -p ${workspace}/.local/share/jupyter/kernels
 	ln -fs $(dotfiles)/jupyter_console_config.py ${workspace}/.jupyter/jupyter_console_config.py
+	ln -fs $(dotfiles)/jupyter_notebook_config.py ${workspace}/.jupyter/jupyter_notebook_config.py
 
 python:
 	mkdir -p ${workspace}/.config/matplotlib
