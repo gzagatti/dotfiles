@@ -342,13 +342,13 @@ endfunction
 let g:slimux_select_from_current_window = 1
 
 """ key mappings
-map <leader>sl :SlimuxREPLSendLine<CR>
-vmap <leader>sl :SlimuxREPLSendSelection<CR>
-map <leader>sd :call SlimuxSendFenced()<CR>
+map <leader>sl :SlimuxREPLSendLine<cr>
+vmap <leader>sl :SlimuxREPLSendSelection<cr>
+map <leader>sd :call SlimuxSendFenced()<cr>
 map <leader>sc :SlimuxGlobalConfigure<cr>
 map <leader>sb :SlimuxREPLSendBuffer<cr>
-map <leader>sr :SlimuxShellLast<CR>
-map <leader>sk :SlimuxSendKeysLast<CR>
+map <leader>sr :SlimuxShellLast<cr>
+map <leader>sk :SlimuxSendKeysLast<cr>
 
 augroup loadfile_slimux:
   autocmd!
@@ -433,7 +433,7 @@ nnoremap [unite]g :Unite -start-insert gista<cr>
 ""}}}
 
 ""tagbar {{{
-nnoremap <silent> <F9> :TagbarToggle<CR>
+nnoremap <silent> <F9> :TagbarToggle<cr>
 let g:tagbar_compact = 1
 let g:tagbar_show_linenumbers = -1
 let g:tagbar_foldlevel = 2
@@ -682,7 +682,7 @@ nnoremap ? ?\v
 ""}}}
 
 ""Pop up navigation{{{
-inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<cr>"
 inoremap <expr> <tab> pumvisible() ? "\<C-n>" : "\<tab>"
 inoremap <expr> <s-tab>       pumvisible() ? "\<C-p>" : "\<s-tab>"
 " Set completeopt to have a better completion experience
@@ -721,12 +721,12 @@ augroup vimrctweaks
   autocmd BufNewFile,BufRead *.jmd runtime! syntax/markdown.vim
   autocmd FileType jmd runtime ftplugin/markdown.vim
   autocmd FileType jmd runtime after/ftplugin/markdown.vim
-  autocmd Filetype julia nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<CR>
+  autocmd Filetype julia nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<cr>
 ""}}}
 
 ""asciidoctor {{{
   autocmd Filetype asciidoctor nnoremap <localleader>ll :call <SID>toggle_asciidoctor_autocompile()<cr>
-  autocmd Filetype asciidoctor nnoremap <localleader>lv :silent AsciidoctorOpenHTML<CR>
+  autocmd Filetype asciidoctor nnoremap <localleader>lv :silent AsciidoctorOpenHTML<cr>
 "" }}}
 
 augroup END
