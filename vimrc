@@ -501,7 +501,7 @@ augroup END
 let g:vimtex_fold_enabled = 1
 let g:vimtex_complete_enabled = 1
 let g:vimtex_quickfix_mode= 0
-let g:vimtex_view_enabled=0
+let g:vimtex_view_enabled=1
 call deoplete#custom#var('omni', 'input_patterns', {
     \ 'tex': g:vimtex#re#deoplete
   \})
@@ -513,10 +513,16 @@ augroup END
 
 ""gutentags {{{
 let g:gutentags_enabled = 0
+let g:gutentags_define_advanced_commands = 1
+let g:gutentags_project_root = ["tags"]
 ""}}}
 
 ""previm {{{
-let g:previm_open_cmd = 'open -a "Google Chrome"'
+if has("mac")
+  let g:previm_open_cmd = 'open -a "Firefox"'
+elseif has("unix")
+  let g:previm_open_cmd = 'xdg-open'
+endif
 ""}}}
 
 ""gnupg {{{
@@ -544,6 +550,23 @@ EOF
 let g:asciidoctor_folding = 1
 let g:asciidoctor_fold_options = 1
 let g:asciidoctor_fenced_languages = ['sh', 'css']
+let g:asciidoctor_autocompile = 0
+
+function! s:toggle_asciidoctor_autocompile()
+  augroup asciidoctor
+    autocmd!
+    if g:asciidoctor_autocompile == 0
+      autocmd BufWritePost *.adoc :execute "silent normal! mq" ':Asciidoctor2HTML' "\r`q"
+    endif
+  augroup END
+  if g:asciidoctor_autocompile == 0
+    let g:asciidoctor_autocompile = 1
+    echo "asciidoctor: Compiler started in continuous mode"
+  else
+    let g:asciidoctor_autocompile = 0
+    echo "asciidoctor: Compiler stopped"
+  endif
+endfunction
 ""}}}
 
 "}}}
@@ -702,8 +725,9 @@ augroup vimrctweaks
 ""}}}
 
 ""asciidoctor {{{
-  autocmd BufWritePost *.adoc :execute "silent normal! mq" ':Asciidoctor2HTML' "\r`q"
-""}}}
+  autocmd Filetype asciidoctor nnoremap <localleader>ll :call <SID>toggle_asciidoctor_autocompile()<cr>
+  autocmd Filetype asciidoctor nnoremap <localleader>lv :silent AsciidoctorOpenHTML<CR>
+"" }}}
 
 augroup END
 ""}}}
