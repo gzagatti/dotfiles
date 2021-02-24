@@ -541,12 +541,14 @@ let g:latex_to_unicode_file_types = ["julia", "lisp", "jmd"]
 lua << EOF
     local nvim_lsp = require'nvim_lsp'
     nvim_lsp.julials.setup({
-      filetypes = {'julia', 'jmd'}
+      filetypes = {'julia', 'jmd'};
+      message_level = vim.lsp.protocol.MessageType.Log;
+      log_level = vim.lsp.protocol.MessageType.Log
     })
 EOF
 ""}}}
 
-""aasciidoctor {{{
+""asciidoctor {{{
 let g:asciidoctor_folding = 1
 let g:asciidoctor_fold_options = 1
 let g:asciidoctor_fenced_languages = ['sh', 'css']

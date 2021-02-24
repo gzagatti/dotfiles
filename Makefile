@@ -60,3 +60,7 @@ rofi:
 texlive:
 	mkdir -p ${workspace}/.config/latexmk
 	ln -fs $(dotfiles)/latexmkrc ${workspace}/.config/latexmk/latexmkrc
+
+julia:
+	mkdir -p ${workspace}/.julia/config/
+	ln -fs $(dotfiles)/startup.jl ${workspace}/.julia/config
