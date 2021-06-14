@@ -456,7 +456,6 @@ if has('nvim')
   }
 EOF
   lua << EOF
-  -- vim.lsp.set_log_level("debug")
   local nvim_lsp = require('lspconfig')
 
   -- Use an on_attach function to only map the following keys
@@ -652,7 +651,7 @@ endfunction
 "Key Mappings {{{
 
 "".vimrc {{{
-"""Open .vimrc in an horizantal split$
+"""Open .vimrc in a horizantal split$
 if has('nvim')
   nnoremap <leader>ev :split ~/.vimrc<cr>
   nnoremap <leader>sv :source ~/.vimrc<cr>
@@ -781,10 +780,6 @@ augroup vimrctweaks
 
 ""json {{{
   autocmd FileType json setlocal foldmethod=syntax
-""}}}
-
-""python {{{
-  autocmd FileType python set equalprg=yapf\ --style='pep8'
 ""}}}
 
 ""rmd {{{
