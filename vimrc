@@ -122,74 +122,52 @@ call plug#begin('~/.vim/plugged')
 
 ""Tools {{{
 " Most Used Functionalities
+Plug 'vim-airline/vim-airline'              "  lean & mean status/tabline for vim that's light as air
+Plug 'dracula/vim'                          "  dracula theme
 Plug 'scrooloose/nerdtree'                  "  file management from within Vim
 Plug 'tpope/vim-commentary'                 "  comment stuff out
 Plug 'suy/vim-context-commentstring'        "  set commentstring value dynamically
-Plug 'scrooloose/syntastic'                 "  syntax checking hacks
 Plug 'tpope/vim-fugitive'                   "  git support
 Plug 'tpope/vim-surround'                   "  surround text with pairs of elements
-Plug 'Shougo/vimproc.vim', {'do' : 'make'}  "  interactive command execution
-Plug 'Shougo/unite.vim'                     "  unite and create user interfaces
-Plug 'lambdalisue/vim-gista'                "  gist management
-Plug 'lambdalisue/vim-gista-unite'          "  gist source for unite.vim
 Plug 'christoomey/vim-tmux-navigator'       "  seamless navigation between tmux panes and vim splits
 Plug 'epeli/slimux'                         "  tmux/vim integration
 Plug 'danro/rename.vim'                     "  rename files in vim
-Plug 'vim-airline/vim-airline'              "  lean & mean status/tabline for vim that's light as air
-Plug 'dracula/vim'                          "  dracula theme
 Plug 'Yggdroot/indentLine'                  "  displays thin vertical lines at each indentation level for code indented with spaces
-Plug 'previm/previm'                        "  realtime preview
-Plug 'dpelle/vim-LanguageTool'              "  LanguageTool grammar checker
-
-if has('nvim')
-  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-  Plug 'neovim/nvim-lsp'                   " neovim built-in language server
-  Plug 'Shougo/deoplete-lsp'               " deoplete support for lsp
-else
-  Plug 'Shougo/deoplete.nvim'
-  Plug 'roxma/nvim-yarp'
-  Plug 'roxma/vim-hug-neovim-rpc'
-endif
-
-" Least Used Functionalities
+Plug 'vim-scripts/matchit.zip'          " extended % matching for HTML, Latex and many other languages
 Plug 'majutsushi/tagbar'                " easy tags navigation
 Plug 'ludovicchabant/vim-gutentags'     " tag management
-Plug 'tsukkee/unite-tag'                " tag for unite.vim
-Plug 'vim-scripts/matchit.zip'          " extended % matching for HTML, Latex and many other languages
-"Plug 'inkarkat/SyntaxAttr.vim'         " show syntax highlighing attributes under cursor; for debugging
-
-Plug 'easymotion/vim-easymotion'        " to make motion around vim easier
 Plug 'junegunn/vim-easy-align'          " for easy alignment
-Plug 'terryma/vim-multiple-cursors'     " multiple cursors
-Plug 'chrisbra/NrrwRgn'                 " a narrow Region Plugin
-Plug 'godlygeek/tabular'                " easy alignment of text
 Plug 'tpope/vim-sleuth'                 " heuristically set indent/tab options
-Plug 'jamessan/vim-gnupg'               " easy gpg handling
 Plug 'gzagatti/vim-pencil'              " rethinking Vim as a tool for writing
 Plug 'junegunn/goyo.vim'                " distraction free-writing in Vim
+
+if has('nvim')
+  Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
+  Plug 'neovim/nvim-lspconfig'            " neovim built-in language server
+  Plug 'hrsh7th/nvim-compe'               " auto-completion for nvim written in Lua
+  Plug 'GoldsteinE/compe-latex-symbols'   " autocomplete LaTeX symbol into your text via nvim-compe
+  Plug 'nvim-lua/popup.nvim'
+  Plug 'nvim-lua/plenary.nvim'
+  Plug 'nvim-telescope/telescope.nvim'
+endif
+
 ""}}}
 
 ""Languages {{{
+Plug 'jamessan/vim-gnupg'               " easy gpg handling
 Plug 'mattn/emmet-vim'                  " improves HTML and CSS workflow
 Plug 'plasticboy/vim-markdown'          " markdown vim mode
-Plug 'lervag/vimtex'                    " latex support
-Plug 'zchee/deoplete-jedi'              " python autocomplete
-Plug 'tmhedberg/SimpylFold'             " for easy python folding
-Plug 'hdima/python-syntax'              " python syntax
-Plug 'elzr/vim-json'                    " json support
 Plug 'jvirtanen/vim-octave'             " octave support
-Plug 'pedrohdz/vim-yaml-folds'          " YAML folding
 Plug 'coyotebush/vim-pweave'            " pweave files
-Plug 'JuliaEditorSupport/julia-vim'     " julia support
 Plug 'habamax/vim-asciidoctor'          " asciidoctor support
-
-
+Plug 'lambdalisue/vim-gista'            " gist management
+Plug 'dpelle/vim-LanguageTool'          " LanguageTool grammar checker
 
 ""}}}
 
-""Archive {{{
-"Plug 'edkolev/tmuxline.vim'           " simple tmux statusline generator with support for powerline symbols and statusline / airline / lightline integration
-"Plug 'ervandew/eclim'                   " java support
+""Debugging {{{
+"Plug 'edkolev/tmuxline.vim'           " simple tmux statusline generator
+"Plug 'inkarkat/SyntaxAttr.vim'        " show syntax highlighing attributes under cursor
 ""}}}
 
 ""Clean up {{{
@@ -234,43 +212,7 @@ nmap <leader>+ <Plug>AirlineSelectNextTab
 " turn off whitespace warnings
 let g:airline#extensions#whitespace#enabled = 0
 ""}}}
-
-""commentary {{{
-xmap <leader>c  <Plug>Commentary
-nmap <leader>c  <Plug>Commentary
-omap <leader>c  <Plug>Commentary
-nmap <leader>cc <Plug>CommentaryLine
-""}}}
-
-""context comment string {{{
-" load the autoloaded variable first
-silent! echo g:context#commentstring#table
-if exists("g:context#commentstring#table")
-  let g:context#commentstring#table.markdown = {
-    \ 'mkdSnippetR': '# %s',
-    \ 'mkdSnippetPYTHON': '# %s',
-    \ 'mkdSnippetSH': '# %s',
-    \}
-  let g:context#commentstring#table.rmd = g:context#commentstring#table.markdown
-endif
-""}}}
-
-""syntastic {{{
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_mode_map = { "mode": "passive" }
-
-" checkers
-" python
-let g:syntastic_python_checkers = ['pylint']
-
-" r
-let g:syntastic_r_checkers = ['lintr']
-let g:syntastic_enable_r_lintr_checker = 1
-let g:syntastic_r_lintr_quiet_messages = { "regex": "Variable and function names should be all lowercase." }
-
-""}}}
-
+"
 ""nerdtree {{{
 "ignore certain files from NERDTree
 let NERDTreeIgnore=['__pycache__', '\.egg-info$']
@@ -302,6 +244,30 @@ endfunction
 command! -n=? -complete=file -bar NERDTreeCustomToggle call s:NERDTreeCustomToggle('<args>')
 
 nnoremap <f8> :NERDTreeCustomToggle<cr>
+""}}}
+
+""commentary {{{
+xmap <leader>c  <Plug>Commentary
+nmap <leader>c  <Plug>Commentary
+omap <leader>c  <Plug>Commentary
+nmap <leader>cc <Plug>CommentaryLine
+""}}}
+
+""context comment string {{{
+" load the autoloaded variable first
+silent! echo g:context#commentstring#table
+if exists("g:context#commentstring#table")
+  let g:context#commentstring#table.markdown = {
+    \ 'mkdSnippetR': '# %s',
+    \ 'mkdSnippetPYTHON': '# %s',
+    \ 'mkdSnippetSH': '# %s',
+    \}
+  let g:context#commentstring#table.rmd = g:context#commentstring#table.markdown
+endif
+""}}}
+
+""tmux-navigator {{{
+let g:tmux_navigator_disable_when_zoomed = 1
 ""}}}
 
 ""slimux {{{
@@ -362,7 +328,9 @@ augroup loadfile_slimux:
     \ :execute ":silent SlimuxShellRun \\i " . @% <cr>
   autocmd FileType r noremap <buffer> <silent> <leader>sf
     \ :execute ":silent SlimuxShellRun source('" . @% . "', echo=TRUE)" <cr>
-  autocmd FileType rmd noremap <buffer> <silent> <leader>sf
+  autocmd FileType r noremap <buffer> <silent> <leader>sw
+    \ :execute ":silent SlimuxShellRun rmarkdown::render('" . @% . "', output_format='all', quiet=TRUE)" <cr>
+  autocmd FileType rmd noremap <buffer> <silent> <leader>sw
     \ :execute ":silent SlimuxShellRun rmarkdown::render('" . @% . "', output_format='all', quiet=TRUE)" <cr>
   autocmd FileType hdl noremap <buffer> <silent> <leader>sf
     \ :execute ":silent SlimuxShellRun sh tools/HardwareSimulator.sh " . expand("%:r") . ".tst" <cr>
@@ -370,6 +338,12 @@ augroup loadfile_slimux:
     \ :execute ":silent SlimuxShellRun sh tools/Assembler.sh " . @% . " && sh tools/CPUEmulator.sh " . expand("%:r") . ".tst"  <cr>
   autocmd FileType markdown noremap <buffer> <silent> <leader>sd
     \ :call SlimuxSendFenced()<cr>
+  autocmd FileType julia noremap <buffer> <silent> <leader>sf
+    \ :execute ":silent SlimuxShellRun include(\\\"" . @% . "\\\");" <cr>
+  autocmd FileType julia noremap <buffer> <silent> <leader>sw
+    \ :execute ":silent SlimuxShellRun weave(\\\"" . @% . "\\\"; doctype=\\\"md2html\\\", out_path = :pwd, mod = Main)" <cr>
+  autocmd FileType *.jmd noremap <buffer> <silent> <leader>sw
+    \ :execute ":silent SlimuxShellRun weave(\\\"" . @% . "\\\"; doctype=\\\"md2html\\\", out_path = :pwd, mod = Main)" <cr>
 augroup END
 
 function! SlimuxEscape_r(text)
@@ -385,53 +359,6 @@ endfunction
 vmap <Enter> <Plug>(EasyAlign)
 ""}}}
 
-""vim-markdown {{{
-let g:vim_markdown_conceal = 0
-let g:tex_conceal = ""
-let g:vim_markdown_math = 1
-let g:vim_markdown_frontmatter = 1
-let g:vim_markdown_folding_style_pythonic = 1
-let g:vim_markdown_conceal_code_blocks = 0
-let g:vim_markdown_fenced_languages = ['julia=julia']
-""}}}
-
-""deoplete{{{
-let g:deoplete#enable_at_startup = 1
-autocmd CompleteDone * silent! pclose!
-""}}}
-
-""narrow negion {{{
-let g_nrrw_rgn_nohl = 3
-let g:nrrw_rgn_resize_window = 'percentage'
-let g:nrrw_rgn_rel_min = 20
-let g:nrrw_topbot_leftright = 'leftabove'
-
-"""allows to set the filetype of the region to be narrowed
-command! -nargs=* -bang -range -complete=filetype NN
-            \ :<line1>,<line2> call nrrwrgn#NrrwRgn('',<q-bang>)
-            \ | set filetype=<args>
-""}}}
-
-""unite {{{
-""" custom preferences: open smaller buffer split at the bottom and$
-""" creating a new one avoid
-call unite#custom#profile('default', 'context', {'direction': 'botright', 'prompt_visible': 1, 'create': 0})
-""" use ag for grep
-let g:unite_source_grep_command = 'ag'
-let g:unite_source_grep_default_opts =
-  \ '-i --vimgrep --hidden --ignore ' .
-  \ '''.hg'' --ignore ''.svn'' --ignore ''.git'' --ignore ''.bzr'''
-let g:unite_source_grep_recursive_opt = ''
-""" key mappings
-nnoremap [unite] <Nop>
-nmap <space> [unite]
-nnoremap [unite]p :Unite -start-insert file_rec/async<cr>
-nnoremap [unite]/ :Unite grep:.<cr>
-nnoremap [unite]y :Unite -quick-match register<cr>
-nnoremap [unite]b :Unite -start-insert buffer<cr>
-nnoremap [unite]g :Unite -start-insert gista<cr>
-""}}}
-
 ""tagbar {{{
 nnoremap <silent> <F9> :TagbarToggle<cr>
 let g:tagbar_compact = 1
@@ -439,6 +366,12 @@ let g:tagbar_show_linenumbers = -1
 let g:tagbar_foldlevel = 2
 let g:tagbar_autofocus = 1
 "" }}}
+
+""gutentags {{{
+let g:gutentags_enabled = 0
+let g:gutentags_define_advanced_commands = 1
+let g:gutentags_project_root = ["tags"]
+""}}}
 
 ""tmux line {{{
 let g:airline#extensions#tmuxline#enabled = 1
@@ -451,20 +384,13 @@ let g:tmuxline_preset = {
       \'z'    : '#H'}
 "" }}}
 
-""eclim {{{
-let g:EclimCompletionMethod = 'omnifunc'
-let g:EclimCValidate = 0
-let g:EclimHtmlValidate = 0
-let g:EclimJavascriptValidate = 0
-let g:EclimPhpValidate = 0
-let g:EclimPhpHtmlValidate = 0
-let g:EclimPythonValidate = 0
-let g:EclimRubyValidate = 0
-let g:EclimScalaValidate = 0
-let g:EclimXmlValidate  = 0
-let g:EclimDtdValidate = 0
-let g:EclimXsdValidate = 0
-"" }}}
+""pencil {{{
+let g:pencil#conceallevel = 0
+augroup pencil
+  autocmd!
+  autocmd FileType tex call pencil#init({'wrap': 'soft'})
+augroup END
+"}}}
 
 ""goyo{{{
 function! s:goyo_enter()
@@ -489,39 +415,197 @@ autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
 ""}}}
 
-""pencil {{{
-let g:pencil#conceallevel = 0
-augroup pencil
-  autocmd!
-  autocmd FileType tex call pencil#init({'wrap': 'soft'})
-augroup END
-"}}}
+""lsp config {{{
+if has('nvim')
+  lua << EOF
+  -- https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/julials.lua
+  local configs = require 'lspconfig/configs'
+  local util = require 'lspconfig/util'
 
-""vimtex {{{
-let g:vimtex_fold_enabled = 1
-let g:vimtex_complete_enabled = 1
-let g:vimtex_quickfix_mode= 0
-let g:vimtex_view_enabled=1
-call deoplete#custom#var('omni', 'input_patterns', {
-    \ 'tex': g:vimtex#re#deoplete
-  \})
-augroup vimtex
-  au!
-  au User VimtexEventQuit call vimtex#compiler#clean(0)
-augroup END
+  local cmd = {
+    "julia",
+    "--startup-file=no",
+    "--history-file=no",
+    "--depwarn=no",
+    "-e", [[
+      using Pkg;
+      using LanguageServer;
+      import SymbolServer;
+      import StaticLint;
+      env_path = dirname(something(Base.current_project(pwd()), Base.load_path_expand(LOAD_PATH[2])))
+      depot_path = join(DEPOT_PATH, ":");
+      @info "Initializing server with env: $(env_path) and depot: $(depot_path)"
+      server = LanguageServer.LanguageServerInstance(stdin, stdout, env_path, depot_path);
+      server.runlinter = true;
+      run(server);
+    ]]
+  };
+
+  configs.julials = {
+    default_config = {
+      cmd = cmd;
+      on_new_config = function(new_config, _)
+        local new_cmd = vim.deepcopy(cmd)
+        new_config.cmd = new_cmd
+      end,
+      filetypes = { "julia" };
+      root_dir = function(fname)
+        return util.find_git_ancestor(fname) or vim.fn.getcwd()
+      end;
+    };
+  }
+EOF
+  lua << EOF
+  -- vim.lsp.set_log_level("debug")
+  local nvim_lsp = require('lspconfig')
+
+  -- Use an on_attach function to only map the following keys
+  -- after the language server attaches to the current buffer
+  local on_attach = function(client, bufnr)
+
+    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+
+    -- Mappings.
+    local opts = { noremap=true, silent=true }
+
+    -- documentation help
+    buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
+    buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
+    buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
+
+    -- workspace management
+    buf_set_keymap('n', '<leader>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<cr>', opts)
+    buf_set_keymap('n', '<leader>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<cr>', opts)
+    buf_set_keymap('n', '<leader>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<cr>', opts)
+
+    -- variable management
+    buf_set_keymap('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
+    buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
+
+    -- diagnostic
+    buf_set_keymap('n', '[telescope]l', '<cmd>lua vim.lsp.diagnostic.set_loclist({open_loclist=false})<cr><cmd>Telescope loclist theme=get_ivy<cr>', opts)
+    buf_set_keymap('n', '<leader>el', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<cr>', opts)
+    buf_set_keymap('n', '<leader>ec', '<cmd>lua vim.lsp.diagnostic.clear(0)<cr>', opts)
+    buf_set_keymap('n', '<leader>es', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<cr>', opts)
+
+    -- formatting
+    buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<cr>", opts)
+
+    -- language specific
+    if(client.name == "texlab")
+    then
+      buf_set_keymap("n", "<leader>ll", "<cmd>echo 'Building file.'<cr><cmd>TexlabBuild<cr>", {})
+    end
+
+  end
+
+  nvim_lsp.julials.setup{
+    on_attach = on_attach,
+  }
+  nvim_lsp.pyright.setup{ on_attach = on_attach }
+  nvim_lsp.stylelint_lsp.setup{
+    on_attach = on_attach,
+    settings = {
+        stylelintplus = {
+          autoFixOnSave = true,
+          autoFixOnFormat = true
+      },
+    }
+  }
+  nvim_lsp.texlab.setup{ on_attach = on_attach }
+
+EOF
+endif
 ""}}}
 
-""gutentags {{{
-let g:gutentags_enabled = 0
-let g:gutentags_define_advanced_commands = 1
-let g:gutentags_project_root = ["tags"]
+""treesiter {{{
+if has('nvim')
+  lua <<EOF
+  require'nvim-treesitter.configs'.setup {
+    ensure_installed = "maintained", -- one of "all", "maintained", or a list of languages
+    ignore_install = { }, -- List of parsers to ignore installing
+    highlight = {
+      enable = true,  -- false will disable the whole extension
+      disable = { },  -- list of language that will be disabled
+    },
+    incremental_selection = {
+      enable = true,
+      keymaps = {
+        init_selection = "gnn",
+        node_incremental = "grn",
+        scope_incremental = "grc",
+        node_decremental = "grm",
+      },
+    },
+    indent = {
+      enable = true
+    },
+  }
+EOF
+  set foldmethod=expr
+  set foldexpr=nvim_treesitter#foldexpr()
+endif
 ""}}}
 
-""previm {{{
-if has("mac")
-  let g:previm_open_cmd = 'open -a "Firefox"'
-elseif has("unix")
-  let g:previm_open_cmd = 'xdg-open'
+""compe {{{
+if has('nvim')
+  lua << EOF
+  require'compe'.setup {
+    enabled = true;
+    autocomplete = true;
+    debug = false;
+    min_length = 1;
+    preselect = 'enable';
+    throttle_time = 80;
+    source_timeout = 200;
+    resolve_timeout = 800;
+    incomplete_delay = 400;
+    max_abbr_width = 100;
+    max_kind_width = 100;
+    max_menu_width = 100;
+    documentation = true;
+
+    source = {
+      path = true;
+      buffer = true;
+      calc = true;
+      nvim_lsp = true;
+      nvim_lua = true;
+      latex_symbols = true;
+    };
+  }
+EOF
+endif
+""}}}
+
+""telescope {{{
+if has('nvim')
+  lua << EOF
+  local actions = require('telescope.actions')
+  require('telescope').setup{
+    defaults = {
+      mappings = {
+        i = {
+          ["<cr>"] = actions.select_horizontal,
+        },
+        n = {
+          ["<cr>"] = actions.select_horizontal,
+          ["x"] = actions.file_split,
+          ["v"] = actions.file_vsplit,
+        },
+      },
+    }
+  }
+EOF
+  nnoremap [telescope] <Nop>
+  nmap <space> [telescope]
+  nnoremap [telescope]p <cmd>Telescope find_files theme=get_ivy<cr>
+  nnoremap [telescope]/ <cmd>Telescope live_grep theme=get_ivy<cr>
+  nnoremap [telescope]y <cmd>Telescope registers theme=get_ivy<cr>
+  nnoremap [telescope]b <cmd>Telescope buffers theme=get_ivy<cr>
+  nnoremap [telescope]l <cmd>Telescope loclist theme=get_ivy<cr>
+  nnoremap [telescope]q <cmd>Telescope quickfix theme=get_ivy<cr>
 endif
 ""}}}
 
@@ -529,29 +613,21 @@ endif
 let g:GPGPreferSymmetric = 1
 ""}}}
 
-""language tool {{{
-let g:languagetool_jar="/usr/local/Cellar/languagetool/4.8/libexec/languagetool-commandline.jar"
-""}}}
-
-""julia {{{
-let g:latex_to_unicode_file_types = ["julia", "lisp", "jmd"]
-"" }}}
-
-""language server {{{
-lua << EOF
-    local nvim_lsp = require'nvim_lsp'
-    nvim_lsp.julials.setup({
-      filetypes = {'julia', 'jmd'};
-      message_level = vim.lsp.protocol.MessageType.Log;
-      log_level = vim.lsp.protocol.MessageType.Log
-    })
-EOF
+""vim-markdown {{{
+let g:vim_markdown_conceal = 0
+let g:tex_conceal = ""
+let g:vim_markdown_math = 1
+let g:vim_markdown_frontmatter = 1
+let g:vim_markdown_folding_style_pythonic = 1
+let g:vim_markdown_conceal_code_blocks = 0
+let g:vim_markdown_fenced_languages = ['julia=julia']
 ""}}}
 
 ""asciidoctor {{{
 let g:asciidoctor_folding = 1
 let g:asciidoctor_fold_options = 1
 let g:asciidoctor_fenced_languages = ['sh', 'css']
+let g:asciidoctor_extensions = ['asciidoctor-bibtex']
 let g:asciidoctor_autocompile = 0
 
 function! s:toggle_asciidoctor_autocompile()
@@ -686,9 +762,9 @@ nnoremap ? ?\v
 ""Pop up navigation{{{
 inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<cr>"
 inoremap <expr> <tab> pumvisible() ? "\<C-n>" : "\<tab>"
-inoremap <expr> <s-tab>       pumvisible() ? "\<C-p>" : "\<s-tab>"
+inoremap <expr> <s-tab> pumvisible() ? "\<C-p>" : "\<s-tab>"
 " Set completeopt to have a better completion experience
-set completeopt=menuone,noinsert,noselect
+set completeopt=menuone,noselect
 " Avoid showing message extra message when using completion
 set shortmess+=c
 ""}}}
@@ -719,16 +795,17 @@ augroup vimrctweaks
 ""}}}
 
 ""julia {{{
-  autocmd BufNewFile,BufRead *.jmd set filetype=jmd
-  autocmd BufNewFile,BufRead *.jmd runtime! syntax/markdown.vim
-  autocmd FileType jmd runtime ftplugin/markdown.vim
-  autocmd FileType jmd runtime after/ftplugin/markdown.vim
-  autocmd Filetype julia nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<cr>
+  autocmd BufNewFile,BufRead *.jl set filetype=julia
+  autocmd BufNewFile,BufRead *.jmd set filetype=markdown.jmd
+""}}}
+
+""latex {{{
+  autocmd BufWipeout *.tex execute ":!cd " . expand("<afile>:h") . "; latexmk -c " . expand("<afile>:t")
 ""}}}
 
 ""asciidoctor {{{
-  autocmd Filetype asciidoctor nnoremap <localleader>ll :call <SID>toggle_asciidoctor_autocompile()<cr>
-  autocmd Filetype asciidoctor nnoremap <localleader>lv :silent AsciidoctorOpenHTML<cr>
+  autocmd Filetype asciidoctor nnoremap <leader>ll :call <SID>toggle_asciidoctor_autocompile()<cr>
+  autocmd Filetype asciidoctor nnoremap <leader>lv :silent AsciidoctorOpenHTML<cr>
 "" }}}
 
 augroup END

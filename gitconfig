@@ -27,8 +27,6 @@
         process = git-lfs filter-process
 [difftool "nbdime"]
         cmd = git-nbdifftool diff \"$LOCAL\" \"$REMOTE\"
-[mergetool "nbdime"]
-        cmd = git-nbmergetool merge \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"
 [diff "pandoc"]
         textconv = pandoc --to=markdown
         prompt = false
@@ -38,3 +36,9 @@
 [merge "jupyternotebook"]
         driver = git-nbmergedriver merge %O %A %B %L %P
         name = jupyter notebook merge driver
+[mergetool "fugitive"]
+        cmd = nvim -f -c \"Gvdiffsplit!\" \"$MERGED\"
+[mergetool "nbdime"]
+        cmd = git-nbmergetool merge \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"
+[merge]
+        tool = fugitive
