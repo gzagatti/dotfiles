@@ -27,18 +27,25 @@ if [[ $- == *i* ]]; then
 
   # Program specific {{{
 
-  # ls {{{
+  ## PATH {{{
+  # add ~/.local/bin to PATH, before looking for other commands
+  export PATH=$HOME/.local/bin:$PATH
+  hash -f
+  ## }}}
+
+  ## ls {{{
   # color scheme
   # https://geoff.greer.fm/lscolors/
   export CLICOLOR=1
   export LSCOLORS="excxhxDxbxhxhxhxhxfxfx"
   export LS_COLORS="no=00:fi=00:di=34::ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
-  # }}}
+  ## }}}
 
   ## brew {{{
   if hash brew &>/dev/null; then
     export PATH=$(brew --prefix)/bin:$(brew --prefix)/sbin:$PATH
-    FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+    export FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+    hash -f
   elif [ -d $HOME/.linuxbrew ]; then
     export HOMEBREW_PREFIX=$HOME/.linuxbrew
     export HOMEBREW_CELLAR=$HOME/.linuxbrew/Cellar
@@ -46,6 +53,8 @@ if [[ $- == *i* ]]; then
     export MANPATH=$HOME/.linuxbrew/share/man::
     export INFOPATH=$HOME/.linuxbrew/share/info:
     export PATH=$HOME/.linuxbrew/bin:$HOME/.linuxbrew/sbin:$PATH
+    export FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+    hash -f
   fi
   ## }}}
 
@@ -69,21 +78,17 @@ if [[ $- == *i* ]]; then
 
   ## pyenv {{{
   if hash pyenv 2>/dev/null; then
-
     eval "$(pyenv init -)"
     eval "$(pyenv virtualenv-init -)"
     export PYENV_VIRTUALENV_DISABLE_PROMPT=1
     export PYENV_ROOT="$(pyenv root)"
-
   fi
   ## }}}
 
   ## rbenv {{{
   if hash rbenv 2>/dev/null; then
-
     eval "$(rbenv init -)"
     export RBENV_ROOT="$(rbenv root)"
-
   fi
   ## }}}
 
@@ -94,7 +99,7 @@ if [[ $- == *i* ]]; then
     alias r='R --no-save --no-restore'
   fi
   ## }}}
-  
+
   ## go {{{
   if hash go 2>/dev/null; then
     export GOPATH=$HOME/.go
@@ -194,13 +199,6 @@ if [[ $- == *i* ]]; then
   }
   # }}}
 
-  # PATH {{{
-  # add ~/bin to PATH
-  export PATH=$HOME/.local/bin:$PATH
-  # removes duplicates from the PATH, given that the above can introduce duplicates
-  PATH=`printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}'`
-  # }}}
-
   # Tab completion {{{
   # case insensitive path-completion
   zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*'
@@ -255,6 +253,14 @@ if [[ $- == *i* ]]; then
     ## }}}
 
   fi
+
+  # }}}
+
+  # PATH {{{
+  # add ~/.local/bin to PATH to the front of the path
+  export PATH=$HOME/.local/bin:$PATH
+  # removes duplicates from the PATH, given that the above can introduce duplicates
+  PATH=`printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}'`
   # }}}
 
 fi
