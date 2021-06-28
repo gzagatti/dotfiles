@@ -113,6 +113,34 @@ augroup END
 set conceallevel=0
 ""}}}
 
+""Newtrw{{{
+let g:netrw_browsex_viewer= "-"
+function! s:myNFH(filename)
+  if executable("xdg-open")
+    let cmd = ":!xdg-open "
+  elseif executable("open")
+    let cmd = ":!open "
+  else
+    return 0
+  endif
+  let path = "file://" . expand("%:p:h") . "/" . a:filename
+  execute cmd . shellescape(path, 1)
+  return 1
+endfunction
+function! NFH_jpg(filename)
+  call s:myNFH(a:filename)
+endfunction
+function! NFH_png(filename)
+  call s:myNFH(a:filename)
+endfunction
+function! NFH_svg(filename)
+  call s:myNFH(a:filename)
+endfunction
+function! NFH_gif(filename)
+  call s:myNFH(a:filename)
+endfunction
+""}}}
+
 "}}}
 
 "Plugin Manager {{{
@@ -146,9 +174,9 @@ if has('nvim')
   Plug 'neovim/nvim-lspconfig'            " neovim built-in language server
   Plug 'hrsh7th/nvim-compe'               " auto-completion for nvim written in Lua
   Plug 'GoldsteinE/compe-latex-symbols'   " autocomplete LaTeX symbol into your text via nvim-compe
-  Plug 'nvim-lua/popup.nvim'
-  Plug 'nvim-lua/plenary.nvim'
-  Plug 'nvim-telescope/telescope.nvim'
+  Plug 'nvim-lua/plenary.nvim'            " lua utilities
+  Plug 'nvim-lua/popup.nvim'              " the popup API from vim in neovim
+  Plug 'nvim-telescope/telescope.nvim'    " find, filter, preview, pick
 endif
 
 ""}}}
@@ -499,6 +527,7 @@ EOF
 
   end
 
+  nvim_lsp.html.setup{ on_attach = on_attach }
   nvim_lsp.julials.setup{
     on_attach = on_attach,
   }
@@ -773,6 +802,21 @@ set shortmess+=c
 " FileType Specific {{{
 augroup vimrctweaks
   autocmd!
+
+""Create directory if not exist {{{
+  " https://travisjeffery.com/b/2011/11/saving-files-in-nonexistent-directories-with-vim/
+  autocmd BufWritePre * call s:auto_mkdir(expand('<afile>:p:h'), v:cmdbang)
+  function! s:auto_mkdir(dir, force)
+    if !isdirectory(a:dir)
+          \ && (
+          \     a:force
+          \     || input("'" . a:dir . "' does not exist. Create? [y/N]") =~? '^y\%[es]$'
+          \    )
+        call mkdir(iconv(a:dir, &encoding, &termencoding), 'p')
+    endif
+  endfunction
+""}}}
+
 
 ""Configuration files {{{
   autocmd BufNewFile,BufRead *.*rc setlocal foldmethod=marker

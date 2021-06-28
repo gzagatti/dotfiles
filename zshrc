@@ -94,6 +94,12 @@ if [[ $- == *i* ]]; then
     alias r='R --no-save --no-restore'
   fi
   ## }}}
+  
+  ## go {{{
+  if hash go 2>/dev/null; then
+    export GOPATH=$HOME/.go
+  fi
+  ## }}}
 
   ## slimux {{{
   # magic environments in order to make slimux work in tmux
