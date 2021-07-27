@@ -190,6 +190,7 @@ Plug 'coyotebush/vim-pweave'            " pweave files
 Plug 'habamax/vim-asciidoctor'          " asciidoctor support
 Plug 'lambdalisue/vim-gista'            " gist management
 Plug 'dpelle/vim-LanguageTool'          " LanguageTool grammar checker
+Plug 'eigenfoo/stan-vim'                " stan probabilistic programming language
 
 ""}}}
 
@@ -289,6 +290,7 @@ if exists("g:context#commentstring#table")
     \ 'mkdSnippetR': '# %s',
     \ 'mkdSnippetPYTHON': '# %s',
     \ 'mkdSnippetSH': '# %s',
+    \ 'mkdSnippetJULIA': '# %s',
     \}
   let g:context#commentstring#table.rmd = g:context#commentstring#table.markdown
 endif
@@ -456,14 +458,11 @@ if has('nvim')
     "--history-file=no",
     "--depwarn=no",
     "-e", [[
-      using Pkg;
       using LanguageServer;
-      import SymbolServer;
-      import StaticLint;
       env_path = dirname(something(Base.current_project(pwd()), Base.load_path_expand(LOAD_PATH[2])))
       depot_path = join(DEPOT_PATH, ":");
-      @info "Initializing server with env: $(env_path) and depot: $(depot_path)"
-      server = LanguageServer.LanguageServerInstance(stdin, stdout, env_path, depot_path);
+      @info "Initializing server with env: $(env_path) and default depot."
+      server = LanguageServer.LanguageServerInstance(stdin, stdout, env_path);
       server.runlinter = true;
       run(server);
     ]]
@@ -476,7 +475,7 @@ if has('nvim')
         local new_cmd = vim.deepcopy(cmd)
         new_config.cmd = new_cmd
       end,
-      filetypes = { "julia" };
+      filetypes = { "julia", "jmd", "jmd.markdown" };
       root_dir = function(fname)
         return util.find_git_ancestor(fname) or vim.fn.getcwd()
       end;
@@ -527,6 +526,9 @@ EOF
 
   end
 
+  -- list of servers:
+  -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
+  -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
   nvim_lsp.html.setup{ on_attach = on_attach }
   nvim_lsp.julials.setup{
     on_attach = on_attach,
@@ -648,7 +650,6 @@ let g:vim_markdown_math = 1
 let g:vim_markdown_frontmatter = 1
 let g:vim_markdown_folding_style_pythonic = 1
 let g:vim_markdown_conceal_code_blocks = 0
-let g:vim_markdown_fenced_languages = ['julia=julia']
 ""}}}
 
 ""asciidoctor {{{
@@ -835,7 +836,10 @@ augroup vimrctweaks
 
 ""julia {{{
   autocmd BufNewFile,BufRead *.jl set filetype=julia
-  autocmd BufNewFile,BufRead *.jmd set filetype=markdown.jmd
+  # to get the syntax highlighing working in markdown, you need to add a
+  # syntax for Julia which does not come default with NeoVim
+  # https://github.com/JuliaEditorSupport/julia-vim/tree/master/syntax
+  autocmd BufNewFile,BufRead *.jmd set filetype=jmd.markdown
 ""}}}
 
 ""latex {{{
