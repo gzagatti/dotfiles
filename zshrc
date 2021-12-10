@@ -46,13 +46,18 @@ if [[ $- == *i* ]]; then
     export PATH=$(brew --prefix)/bin:$(brew --prefix)/sbin:$PATH
     export FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
     hash -f
-  elif [ -d $HOME/.linuxbrew ]; then
+  elif [ -f $HOME/.linuxbrew/bin/brew ]; then
     export HOMEBREW_PREFIX=$HOME/.linuxbrew
-    export HOMEBREW_CELLAR=$HOME/.linuxbrew/Cellar
-    export HOMEBREW_REPOSITORY=$HOME/.linuxbrew/Homebrew
-    export MANPATH=$HOME/.linuxbrew/share/man::
-    export INFOPATH=$HOME/.linuxbrew/share/info:
-    export PATH=$HOME/.linuxbrew/bin:$HOME/.linuxbrew/sbin:$PATH
+  elif [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
+    export HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
+  fi
+
+  if [ -n "$HOMEBREW_PREFIX" ]; then
+    export HOMEBREW_CELLAR=$HOMEBREW_PREFIX/Cellar
+    export HOMEBREW_REPOSITORY=$HOMEBREW_PREFIX/Homebrew
+    export MANPATH=$HOMEBREW_PREFIX/share/man::
+    export INFOPATH=$HOMEBREW_PREFIX/share/info:
+    export PATH=$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH
     export FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
     hash -f
   fi
