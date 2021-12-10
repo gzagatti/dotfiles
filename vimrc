@@ -832,7 +832,7 @@ set conceallevel=2
 set concealcursor=nc
 nnoremap <expr> <silent> <buffer> l <SID>ForwardSkipConceal(v:count1)
 nnoremap <expr> <silent> <buffer> h <SID>BackwardSkipConceal(v:count1)
-nnoremap <expr> <leader>c <SID>ToggleConceal()
+nnoremap <expr> <leader>h <SID>ToggleConceal()
 ""}}}
 
 ""Copy/Paste mode toggle and shortcuts {{{
