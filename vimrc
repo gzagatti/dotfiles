@@ -63,9 +63,9 @@ highlight Folded ctermbg=darkgray guibg=darkgray
 
 ""Cursor {{{
 if exists('$ITERM_PROFILE')
-    let &t_SI = "\033[4 q"
-    let &t_EI = "\033[2 q"
-    autocmd VimLeave * silent !echo -ne "\033[2 q"
+  let &t_SI = "\033[4 q"
+  let &t_EI = "\033[2 q"
+  autocmd VimLeave * silent !echo -ne "\033[2 q"
 endif
 
 "upon hitting escape to change modes,
@@ -109,10 +109,6 @@ augroup auto_save
 augroup END
 ""}}}
 
-""Conceal {{{
-set conceallevel=0
-""}}}
-
 ""Newtrw{{{
 let g:netrw_browsex_viewer= "-"
 function! s:myNFH(filename)
@@ -137,6 +133,9 @@ function! NFH_svg(filename)
   call s:myNFH(a:filename)
 endfunction
 function! NFH_gif(filename)
+  call s:myNFH(a:filename)
+endfunction
+function! NFH_pdf(filename)
   call s:myNFH(a:filename)
 endfunction
 ""}}}
@@ -191,7 +190,9 @@ Plug 'habamax/vim-asciidoctor'          " asciidoctor support
 Plug 'lambdalisue/vim-gista'            " gist management
 Plug 'dpelle/vim-LanguageTool'          " LanguageTool grammar checker
 Plug 'eigenfoo/stan-vim'                " stan probabilistic programming language
-
+if has('nvim')
+  Plug 'nvim-orgmode/orgmode'             " orgmode clone written in Lua
+endif
 ""}}}
 
 ""Debugging {{{
@@ -307,30 +308,30 @@ function! SlimuxSendFenced()
   let start = search('^\s*[`~]\{3,}\s*\%({\s*\.\?\)\?\a\+', 'bnW')
 
   if !start
-      echohl WarningMsg
-      echom "Not inside fenced code block."
-      echohl None
-      return
+    echohl WarningMsg
+    echom "Not inside fenced code block."
+    echohl None
+    return
   endif
 
   call cursor(start, 1)
   let [fence, lang] = matchlist(getline(start),
-              \ '^\s*\([`~]\{3,}\)\s*\%({\s*\.\?\)\?\(\a\+\)\?')[1:2]
+    \ '^\s*\([`~]\{3,}\)\s*\%({\s*\.\?\)\?\(\a\+\)\?')[1:2]
   let end = search('^\s*' . fence . '\s*$', 'nW')
 
   if end < line
-      call winrestview(view)
-      echohl WarningMsg
-      echom "Not inside fenced code block."
-      echohl None
-      return
-    endif
+    call winrestview(view)
+    echohl WarningMsg
+    echom "Not inside fenced code block."
+    echohl None
+    return
+  endif
 
   let block = getline(start + 1, end - 1)
   call add(block, "\n")
 
   call winrestview(view)
- call SlimuxSendCode(block)
+  call SlimuxSendCode(block)
 
 endfunction
 
@@ -374,6 +375,8 @@ augroup loadfile_slimux:
     \ :execute ":silent SlimuxShellRun weave(\\\"" . @% . "\\\"; doctype=\\\"md2html\\\", out_path = :pwd, mod = Main)" <cr>
   autocmd FileType *.jmd noremap <buffer> <silent> <leader>sw
     \ :execute ":silent SlimuxShellRun weave(\\\"" . @% . "\\\"; doctype=\\\"md2html\\\", out_path = :pwd, mod = Main)" <cr>
+  autocmd FileType lua noremap <buffer> <silent> <leader>sf
+    \ :execute ":silent SlimuxShellRun dofile(\\\"" . @% . "\\\");" <cr>
 augroup END
 
 function! SlimuxEscape_r(text)
@@ -388,6 +391,12 @@ endfunction
 ""easy-align {{{
 vmap <Enter> <Plug>(EasyAlign)
 ""}}}
+
+""indentLine {{{
+let g:indentLine_concealcursor = 'nc'
+let g:indentLine_conceallevel = 2
+"" }}
+
 
 ""tagbar {{{
 nnoremap <silent> <F9> :TagbarToggle<cr>
@@ -415,7 +424,8 @@ let g:tmuxline_preset = {
 "" }}}
 
 ""pencil {{{
-let g:pencil#conceallevel = 0
+let g:pencil#conceallevel = 2
+let g:pencil#concealcursor = "nc"
 augroup pencil
   autocmd!
   autocmd FileType tex call pencil#init({'wrap': 'soft'})
@@ -423,7 +433,7 @@ augroup END
 "}}}
 
 ""goyo{{{
-function! s:goyo_enter()
+function! s:GoyoEnter()
   silent !tmux set -w status off
   silent !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
   nnoremap <f8> :NERDTreeToggle<cr>:Goyo x<cr>
@@ -433,7 +443,7 @@ function! s:goyo_enter()
 endfunction
 
 
-function! s:goyo_leave()
+function! s:GoyoLeave()
   silent !tmux set -w status on
   silent !tmux list-panes -F '\#F' | grep -q Z && tmux resize-pane -Z
   nnoremap <f8> :NERDTreeToggle<cr>
@@ -441,8 +451,8 @@ function! s:goyo_leave()
   set showcmd
 endfunction
 
-autocmd! User GoyoEnter nested call <SID>goyo_enter()
-autocmd! User GoyoLeave nested call <SID>goyo_leave()
+autocmd! User GoyoEnter nested call <SID>GoyoEnter()
+autocmd! User GoyoLeave nested call <SID>GoyoLeave()
 ""}}}
 
 ""lsp config {{{
@@ -489,40 +499,40 @@ EOF
   -- after the language server attaches to the current buffer
   local on_attach = function(client, bufnr)
 
-    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
 
-    -- Mappings.
-    local opts = { noremap=true, silent=true }
+  -- Mappings.
+  local opts = { noremap=true, silent=true }
 
-    -- documentation help
-    buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
-    buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-    buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
+  -- documentation help
+  buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
+  buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
+  buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
 
-    -- workspace management
-    buf_set_keymap('n', '<leader>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<cr>', opts)
-    buf_set_keymap('n', '<leader>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<cr>', opts)
-    buf_set_keymap('n', '<leader>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<cr>', opts)
+  -- workspace management
+  buf_set_keymap('n', '<leader>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<cr>', opts)
+  buf_set_keymap('n', '<leader>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<cr>', opts)
+  buf_set_keymap('n', '<leader>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<cr>', opts)
 
-    -- variable management
-    buf_set_keymap('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-    buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
+  -- variable management
+  buf_set_keymap('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
+  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
 
-    -- diagnostic
-    buf_set_keymap('n', '[telescope]l', '<cmd>lua vim.lsp.diagnostic.set_loclist({open_loclist=false})<cr><cmd>Telescope loclist theme=get_ivy<cr>', opts)
-    buf_set_keymap('n', '<leader>el', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<cr>', opts)
-    buf_set_keymap('n', '<leader>ec', '<cmd>lua vim.lsp.diagnostic.clear(0)<cr>', opts)
-    buf_set_keymap('n', '<leader>es', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<cr>', opts)
+  -- diagnostic
+  buf_set_keymap('n', '[telescope]l', '<cmd>lua vim.lsp.diagnostic.set_loclist({open_loclist=false})<cr><cmd>Telescope loclist theme=get_ivy<cr>', opts)
+  buf_set_keymap('n', '<leader>el', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<cr>', opts)
+  buf_set_keymap('n', '<leader>ec', '<cmd>lua vim.lsp.diagnostic.clear(0)<cr>', opts)
+  buf_set_keymap('n', '<leader>es', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<cr>', opts)
 
-    -- formatting
-    buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<cr>", opts)
+  -- formatting
+  buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<cr>", opts)
 
-    -- language specific
-    if(client.name == "texlab")
-    then
-      buf_set_keymap("n", "<leader>ll", "<cmd>echo 'Building file.'<cr><cmd>TexlabBuild<cr>", {})
-    end
+  -- language specific
+  if(client.name == "texlab")
+  then
+    buf_set_keymap("n", "<leader>ll", "<cmd>echo 'Building file.'<cr><cmd>TexlabBuild<cr>", {})
+  end
 
   end
 
@@ -530,10 +540,17 @@ EOF
   -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
   -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
   nvim_lsp.html.setup{ on_attach = on_attach }
-  nvim_lsp.julials.setup{
-    on_attach = on_attach,
-  }
+  nvim_lsp.julials.setup{ on_attach = on_attach }
   nvim_lsp.pyright.setup{ on_attach = on_attach }
+  nvim_lsp.solargraph.setup{ 
+    on_attach = on_attach,  
+    settings = {
+      solargraph = {
+        diagnostic = true,
+        useBundler = true
+      }
+    }
+  }
   nvim_lsp.stylelint_lsp.setup{
     on_attach = on_attach,
     settings = {
@@ -549,6 +566,26 @@ EOF
 endif
 ""}}}
 
+""orgmode {{{
+if has('nvim')
+  lua << EOF
+  local treesitter_parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
+  treesitter_parser_config.org = {
+    install_info = {
+      url = 'https://github.com/milisims/tree-sitter-org',
+      revision = 'main',
+      files = {'src/parser.c', 'src/scanner.cc'},
+    },
+    filetype = 'org',
+  }
+  require('orgmode').setup({
+    org_agenda_files = {'~/dev/org/**/*'},
+    org_default_notes_file = '~/dev/org/inbox.org'
+  })
+EOF
+endif
+""}}}
+
 ""treesiter {{{
 if has('nvim')
   lua <<EOF
@@ -557,7 +594,8 @@ if has('nvim')
     ignore_install = { }, -- List of parsers to ignore installing
     highlight = {
       enable = true,  -- false will disable the whole extension
-      disable = { },  -- list of language that will be disabled
+      disable = { 'org' },  -- list of language that will be disabled
+      additional_vim_regex_highlighting = {'org'}, -- Required since TS highlighter doesn't support all syntax features (conceal)
     },
     incremental_selection = {
       enable = true,
@@ -603,6 +641,7 @@ if has('nvim')
       nvim_lsp = true;
       nvim_lua = true;
       latex_symbols = true;
+      orgmode = true;
     };
   }
 EOF
@@ -644,22 +683,19 @@ let g:GPGPreferSymmetric = 1
 ""}}}
 
 ""vim-markdown {{{
-let g:vim_markdown_conceal = 0
-let g:tex_conceal = ""
 let g:vim_markdown_math = 1
 let g:vim_markdown_frontmatter = 1
 let g:vim_markdown_folding_style_pythonic = 1
-let g:vim_markdown_conceal_code_blocks = 0
 ""}}}
 
 ""asciidoctor {{{
 let g:asciidoctor_folding = 1
 let g:asciidoctor_fold_options = 1
 let g:asciidoctor_fenced_languages = ['sh', 'css']
-let g:asciidoctor_extensions = ['asciidoctor-bibtex']
+let g:asciidoctor_extensions = ['asciidoctor-tufte', 'asciidoctor-bibtex']
 let g:asciidoctor_autocompile = 0
 
-function! s:toggle_asciidoctor_autocompile()
+function! s:ToggleAsciidoctorAutocompile()
   augroup asciidoctor
     autocmd!
     if g:asciidoctor_autocompile == 0
@@ -711,15 +747,103 @@ noremap j gj
 noremap k gk
 ""}}}
 
+""Moving laterally when concealed {{{
+" https://stackoverflow.com/questions/12397103/the-conceal-feature-in-vim-still-makes-me-move-over-all-the-characters
+" https://github.com/albfan/ag.vim/commit/bdccf94877401035377aafdcf45cd44b46a50fb5
+function! s:ForwardSkipConceal(count)
+  let cnt=a:count
+  let mvcnt=0
+  let c=col('.')
+  let l=line('.')
+  let lc=col('$')
+  let line=getline('.')
+  while cnt
+    if c>=lc
+      let mvcnt+=cnt
+      break
+    endif
+    if stridx(&concealcursor, 'n')==-1
+      let isconcealed=0
+    else
+      let [isconcealed, cchar, group]=synconcealed(l, c)
+    endif
+    if isconcealed
+      let cnt-=strchars(cchar)
+      let oldc=c
+      let c+=1
+      while c<lc && synconcealed(l, c)[0]
+        let c+=1
+      endwhile
+      let mvcnt+=strchars(line[oldc-1:c-3])
+    else
+      let cnt-=1
+      let mvcnt+=1
+      let c+=len(matchstr(line[c-1:], '.'))
+    endif
+  endwhile
+  "exec "normal ".mvcnt."l"
+  return ":\<C-u>\e".mvcnt."l"
+endfunction
+
+function! s:BackwardSkipConceal(count)
+  let cnt=a:count
+  let mvcnt=0
+  let c=col('.')
+  let l=line('.')
+  let lc=1
+  let line=getline('.')
+  while cnt
+    if c<=lc
+      let mvcnt+=cnt
+      break
+    endif
+    if stridx(&concealcursor, 'n')==-1
+      let isconcealed=0
+    else
+      let [isconcealed, cchar, group]=synconcealed(l, c)
+    endif
+    if isconcealed
+      let cnt-=strchars(cchar)
+      let oldc=c
+      let c-=1
+      while c>lc && synconcealed(l, c)[0]
+        let c-=1
+      endwhile
+      let mvcnt+=strchars(line[c+1:oldc-1])
+    else
+      let cnt-=1
+      let mvcnt+=1
+      let c+=len(matchstr(line[c-1:], '.'))
+    endif
+  endwhile
+  "exec "normal ".mvcnt."h"
+  return ":\<C-u>\e".mvcnt."h"
+endfunction
+
+function! s:ToggleConceal()
+  if &conceallevel==0
+    set conceallevel=2 conceallevel?
+  else
+    set conceallevel=0 conceallevel?
+  endif
+endfunction
+
+set conceallevel=2
+set concealcursor=nc
+nnoremap <expr> <silent> <buffer> l <SID>ForwardSkipConceal(v:count1)
+nnoremap <expr> <silent> <buffer> h <SID>BackwardSkipConceal(v:count1)
+nnoremap <expr> <leader>c <SID>ToggleConceal()
+""}}}
+
 ""Copy/Paste mode toggle and shortcuts {{{
 nnoremap <F4> :set invpaste paste?<cr>
 inoremap <F4> <c-o>:set invpaste paste?<cr>
 if has("mac")
-  noremap <leader>p "*p
-  noremap <leader>y "*y
+    noremap <leader>p "*p
+    noremap <leader>y "*y
 elseif has("unix")
-  noremap <leader>p "+p
-  noremap <leader>y "+y
+    noremap <leader>p "+p
+    noremap <leader>y "+y
 endif
 
 " 'bracketed paste mode' support: programs that support it send the terminal
@@ -727,30 +851,30 @@ endif
 " pasted text with a pair of escape sequences that identify the start and end.
 " http://stackoverflow.com/questions/5585129/pasting-code-into-terminal-window-into-vim-on-mac-os-x
 if &term =~ "xterm.*"
-    let &t_ti = &t_ti . "\e[?2004h"
-    let &t_te = "\e[?2004l" . &t_te
-    function! XTermPasteBegin(ret)
-        set pastetoggle=<Esc>[201~
-        set paste
-        return a:ret
-    endfunction
-    map <expr> <Esc>[200~ XTermPasteBegin("i")
-    imap <expr> <Esc>[200~ XTermPasteBegin("")
-    vmap <expr> <Esc>[200~ XTermPasteBegin("c")
-    cmap <Esc>[200~ <nop>
-    cmap <Esc>[201~ <nop>
-  endif
+  let &t_ti = &t_ti . "\e[?2004h"
+  let &t_te = "\e[?2004l" . &t_te
+  function! s:XTermPasteBegin(ret)
+      set pastetoggle=<Esc>[201~
+      set paste
+      return a:ret
+  endfunction
+  map <expr> <Esc>[200~ <SID>XTermPasteBegin("i")
+  imap <expr> <Esc>[200~ <SID>XTermPasteBegin("")
+  vmap <expr> <Esc>[200~ <SID>XTermPasteBegin("c")
+  cmap <Esc>[200~ <nop>
+  cmap <Esc>[201~ <nop>
+endif
 ""}}}
 
 ""Clipboard Toogle{{{
-noremap <F5> :call ToggleClipboard()<cr>
-function! ToggleClipboard()
+function! s:ToggleClipboard()
   if &clipboard == 'unnamed'
     set clipboard& clipboard?
   else
     set clipboard=unnamed clipboard?
   endif
 endfunction
+noremap <expr> <F5> <SID>ToggleClipboard()
 ""}}}
 
 ""Line Transposition {{{
@@ -758,13 +882,6 @@ nnoremap <s-down> :set fdm=manual<cr>:m .+1<cr>:set fdm=marker<cr>
 nnoremap <s-up> :set fdm=manual<cr>:m .-2<cr>:set fdm=marker<cr>
 vnoremap <s-down> <esc>:set fdm=manual<cr>'<V'>:m '>+1<cr>:set fdm=marker<cr>gv
 vnoremap <s-up> <esc>:set fdm=manual<cr>'<V'>:m '<-2<cr>:set fdm=marker<cr>gv
-function! ToggleFold()
-  if &clipboard == 'unnamed'
-    set clipboard& clipboard?
-  else
-    set clipboard=unnamed clipboard?
-  endif
-endfunction
 ""}}}
 
 ""Select last inserted text {{{
@@ -836,9 +953,9 @@ augroup vimrctweaks
 
 ""julia {{{
   autocmd BufNewFile,BufRead *.jl set filetype=julia
-  # to get the syntax highlighing working in markdown, you need to add a
-  # syntax for Julia which does not come default with NeoVim
-  # https://github.com/JuliaEditorSupport/julia-vim/tree/master/syntax
+  " to get the syntax highlighing working in markdown, you need to add a
+  " syntax for Julia which does not come default with NeoVim
+  " https://github.com/JuliaEditorSupport/julia-vim/tree/master/syntax
   autocmd BufNewFile,BufRead *.jmd set filetype=jmd.markdown
 ""}}}
 
@@ -847,7 +964,7 @@ augroup vimrctweaks
 ""}}}
 
 ""asciidoctor {{{
-  autocmd Filetype asciidoctor nnoremap <leader>ll :call <SID>toggle_asciidoctor_autocompile()<cr>
+  autocmd Filetype asciidoctor nnoremap <leader>ll :call <SID>ToggleAsciidoctorAutocompile()<cr>
   autocmd Filetype asciidoctor nnoremap <leader>lv :silent AsciidoctorOpenHTML<cr>
 "" }}}
 
