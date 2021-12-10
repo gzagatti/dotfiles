@@ -1,0 +1,31 @@
+#!/usr/bin/env zsh
+
+# A rofi mode script to convert Latex expressions to unicode
+#
+# Usage:
+# - Download this into a dir
+# - Download this into a dir
+# - Make sure it's executable: chmod +x rofi-unicodeit
+# - Make sure you have unicodeit in your path
+# - Run: rofi -show unicodeit -modi "unicodeit:./rofi-unicodeit"
+# - Enter expressions like "\alpha" which will get converted.
+# - Select the conversion to capture with the clipboard and close rofi.
+
+if [ ! -z "$@" ]; then
+
+    # if we select it from rofi's output, it means we want to copy to the
+    # clipboard
+    if [[ ${1: -1} == $'\r' ]]; then
+        echo -n $1 | tr -d "\r" | xsel -ib
+        exit 0
+    fi
+
+    cmd="/home/linuxbrew/.linuxbrew/bin/unicodeit \"$@\""
+    out="$(eval $cmd)"
+    echo -en "\0markup-rows\x1ftrue\n"
+    # print a carriage return so we know this was a rofi output
+    echo -en "$out\r"
+
+fi
+
+echo -en "\0prompt\x1funicodeit\n"
