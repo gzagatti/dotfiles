@@ -42,3 +42,5 @@
         cmd = git-nbmergetool merge \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"
 [merge]
         tool = fugitive
+[http]
+	sslVerify = true
