@@ -1,0 +1,533 @@
+* Emacs configuration
+
+** Intro
+
+My main motivation to use Emacs is Org-mode. So there is no better way to start, than to implement a [[https://leanpub.com/lit-config/read][literate configuration file]]. The main idea is to provide a self-documenting configuration that tangles narrative and code in the same file.
+
+Second, my main objective with this configuration file is to bring the user experience as close as possible to the experience that I have using Neovim. As a long time Neovim user, I spent many hours curating its configuration file and know what works best for me.
+
+As a beginner Emacs user, I search for inspiration in [[https://github.com/hlissner/doom-emacs][Doom Emacs]]. So, many of the settings and tweaks are borrowed from them. Why did I not just use Doom? Vim taught me that the best way to tame an editor is to curate your own configuration.
+
+** Basics
+
+Emacs configuration is written in ~elisp~, so it's useful to know a few things about it:
+
+  1. Everything in elisp is a list, so every command is surrounded by paranthesis ~()~.
+
+  2. Many settings are activated by setting the value of certain variables. We can set the value of a variable with either ~(setq [SYM VAL]...)~ which sets the value of ~SYM~ to ~VAL~, or ~(setq-default [SYM VAL]...)~ which sets the default value of ~SYM~ which is seen in buffers that do not have their own values for the variable.
+
+Emacs can be slow to start up if badly configured. So let's start our timer to keep an eye on that.
+
+#+begin_src elisp
+  (defconst emacs-start-time (current-time))
+#+end_src
+
+*** The dirty laundry
+
+I start by tweaking basic settings to improve the baseline user experience. This is mostly a laundry list of settings, the meaning of each setting is best explained in the comments that come before them.
+
+#+begin_src elisp
+  ; get rid of the ugly, but helpful startup screen
+  (setq inhibit-startup-screen t)
+
+  ; avoid loading old bytecode instead of newer source
+  (setq load-prefer-newer t)
+
+  ; line rulers
+  (setq-default display-line-numbers-width 3)
+  (global-display-line-numbers-mode)
+
+  ; turn-off the annoying bell
+  (setq ring-bell-function 'ignore)
+
+  ; don't prompt for configuration when creating a new file
+  ; DOOM
+  (setq confirm-nonexistent-file-or-buffer nil)
+
+  ; show current key-sequence in minibuffer ala 'set showcmd' in vim. Any
+  ; feedback after typing is better UX than no feedback at all.
+  ; DOOM
+  (setq echo-keystrokes 0.02)
+
+  ; typing yes/no is obnoxious when y/n will do
+  ; DOOM
+  (advice-add #'yes-or-no-p :override #'y-or-n-p)
+  (defalias 'yes-or-no-p 'y-or-n-p)
+
+  ; hide menu bar, reduce visual clutter
+  ; DOOM
+  (push '(menu-bar-lines . 0)   default-frame-alist)
+  (push '(tool-bar-lines . 0)   default-frame-alist)
+  (push '(vertical-scroll-bars) default-frame-alist)
+  (setq menu-bar-mode nil tool-bar-mode nil scroll-bar-mode nil)
+
+  ; no backup files, use auto-save instead
+  (setq make-backup-files nil)
+#+end_src
+
+*** Mouse
+
+Most of the time, I will use the keyboard to interact with the text editor. But, sometimes the mouse is too convenient to ignore. Thus, why not just turn this modern interface on whenever we can?
+
+#+begin_src elisp
+  (if window-system
+    ; DOOM
+    (setq hscroll-margin 2
+      hscroll-step 1
+      ;; emacs spends too much effort recentering the screen if you scroll the
+      ;; cursor more than N lines past window edges (where N is the settings of
+      ;; `scroll-conservatively'). This is especially slow in larger files
+      ;; during large-scale scrolling commands. If kept over 100, the window is
+      ;; never automatically recentered.
+      scroll-conservatively 101
+      scroll-margin 0
+      scroll-preserve-screen-position t
+      ;; reduce cursor lag by a tiny bit by not auto-adjusting `window-vscroll'
+      ;; for tall lines.
+      auto-window-vscroll nil
+      ;; mouse
+      mouse-wheel-scroll-amount '(1 ((shift) . hscroll))
+      mouse-wheel-scroll-amount-horizontal 2)
+    (progn
+      (xterm-mouse-mode t)
+      (global-set-key [mouse-4] (lambda ()
+        (interactive)
+        (scroll-down 1)))
+      (global-set-key [mouse-5] (lambda ()
+        (interactive)
+        (scroll-up 1)))
+      (defun track-mouse (e))
+      (setq mouse-sel-mode t)))
+#+end_src
+
+** Package management
+
+Following Emacs Doom advice, I adopt the [[https://github.com/raxod502/straight.el][~straight.el~]] package management system which is a purely functional package manager. It allows for fine grained package installation and natively supports installation of Git repositories. It thus solves many issues in the default package manager, ~package.el~.
+
+Set up instructions for ~straight.el~ comes directly from the package's [[https://github.com/raxod502/straight.el#getting-started][~README~ file]].
+
+#+begin_src elisp
+  (setq package-enable-at-startup nil)
+
+  (defvar bootstrap-version)
+
+  (let ((bootstrap-file (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+  (bootstrap-version 5))
+    (unless (file-exists-p bootstrap-file)
+  (with-current-buffer
+      (url-retrieve-synchronously
+      "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+      'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+      (load bootstrap-file nil 'nomessage)
+      )
+#+end_src
+
+** Evil mode
+
+The switch to Emacs would not have been possible if it were not for [[https://github.com/emacs-evil/evil][Evil mode]]. This package not only brings Vim keybindings to Emacs, but transforms it into a modal editor. Emacs original interface is one of its big disadvantages. The abuse of the ~[CTRL]~ key and extended keyboard combinations feels clunky. The keyboard strokes are difficult to memorize, and sometimes even to execute. Often, it requires the use of both hands.
+
+Evil mode contains many settings that can be adjusted before the package is activated, check the [[https://evil.readthedocs.io/en/latest/overview.html][documentation]] for a complete list.
+
+#+begin_src elisp
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-move-beyond-eol t)
+  (setq evil-respect-visual-line-mode t)
+  (setq evil-undo-system 'undo-redo)
+  (setq evil-auto-indent nil)
+#+end_src
+
+On top of that, I also install [[https://github.com/emacs-evil/evil-collection][Evil collection]] which brings Evil to most popular Emacs packages. I activate the collection only on the packages that I use.
+
+#+begin_src elisp
+  (setq evil-collection-mode-list '(
+    magit
+    help
+    org
+  ))
+#+end_src
+
+Once the pre-activation settings are set, I activate both ~evil~ and ~evil-collection~.
+
+#+begin_src elisp
+  (straight-use-package 'evil)
+  (straight-use-package 'evil-collection)
+  (evil-mode 1)
+  (when (require 'evil-collection nil t)
+    (evil-collection-init))
+#+end_src
+
+Evil does not automatically set a ~<leader>~ key. Since there is a few combinations that uses this key which I often use in Neovim, I set it up here.
+
+#+begin_src elisp
+  (evil-set-leader 'visual (kbd ";"))
+  (evil-set-leader 'normal (kbd ";"))
+#+end_src
+
+*** Navigate
+
+In neovim, I often navigate between windows and, when using tmux, between panes with ~[CTRL]~ plus Vim directional keys ~[h], [j], [k], [l]~. Luckily, these keybindings which integrate with Evil mode are available in [[https://github.com/keith/evil-tmux-navigator/][Github]].
+
+#+begin_src elisp
+  (straight-use-package
+    '(navigate :type git :host github :repo  "keith/evil-tmux-navigator"))
+  (require 'navigate)
+#+end_src
+
+*** Edit your ~config.org~ often
+
+A [[https://learnvimscriptthehardway.stevelosh.com/chapters/07.html][good advice]] given by Steve Losh in /Learn Vimscript the Hard Way/ is to create a binding for quickly editing your configuration file and sourcing it again. I implement his advice in Emacs and bind the shortcuts to the same keys as I have in Neovim.
+
+#+begin_src elisp
+  (evil-define-key 'normal 'global (kbd "<leader>ev")
+    (lambda () (interactive) (
+      window--display-buffer (find-file-noselect "~/.emacs.d/emacs-config.org")
+      (split-window (selected-window) nil 'above) 'window)))
+  (evil-define-key 'normal 'global (kbd "<leader>sv")
+    (lambda () (interactive) (load "~/.emacs.d/init.el")))
+#+end_src
+
+** Theme
+
+#+begin_src elisp
+  ;;; theme {{{
+  (straight-use-package 'dracula-theme)                                    ; dracula theme
+  (load-theme 'dracula t)
+  ;;;}}}
+
+  ;; fonts {{{
+  ;; there was a lot of issues with the font due to how emacs was built
+  ;; it is necessary to ensure that it builds with GTK-3 support in Linux
+  (set-face-attribute 'default nil
+                      :font "Cousine for Powerline"
+                      :height 104
+                      :weight 'normal
+                      :width 'normal)
+  ;;}}}
+
+  ;;; powerline {{{
+  (straight-use-package 'powerline)                                        ; emacs powerline
+  (powerline-default-theme)
+  ;;;}}}
+
+#+end_src
+
+** Addional settings
+
+*** Clipboard management
+
+The main objective of this section is to avoid poluting the system clipboard. When editing text in an editor, it is fairly common to copy-and-paste to move sections of the text around. I would like to avoid that they leak into the system clipboard which I prefer to use between applications. Therefore I deactivate the system clipboard by default.
+
+#+begin_src elisp
+  (custom-set-variables '(select-enable-clipboard nil))
+#+end_src
+
+When needed, I prefix the yank and paste commands with the ~<leader>~ key to perform these operations with the system clipboard.
+
+#+begin_src  elisp
+  (defun yank-to-clipboard (start end)
+    "Yank to system clipboard."
+    (interactive "r")
+    (if (use-region-p)
+        (progn
+        ; does not check if the option might originally be true
+        (custom-set-variables '(select-enable-clipboard t))
+        (clipboard-kill-ring-save start end)
+        (custom-set-variables '(select-enable-clipboard nil)))))
+  (evil-define-key 'visual 'global (kbd "<leader>y")  'yank-to-clipboard)
+
+  (defun paste-clipboard ()
+    "Paste from system clipboard."
+    (interactive)
+        (progn
+        ; does not check if the option might originally be true
+        (custom-set-variables '(select-enable-clipboard t))
+        (clipboard-yank)
+        (custom-set-variables '(select-enable-clipboard nil))))
+  (evil-define-key 'normal 'global (kbd "<leader>p") 'paste-clipboard)
+#+end_srC
+
+More info on copy-and-paste in Emacs can be found in the [[https://www.emacswiki.org/emacs/CopyAndPastej][Wiki]].
+
+*** Line wrapping
+
+#+begin_src elisp
+  ;;; adaptive-wrap {{{
+  (straight-use-package 'adaptive-wrap)
+
+  (defvar +word-wrap-extra-indent 'double)
+
+  (defvar +word-wrap-disabled-modes
+    '(fundamental-mode so-long-mode)
+    "Major-modes where `+global-word-wrap-mode' should not enable `+word-wrap-mode'.")
+
+  (defvar +word-wrap-visual-modes
+    '(org-mode)
+    "Major mode where `+word-wrap-mode' should not enable `adaptive-wrap-prefix-mode'.")
+
+  (defvar +word-wrap-text-modes
+    '(text-mode markdown-mode markdown-view-mode gfm-mode gfm-view-mode rst-mode latex-mode LaTex-mode)
+    "Major-modes where `+word-wrap-mode' should not provide extra indentation.")
+
+  (defvar +word-wrap--major-mode-is-visual nil)
+  (defvar +word-wrap--major-mode-is-text nil)
+  (defvar +word-wrap--enable-adaptive-wrap-mode nil)
+  (defvar +word-wrap--enable-visual-line-mode nil)
+
+  ;;;###autoload
+  (define-minor-mode +word-wrap-mode
+    "Wrap long lines in the buffer with langugage-aware indentation.
+
+  Wrapped lines will be indented to match the preceding line. In code buffers,
+  lines which are not inside a string or comment will have additional indentation
+  according to the configuration of `+word-wrap-extra-indent'."
+    :init-value nil
+    (if +word-wrap-mode
+      (progn
+        (setq-local +word-wrap--major-mode-is-visual
+          (memq major-mode +word-wrap-visual-modes))
+        (setq-local +word-wrap--major-mode-is-text
+          (memq major-mode +word-wrap-text-modes))
+
+        (setq-local +word-wrap--enable-adaptive-wrap-mode
+          (and (not (bound-and-true-p adaptive-wrap-prefix-mode))
+                (not +word-wrap--major-mode-is-visual)))
+
+        (setq-local +word-wrap--enable-visual-line-mode
+          (not (bound-and-true-p visual-line-mode)))
+
+        (when +word-wrap--enable-adaptive-wrap-mode
+          (adaptive-wrap-prefix-mode +1))
+        (when +word-wrap--enable-visual-line-mode
+          (visual-line-mode +1)))
+
+        (when +word-wrap--enable-adaptive-wrap-mode
+          (adaptive-wrap-prefix-mode -1))
+        (when +word-wrap--enable-visual-line-mode
+          (visual-line-mode -1))))
+
+  (defun +word-wrap--enable-global-mode ()
+    "Enable `+word-wrap-mode' for `+word-wrap-global-mode'.
+
+  Wrapping will be automatically enabled in all modes except special mode, or
+  modes explicitly listed in `+word-wrap-disabled-modes'."
+    (unless (or (eq (get major-mode 'mode-class) 'special)
+        (memq major-mode +word-wrap-disabled-modes))
+      (+word-wrap-mode +1)))
+
+  ;;;###autoload
+  (define-globalized-minor-mode +global-word-wrap-mode
+    +word-wrap-mode +word-wrap--enable-global-mode)
+
+  (+global-word-wrap-mode +1)
+  ;;;}}}
+#+end_src
+
+*** White space
+
+#+begin_src elisp
+  ;; white space {{{
+  ; https://dougie.io/emacs/indentation/
+  (setq-default electric-indent-inhibit t)
+  (setq-default tab-width 2)
+  (setq-default indent-tabs-mode nil)
+  (setq-default evil-shift-width 2)
+  (evil-define-key 'insert 'global (kbd "TAB") 'tab-to-tab-stop)
+  (setq backward-delete-char-untabify-method 'hungry)
+  (setq whitespace-style '(face tabs tab-mark trailing indentation))
+  (global-whitespace-mode)
+  (custom-set-faces
+    '(whitespace-trailing ((t (:foreground nil :background "#636363"))))
+    '(whitespace-tab ((t (:foreground "#636363" :background nil)))))
+  (setq whitespace-display-mappings
+  '((tab-mark 9 [62 32 92 92 92]))) ; print tab as > \\\
+  (evil-define-key 'normal 'global (kbd "<leader>dt") 'whitespace-cleanup)
+  ;;}}}
+#+end_src
+
+** Third-party packages
+
+#+begin_src elisp
+  ;;; neotree {{{
+  (straight-use-package 'neotree)                                          ; file management from within Emacs
+  (require 'neotree)
+  (global-set-key [f8] 'neotree-toggle)
+  ;;;}}}
+
+  ;;; magit {{{
+  (straight-use-package 'magit)                                            ; a git porcelain
+  ;;;}}}
+
+  ;;; vimmish-fold {{{
+;  (straight-use-package 'vimish-fold)                                      ; vim-like text folding
+;  (straight-use-package 'evil-vimish-fold)                                 ; vim keybindings for vimish-fold
+;  (vimish-fold-global-mode 1)
+;  (setq evil-vimish-fold-target-modes '(prog-mode conf-mode text-mode))
+;  (global-evil-vimish-fold-mode 1)
+  ;;;}}}
+  ;;}}}
+#+end_src
+
+*** Helm
+
+#+begin_src elisp
+  (straight-use-package 'helm)
+  (straight-use-package 'helm-descbinds)
+
+  ; developer's configuration
+  ; https://github.com/thierryvolpiatto/emacs-config/blob/main/init-helm.el
+  ; https://tuhdo.github.io/helm-intro.html
+  (require 'helm-config)
+  (helm-define-key-with-subkeys global-map (kbd "C-c n") ?n 'helm-cycle-resume)
+  (global-set-key (kbd "M-x") 'helm-M-x)
+  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebind tab to run persistent action
+  (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make tab work in terminal
+  (define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
+  (setq       helm-move-to-line-cycle-in-source     t ; move to end or beginning of source when reaching top or bottom of source.
+      helm-ff-search-library-in-sexp        t ; search for library in `require' and `declare-function' sexp.
+    helm-display-buffer-default-height 0.30
+        helm-autoresize-max-height                80 ; it is %.
+  )
+  ;(add-to-list 'helm-completing-read-handlers-alist (cons #'find-file-at-point nil)))
+  ;(setq completion-styles '(flex))
+  ;(helm-mode 1)
+
+  (helm-descbinds-mode)
+#+end_src
+
+*** Which-key mode
+
+#+begin_src elisp
+  (straight-use-package 'which-key)
+  (require 'which-key)
+  (setq which-key-show-early-on-C-h t)
+  (setq which-key-use-C-h-commands nil)
+  (which-key-mode)
+#+end_src
+
+*** Company mode
+
+https://github.com/vspinu/company-math
+
+
+#+begin_src elisp
+  (straight-use-package 'company)
+  (straight-use-package 'company-math)
+
+  (add-hook 'after-init-hook (lambda ()
+    (global-company-mode t)
+    (add-to-list 'company-backends 'company-math-symbols-unicode)))
+
+  (defun company-mode-latex-setup ()
+    (setq-local company-backends
+                (append '((company-math-symbols-latex company-latex-commands))
+                        company-backends)))
+
+  (add-hook 'tex-mode-hook 'company-mode-latex-setup)
+#+end_src
+
+*** LSP
+
+#+begin_src
+  (straight-use-package 'lsp-mode)
+  (add-hook prog-mode-hook #'lsp)
+#+end_src
+
+*** Ein --- Emacs Ipython Notebool
+
+[[http://millejoh.github.io/emacs-ipython-notebook/][Ein manual]]
+
+#+begin_src elisp
+  (straight-use-package 'ein)
+#+end_src
+
+** Modes
+
+*** Org-mode
+
+#+begin_src elisp
+  ; hide emphasis markup
+  (setq org-hide-emphasis-markers t)
+
+  ; beautiful unicode bullets
+  (straight-use-package 'org-bullets)
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
+  ; fold
+  (setq org-ellipsis " ▼")
+  (setq org-startup-folded t)
+  (setq org-hide-block-startup t)
+
+  ; indent in org-mode
+  (setq org-indent-mode t)
+
+  ; agenda
+  (defvar org-my-inbox-file "~/dev/org/inbox.org")
+  (defvar org-my-general-files "~/dev/org")
+  (setq org-default-notes-file org-my-inbox-file)
+  (add-to-list 'org-agenda-files org-my-general-files)
+  (setq org-refile-targets (quote ((org-agenda-files :maxlevel .2))))
+  (setq org-reverse-note-order t)
+
+  ; tab support
+  (setq org-cycle-emulate-tab nil)
+
+  ; keys
+  (evil-define-key 'normal 'global
+    (kbd "<leader>oa") 'org-agenda
+    (kbd "<leader>oc") 'org-capture
+  )
+  (define-minor-mode org-mode-my-map
+    "Custom org-mode mappings."
+    :keymap (make-sparse-keymap))
+  ;  (evil-define-key 'normal 'org-mode-my-map
+  ;    [za] 'org-cycle
+  ;    [zo] 'outline-show-children
+  ;    [zO] 'outline-show-subtree
+  ;    [zc] 'outline-hide-subtree
+  ;    [zC] 'outline-hide-sublevels
+  ;    [zR] 'outline-show-all
+  ;    [zM] 'org-overview
+  ;  )
+  (evil-define-key 'insert 'org-mode-my-map
+    [tab] 'tab-to-tab-stop
+    [s-tab] 'ignore
+  )
+  (add-hook 'org-mode-hook 'org-mode-my-map)
+  (add-hook 'org-mode-hook (lambda ()
+    (set (make-local-variable 'electric-indent-functions)
+    (list (lambda (arg) 'no-indent)))))
+#+end_src
+
+** Wrap-up
+
+How long did we take to fire up Emacs? We compute the elapsed time and print it at the top of our start window which is the ~*scratch*~ buffer.
+
+#+begin_src elisp
+  (let ((elapsed (float-time (time-subtract (current-time) emacs-start-time))))
+
+  (setq initial-scratch-message
+    (format "; *scratch*\n; config.org loaded in %.3fs" elapsed)))
+#+end_src
+
+** References
+
+- [[https://github.com/emacs-evil/evil-collection][Evil collection repo]]
+- [[https://packagm/tecosaur/emacs-config/blob/master/config.org][A good example of literate config]]
+- [[https://www.reddit.com/r/emacs/comments/84l5jl/evil_how_can_i_autosave_whenever_i_make_a_change/][Auto-save?]]
+- http://emacsrocks.com/
+- https://github.com/mattmahn/emacsfiles/blob/master/emacs-config.org
+- https://tammymakesthings.com/posts/2020-04-28-literate-emacs-configuration-in-org-mode/
+- https://systemcrafters.cc/emacs-from-scratch/key-bindings-and-evil/
+- [[https://idiocy.org/emacs-fonts-and-fontsets.html][setting emacs font]]
+- [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][Beautifying Orgmode in Emacs]]
+- https://www.emacswiki.org/emacs/GoodFonts
+- https://www.reddit.com/r/emacs/comments/jue3xc/use_of_progn_to_fix_invalid_function_errors/ , good explanation of if, why to use progn
+- [[https://www.emacswiki.org/emacs/RecreateScratchBuffer][Re-create scratch buffer]]
+- [[https://emacs.christianbaeuerlein.com/my-org-config.html][Great org configuration]]
+- clone-indirect-buffer-other-window
+- https://github.com/phrb/ob-julia
+
