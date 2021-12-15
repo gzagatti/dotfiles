@@ -175,6 +175,7 @@ if has('nvim')
   Plug 'nvim-lua/plenary.nvim'            " lua utilities
   Plug 'nvim-lua/popup.nvim'              " the popup API from vim in neovim
   Plug 'nvim-telescope/telescope.nvim'    " find, filter, preview, pick
+  Plug 'michaelb/sniprun', {'do': 'bash install.sh 1'}  " run lines/blocs of code (independently of the rest of the file)
 endif
 
 ""}}}
@@ -395,7 +396,6 @@ vmap <Enter> <Plug>(EasyAlign)
 let g:indentLine_concealcursor = 'nc'
 let g:indentLine_conceallevel = 2
 "" }}}
-
 
 ""tagbar {{{
 nnoremap <silent> <F9> :TagbarToggle<cr>
@@ -670,7 +670,7 @@ if has('nvim')
 EOF
   nnoremap [telescope] <Nop>
   nmap <space> [telescope]
-  nnoremap [telescope]p <cmd>Telescope find_files theme=get_ivy<cr>
+  nnoremap [telescope]f <cmd>Telescope find_files theme=get_ivy<cr>
   nnoremap [telescope]/ <cmd>Telescope live_grep theme=get_ivy<cr>
   nnoremap [telescope]y <cmd>Telescope registers theme=get_ivy<cr>
   nnoremap [telescope]b <cmd>Telescope buffers theme=get_ivy<cr>
@@ -711,6 +711,21 @@ function! s:ToggleAsciidoctorAutocompile()
     echo "asciidoctor: Compiler stopped"
   endif
 endfunction
+""}}}
+
+""sniprun {{{
+if has('nvim')
+  lua <<EOF
+  require'sniprun'.setup({
+    repl_enable = {'Python3_original'},
+    interpreter_options = {
+      Python3_original = {
+        interpreter = 'python',
+      },
+    },
+  })
+EOF
+endif
 ""}}}
 
 "}}}
@@ -940,10 +955,6 @@ augroup vimrctweaks
 ""Configuration files {{{
   autocmd BufNewFile,BufRead *.*rc setlocal foldmethod=marker
   autocmd BufNewFile,BufRead *rc setlocal foldmethod=marker
-""}}}
-
-""json {{{
-  autocmd FileType json setlocal foldmethod=syntax
 ""}}}
 
 ""rmd {{{
