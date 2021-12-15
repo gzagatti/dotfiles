@@ -4,7 +4,9 @@ set nocompatible
 set encoding=utf-8
 set lazyredraw
 filetype off
-syntax on
+if !has('nvim')
+  syntax on
+end
 ""}}}
 
 ""Leaders {{{
@@ -42,9 +44,7 @@ set number numberwidth=4
 
 ""White Space {{{
 set wrap
-"set shiftround shiftwidth=2
-"set softtabstop=2
-"set expandtab
+set shiftround shiftwidth=2 softtabstop=2 expandtab 
 set backspace=indent,eol,start
 set list
 set listchars=""
@@ -164,7 +164,6 @@ Plug 'vim-scripts/matchit.zip'          " extended % matching for HTML, Latex an
 Plug 'majutsushi/tagbar'                " easy tags navigation
 Plug 'ludovicchabant/vim-gutentags'     " tag management
 Plug 'junegunn/vim-easy-align'          " for easy alignment
-Plug 'tpope/vim-sleuth'                 " heuristically set indent/tab options
 Plug 'gzagatti/vim-pencil'              " rethinking Vim as a tool for writing
 Plug 'junegunn/goyo.vim'                " distraction free-writing in Vim
 
@@ -569,8 +568,8 @@ endif
 ""orgmode {{{
 if has('nvim')
   lua << EOF
-  local treesitter_parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
-  treesitter_parser_config.org = {
+  local parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
+  parser_config.org = {
     install_info = {
       url = 'https://github.com/milisims/tree-sitter-org',
       revision = 'main',
@@ -594,7 +593,6 @@ if has('nvim')
     ignore_install = { }, -- List of parsers to ignore installing
     highlight = {
       enable = true,  -- false will disable the whole extension
-      disable = { 'org' },  -- list of language that will be disabled
       additional_vim_regex_highlighting = {'org'}, -- Required since TS highlighter doesn't support all syntax features (conceal)
     },
     incremental_selection = {
@@ -609,10 +607,13 @@ if has('nvim')
     indent = {
       enable = true
     },
+    fold = {
+      enable = true
+    },
   }
+  vim.cmd [[set foldmethod=expr]]
+  vim.cmd [[set foldexpr=nvim_treesitter#foldexpr()]]
 EOF
-  set foldmethod=expr
-  set foldexpr=nvim_treesitter#foldexpr()
 endif
 ""}}}
 
@@ -938,6 +939,7 @@ augroup vimrctweaks
 
 ""Configuration files {{{
   autocmd BufNewFile,BufRead *.*rc setlocal foldmethod=marker
+  autocmd BufNewFile,BufRead *rc setlocal foldmethod=marker
 ""}}}
 
 ""json {{{
