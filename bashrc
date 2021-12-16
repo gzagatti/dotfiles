@@ -67,10 +67,11 @@ if [[ $- == *i* ]]; then
 
   ## pyenv {{{
   if hash pyenv 2>/dev/null; then
+    export PYENV_ROOT="$(pyenv root)"
+    eval "$(pyenv init --path)"
     eval "$(pyenv init -)"
     eval "$(pyenv virtualenv-init -)"
     export PYENV_VIRTUALENV_DISABLE_PROMPT=1
-    export PYENV_ROOT="$(pyenv root)"
   fi
   ## }}}
 
