@@ -861,8 +861,8 @@ require('packer').sync()
 
 ---.vimrc {{{
 --open .vimrc in a horizantal split$
-vim.api.nvim_set_keymap('n', '<leader>ev', ':split $HOME/.config/nvim/init.lua<cr>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<leader>sv', ':luafile $HOME/.config/nvim/init.lua<cr>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<leader>ev', ':split $MYVIMRC<cr>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<leader>sv', ':luafile $MYVIMRC<cr>', { noremap = true })
 ---}}}
 
 ---map j and k such that is based on display lines, not physical ones {{{
