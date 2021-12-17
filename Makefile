@@ -8,8 +8,11 @@ osx:
 
 vim:
 	ln -fs $(dotfiles)/vimrc ${workspace}/.vimrc
-	mkdir -p ${workspace}/.config/nvim/
 	ln -fs $(dotfiles)/init.vim ${workspace}/.config/nvim/init.vim
+
+nvim:
+	mkdir -p ${workspace}/.config/nvim/
+	ln -fs $(dotfiles)/init.lua $(workspace)/.config/nvim
 
 emacs:
 	mkdir -p ${workspace}/.emacs.d/

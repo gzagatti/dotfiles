@@ -639,3 +639,4 @@ How long did we take to fire up Emacs? We compute the elapsed time and print it 
 #  (global-evil-vimish-fold-mode 1)
 #  ;;;}}}
 #  ;;}}}
+
