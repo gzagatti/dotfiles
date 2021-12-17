@@ -4,9 +4,7 @@ set nocompatible
 set encoding=utf-8
 set lazyredraw
 filetype off
-if !has('nvim')
-  syntax on
-end
+syntax on
 ""}}}
 
 ""Leaders {{{
@@ -17,7 +15,6 @@ let maplocalleader = "\\"
 ""Mouse {{{
 if has('mouse')
   set mouse=a
-  if !has('nvim')
     if &term =~ "xterm" || &term =~ "screen"
       " for some reason, doing this directly with 'set ttymouse=xterm2'
       " doesn't work -- 'set ttymouse?' returns xterm2 but the mouse
@@ -28,7 +25,6 @@ if has('mouse')
       autocmd FocusGained * set ttymouse=xterm2
       autocmd BufEnter * set ttymouse=xterm2
     endif
-  endif
 endif
 ""}}}
 
@@ -140,6 +136,21 @@ function! NFH_pdf(filename)
 endfunction
 ""}}}
 
+""Providers {{{
+"""Python provider {{{
+let g:loaded_python_provider=0
+let g:python3_host_prog = $HOME . "/.pyenv/versions/vim3/bin/python"
+"""}}}
+
+"""Ruby provider {{{
+let g:loaded_ruby_provider = 0
+"""}}}
+
+"""Perl provider {{{
+let g:loaded_perl_provider = 0
+"""}}}
+""}}}
+
 "}}}
 
 "Plugin Manager {{{
@@ -151,7 +162,7 @@ call plug#begin('~/.vim/plugged')
 " Most Used Functionalities
 Plug 'vim-airline/vim-airline'              "  lean & mean status/tabline for vim that's light as air
 Plug 'dracula/vim'                          "  dracula theme
-Plug 'scrooloose/nerdtree'                  "  file management from within Vim
+Plug 'preservim/nerdtree'                  "  file management from within Vim
 Plug 'tpope/vim-commentary'                 "  comment stuff out
 Plug 'suy/vim-context-commentstring'        "  set commentstring value dynamically
 Plug 'tpope/vim-fugitive'                   "  git support
@@ -166,18 +177,6 @@ Plug 'ludovicchabant/vim-gutentags'     " tag management
 Plug 'junegunn/vim-easy-align'          " for easy alignment
 Plug 'gzagatti/vim-pencil'              " rethinking Vim as a tool for writing
 Plug 'junegunn/goyo.vim'                " distraction free-writing in Vim
-
-if has('nvim')
-  Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
-  Plug 'neovim/nvim-lspconfig'            " neovim built-in language server
-  Plug 'hrsh7th/nvim-compe'               " auto-completion for nvim written in Lua
-  Plug 'GoldsteinE/compe-latex-symbols'   " autocomplete LaTeX symbol into your text via nvim-compe
-  Plug 'nvim-lua/plenary.nvim'            " lua utilities
-  Plug 'nvim-lua/popup.nvim'              " the popup API from vim in neovim
-  Plug 'nvim-telescope/telescope.nvim'    " find, filter, preview, pick
-  Plug 'michaelb/sniprun', {'do': 'bash install.sh 1'}  " run lines/blocs of code (independently of the rest of the file)
-endif
-
 ""}}}
 
 ""Languages {{{
@@ -190,9 +189,6 @@ Plug 'habamax/vim-asciidoctor'          " asciidoctor support
 Plug 'lambdalisue/vim-gista'            " gist management
 Plug 'dpelle/vim-LanguageTool'          " LanguageTool grammar checker
 Plug 'eigenfoo/stan-vim'                " stan probabilistic programming language
-if has('nvim')
-  Plug 'nvim-orgmode/orgmode'             " orgmode clone written in Lua
-endif
 ""}}}
 
 ""Debugging {{{
@@ -271,7 +267,7 @@ function! s:NERDTreeCustomToggle(pathStr)
   endif
 endfunction
 
-command! -n=? -complete=file -bar NERDTreeCustomToggle call s:NERDTreeCustomToggle('<args>')
+command! -n=? -complete=file -bar NERDTreeCustomToggle call <SID>NERDTreeCustomToggle('<args>')
 
 nnoremap <f8> :NERDTreeCustomToggle<cr>
 ""}}}
@@ -454,231 +450,6 @@ autocmd! User GoyoEnter nested call <SID>GoyoEnter()
 autocmd! User GoyoLeave nested call <SID>GoyoLeave()
 ""}}}
 
-""lsp config {{{
-if has('nvim')
-  lua << EOF
-  -- https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/julials.lua
-  local configs = require 'lspconfig/configs'
-  local util = require 'lspconfig/util'
-
-  local cmd = {
-    "julia",
-    "--startup-file=no",
-    "--history-file=no",
-    "--depwarn=no",
-    "-e", [[
-      using LanguageServer;
-      env_path = dirname(something(Base.current_project(pwd()), Base.load_path_expand(LOAD_PATH[2])))
-      depot_path = join(DEPOT_PATH, ":");
-      @info "Initializing server with env: $(env_path) and default depot."
-      server = LanguageServer.LanguageServerInstance(stdin, stdout, env_path);
-      server.runlinter = true;
-      run(server);
-    ]]
-  };
-
-  configs.julials = {
-    default_config = {
-      cmd = cmd;
-      on_new_config = function(new_config, _)
-        local new_cmd = vim.deepcopy(cmd)
-        new_config.cmd = new_cmd
-      end,
-      filetypes = { "julia", "jmd", "jmd.markdown" };
-      root_dir = function(fname)
-        return util.find_git_ancestor(fname) or vim.fn.getcwd()
-      end;
-    };
-  }
-EOF
-  lua << EOF
-  local nvim_lsp = require('lspconfig')
-
-  -- Use an on_attach function to only map the following keys
-  -- after the language server attaches to the current buffer
-  local on_attach = function(client, bufnr)
-
-  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-
-  -- Mappings.
-  local opts = { noremap=true, silent=true }
-
-  -- documentation help
-  buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
-  buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-  buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
-
-  -- workspace management
-  buf_set_keymap('n', '<leader>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<cr>', opts)
-  buf_set_keymap('n', '<leader>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<cr>', opts)
-  buf_set_keymap('n', '<leader>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<cr>', opts)
-
-  -- variable management
-  buf_set_keymap('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-
-  -- diagnostic
-  buf_set_keymap('n', '[telescope]l', '<cmd>lua vim.lsp.diagnostic.set_loclist({open_loclist=false})<cr><cmd>Telescope loclist theme=get_ivy<cr>', opts)
-  buf_set_keymap('n', '<leader>el', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<cr>', opts)
-  buf_set_keymap('n', '<leader>ec', '<cmd>lua vim.lsp.diagnostic.clear(0)<cr>', opts)
-  buf_set_keymap('n', '<leader>es', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<cr>', opts)
-
-  -- formatting
-  buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<cr>", opts)
-
-  -- language specific
-  if(client.name == "texlab")
-  then
-    buf_set_keymap("n", "<leader>ll", "<cmd>echo 'Building file.'<cr><cmd>TexlabBuild<cr>", {})
-  end
-
-  end
-
-  -- list of servers:
-  -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
-  -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
-  nvim_lsp.html.setup{ on_attach = on_attach }
-  nvim_lsp.julials.setup{ on_attach = on_attach }
-  nvim_lsp.pyright.setup{ on_attach = on_attach }
-  nvim_lsp.solargraph.setup{ 
-    on_attach = on_attach,  
-    settings = {
-      solargraph = {
-        diagnostic = true,
-        useBundler = true
-      }
-    }
-  }
-  nvim_lsp.stylelint_lsp.setup{
-    on_attach = on_attach,
-    settings = {
-        stylelintplus = {
-          autoFixOnSave = true,
-          autoFixOnFormat = true
-      },
-    }
-  }
-  nvim_lsp.texlab.setup{ on_attach = on_attach }
-
-EOF
-endif
-""}}}
-
-""orgmode {{{
-if has('nvim')
-  lua << EOF
-  local parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
-  parser_config.org = {
-    install_info = {
-      url = 'https://github.com/milisims/tree-sitter-org',
-      revision = 'main',
-      files = {'src/parser.c', 'src/scanner.cc'},
-    },
-    filetype = 'org',
-  }
-  require('orgmode').setup({
-    org_agenda_files = {'~/dev/org/**/*'},
-    org_default_notes_file = '~/dev/org/inbox.org'
-  })
-EOF
-endif
-""}}}
-
-""treesiter {{{
-if has('nvim')
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    ensure_installed = "maintained", -- one of "all", "maintained", or a list of languages
-    ignore_install = { }, -- List of parsers to ignore installing
-    highlight = {
-      enable = true,  -- false will disable the whole extension
-      additional_vim_regex_highlighting = {'org'}, -- Required since TS highlighter doesn't support all syntax features (conceal)
-    },
-    incremental_selection = {
-      enable = true,
-      keymaps = {
-        init_selection = "gnn",
-        node_incremental = "grn",
-        scope_incremental = "grc",
-        node_decremental = "grm",
-      },
-    },
-    indent = {
-      enable = true
-    },
-    fold = {
-      enable = true
-    },
-  }
-  vim.cmd [[set foldmethod=expr]]
-  vim.cmd [[set foldexpr=nvim_treesitter#foldexpr()]]
-EOF
-endif
-""}}}
-
-""compe {{{
-if has('nvim')
-  lua << EOF
-  require'compe'.setup {
-    enabled = true;
-    autocomplete = true;
-    debug = false;
-    min_length = 1;
-    preselect = 'enable';
-    throttle_time = 80;
-    source_timeout = 200;
-    resolve_timeout = 800;
-    incomplete_delay = 400;
-    max_abbr_width = 100;
-    max_kind_width = 100;
-    max_menu_width = 100;
-    documentation = true;
-
-    source = {
-      path = true;
-      buffer = true;
-      calc = true;
-      nvim_lsp = true;
-      nvim_lua = true;
-      latex_symbols = true;
-      orgmode = true;
-    };
-  }
-EOF
-endif
-""}}}
-
-""telescope {{{
-if has('nvim')
-  lua << EOF
-  local actions = require('telescope.actions')
-  require('telescope').setup{
-    defaults = {
-      mappings = {
-        i = {
-          ["<cr>"] = actions.select_horizontal,
-        },
-        n = {
-          ["<cr>"] = actions.select_horizontal,
-          ["x"] = actions.file_split,
-          ["v"] = actions.file_vsplit,
-        },
-      },
-    }
-  }
-EOF
-  nnoremap [telescope] <Nop>
-  nmap <space> [telescope]
-  nnoremap [telescope]f <cmd>Telescope find_files theme=get_ivy<cr>
-  nnoremap [telescope]/ <cmd>Telescope live_grep theme=get_ivy<cr>
-  nnoremap [telescope]y <cmd>Telescope registers theme=get_ivy<cr>
-  nnoremap [telescope]b <cmd>Telescope buffers theme=get_ivy<cr>
-  nnoremap [telescope]l <cmd>Telescope loclist theme=get_ivy<cr>
-  nnoremap [telescope]q <cmd>Telescope quickfix theme=get_ivy<cr>
-endif
-""}}}
-
 ""gnupg {{{
 let g:GPGPreferSymmetric = 1
 ""}}}
@@ -713,34 +484,13 @@ function! s:ToggleAsciidoctorAutocompile()
 endfunction
 ""}}}
 
-""sniprun {{{
-if has('nvim')
-  lua <<EOF
-  require'sniprun'.setup({
-    repl_enable = {'Python3_original'},
-    interpreter_options = {
-      Python3_original = {
-        interpreter = 'python',
-      },
-    },
-  })
-EOF
-endif
-""}}}
-
 "}}}
 
 "Key Mappings {{{
 
 "".vimrc {{{
 """Open .vimrc in a horizantal split$
-if has('nvim')
-  nnoremap <leader>ev :split ~/.vimrc<cr>
-  nnoremap <leader>sv :source ~/.vimrc<cr>
-else
-  nnoremap <leader>ev :split $MYVIMRC<cr>
-endif
-
+nnoremap <leader>ev :split $MYVIMRC<cr>
 """Source .vimrc
 nnoremap <leader>sv :source $MYVIMRC<cr>
 "}}}
