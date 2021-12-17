@@ -155,7 +155,7 @@ vim.cmd [[
 --}}}
 
 --plugins {{{
-require'packer'.startup({function (use)
+require'packer'.startup {function (use)
 
   ---packer {{{
   -- package management
@@ -437,24 +437,10 @@ require'packer'.startup({function (use)
   use {
     'nvim-telescope/telescope.nvim',
     config = function ()
-      local actions = require('telescope.actions')
-      require('telescope').setup{
-        defaults = {
-          mappings = {
-            i = {
-              ['<cr>'] = actions.select_horizontal,
-            },
-            n = {
-              ['<cr>'] = actions.select_horizontal,
-              ['x'] = actions.file_split,
-              ['v'] = actions.file_vsplit,
-            },
-          },
-        }
-      }
+      require'telescope'.setup { }
       vim.api.nvim_set_keymap('n', '[telescope]', '', { noremap = true })
       vim.api.nvim_set_keymap('n', '<space>', '[telescope]', {})
-      vim.api.nvim_set_keymap('n', '[telescope]/', '<cmd>Telescope find_files theme=get_ivy<cr>', { noremap = true })
+      vim.api.nvim_set_keymap('n', '[telescope]/', '<cmd>Telescope file_browser theme=get_ivy<cr>', { noremap = true })
       vim.api.nvim_set_keymap('n', '[telescope]f', '<cmd>Telescope live_grep theme=get_ivy<cr>', { noremap = true })
       vim.api.nvim_set_keymap('n', '[telescope]y', '<cmd>Telescope registers theme=get_ivy<cr>', { noremap = true })
       vim.api.nvim_set_keymap('n', '[telescope]b', '<cmd>Telescope buffers theme=get_ivy<cr>', { noremap = true })
@@ -502,7 +488,7 @@ require'packer'.startup({function (use)
               diagnostic_hidden[toggle_bufnr] = true
             end
           end
-          buf_set_keymap('n', '[telescope]l', '<cmd>lua vim.diagnostic.setloclist({open=false})<cr><cmd>Telescope loclist theme=get_ivy<cr>', opts)
+          buf_set_keymap('n', '[telescope]l', '<cmd>Telescope diagnostics theme=get_ivy<cr>', opts)
           buf_set_keymap('n', '<leader>d', '<cmd>lua DiagnosticToggle(0)<cr>', opts)
 
           -- formatting
@@ -565,10 +551,10 @@ require'packer'.startup({function (use)
           },
           filetype = 'org',
         }
-        require('orgmode').setup({
+        require('orgmode').setup {
           org_agenda_files = { vim.env.HOME .. '/dev/org/**/*' },
           org_default_notes_file = vim.env.HOME .. '/dev/org/inbox.org'
-        })
+        }
       end,
       requires = { 'nvim-treesitter/nvim-treesitter' }
     }
@@ -576,9 +562,9 @@ require'packer'.startup({function (use)
       'akinsho/org-bullets.nvim',
       requires = { 'nvim-orgmode/orgmode' },
       config = function ()
-        require("org-bullets").setup({
+        require("org-bullets").setup {
             symbols = { "◉", "○", "✸", "✿" }
-        })
+        }
       end
     }
   ---}}}
@@ -613,7 +599,7 @@ require'packer'.startup({function (use)
         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), mode, true)
       end
 
-      cmp.setup({
+      cmp.setup {
         snippet = {
           expand = function(args)
             vim.fn["vsnip#anonymous"](args.body)
@@ -642,7 +628,7 @@ require'packer'.startup({function (use)
             end,
             { "i", "s" }
           ),
-          ['<CR>'] = cmp.mapping.confirm({ select = true }),
+          ['<CR>'] = cmp.mapping.confirm { select = true },
         },
         sources = {
           { name = 'nvim_lsp' },
@@ -654,15 +640,15 @@ require'packer'.startup({function (use)
           { name = 'nvim_lua' },
           { name = 'treesitter' },
         },
-        })
+      }
 
       local capabilities = require'cmp_nvim_lsp'.update_capabilities(
         vim.lsp.protocol.make_client_capabilities())
 
       for _, v in pairs(require'lspconfig'.available_servers()) do
-        require'lspconfig'[v].setup({
+        require'lspconfig'[v].setup {
           capabilities = capabilities,
-        })
+        }
       end
     end
   }
@@ -737,7 +723,7 @@ require'packer'.startup({function (use)
     'michaelb/sniprun',
     run = "bash ./install.sh 1",
     config = function ()
-      require'sniprun'.setup({
+      require'sniprun'.setup {
         repl_enable = {'Python3_jupyter', 'Julia_jupyter'},
         interpreter_options = {
           Python3_original = {
@@ -747,7 +733,7 @@ require'packer'.startup({function (use)
             interpreter = 'julia',
           },
         },
-      })
+      }
     end
   }
   ---}}}
@@ -757,10 +743,10 @@ require'packer'.startup({function (use)
     use {
       'ahmedkhalf/project.nvim',
       config = function ()
-        require'project_nvim'.setup({
+        require'project_nvim'.setup {
           manual_mode = false,
           silent_chdir = false,
-        })
+        }
         local ok, telescope = pcall(require, 'telescope')
         if ok then
           telescope.load_extension('projects')
@@ -849,12 +835,12 @@ require'packer'.startup({function (use)
   }
   ---}}}
   end,
-  config = {
-    display = { non_interactive = true }
-  }
-})
+}
 
-require('packer').sync()
+-- turn it on for automatic sync and compilation, slows down startup
+-- otherwise, just call `:PackerSync' to synchronize it all
+--require('packer').sync()
+
 --}}}
 
 --key mappings {{{
