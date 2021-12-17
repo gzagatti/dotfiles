@@ -5,8 +5,15 @@ workspace := $(HOME)
 
 vim:
 	ln -fs $(dotfiles)/vimrc $(workspace)/.vimrc
+
+nvim:
 	mkdir -p $(workspace)/.config/nvim/
-	ln -fs $(dotfiles)/init.vim $(workspace)/.config/nvim/init.vim
+	ln -fs $(dotfiles)/init.lua $(workspace)/.config/nvim
+
+emacs:
+	mkdir -p $(workspace)/.emacs.d/
+	ln -fs $(dotfiles)/init.el $(workspace)/.emacs.d/init.el
+	ln -fs $(dotfiles)/emacs-config.org $(workspace)/.emacs.d/emacs-config.org
 
 tmux:
 	ln -fs $(dotfiles)/tmux.conf $(workspace)/.tmux.conf
