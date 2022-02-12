@@ -152,6 +152,16 @@ vim.cmd [[
   au ColorScheme dracula highlight Normal ctermfg=253 ctermbg='NONE'
 ]]
 ---}}}
+
+---terminal {{{
+vim.api.nvim_set_keymap('t', '<c-h>', '<C-\\><C-N><C-w>h', { noremap = true })
+vim.api.nvim_set_keymap('t', '<c-j>', '<C-\\><C-N><C-w>j', { noremap = true })
+vim.api.nvim_set_keymap('t', '<c-k>', '<C-\\><C-N><C-w>k', { noremap = true })
+vim.api.nvim_set_keymap('t', '<c-l>', '<C-\\><C-N><C-w>l', { noremap = true })
+vim.cmd [[
+  au TermOpen * set nonumber
+]]
+---}}}
 --}}}
 
 --plugins {{{
@@ -238,109 +248,82 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
-  ---tmux-navigator {{{
-  -- seamless navigation between tmux panes and vim splits
-  use {
-    'christoomey/vim-tmux-navigator',
-    config = function()
-      vim.g ['tmux_navigator_disable_when_zoomed'] = 1
-    end
-  }
+  ---navigators {{{
+    ---kitty-navigator
+    use {
+      'knubie/vim-kitty-navigator',
+      config = function()
+        if vim.env.TERM ~= 'xterm-kitty' then
+          vim.g['kitty_navigator_no_mappings'] = 1
+        end
+      end,
+      run = 'cp ./*.py ~/.config/kitty/'
+    }
+
+    -- tmux-navigator
+    -- seamless navigation between tmux panes and vim splits
+    use {
+      'christoomey/vim-tmux-navigator',
+      config = function()
+        if not string.match(vim.env.TERM, "tmux-") then
+          vim.g['tmux_navigator_no_mappings'] = 1
+          vim.g ['tmux_navigator_disable_when_zoomed'] = 1
+        end
+      end
+    }
   ---}}}
 
-  ---slimux {{{
-  -- tmux/vim integration
+  ---slime {{{
+  -- multiplexer integration
   use {
-    'epeli/slimux',
+    'jpalardy/vim-slime',
     config = function()
-      -- only allow panes from current window
-      vim.g ['slimux_select_from_current_window'] = true
+      if vim.env.TERM == 'xterm-kitty' then
+        vim.g.slime_target = "kitty"
+      else
+        vim.g.slime_target = "tmux"
+      end
 
+      vim.g.slime_no_mappings = 1
+
+      vim.api.nvim_set_keymap('', '[slime]', '', { noremap = true })
+      vim.api.nvim_set_keymap('', '<leader>s', '[slime]', {})
+      vim.api.nvim_set_keymap('' , '[slime]l', ':<c-u>call slime#send_lines(v:count1)<cr>', {})
+      vim.api.nvim_set_keymap('v', '[slime]l', ':<c-u>call slime#send_op(visualmode(), 1)<cr>', {})
+      vim.api.nvim_set_keymap('', '[slime]v', ':<c-u>call slime#config()<cr>', {})
+      vim.api.nvim_set_keymap('' , '[slime]b', ':<c-u>call slime#send_range(line(1), line("$"))<cr>', {})
       vim.cmd [[
-        function! SlimuxSendFenced()
-          let view = winsaveview()
-          let line = line('.')
-          let start = search('^\s*[`~]\{3,}\s*\%({\s*\.\?\)\?\a\+', 'bnW')
-
-          if !start
-            echohl WarningMsg
-            echom "Not inside fenced code block."
-            echohl None
-            return
-          endif
-
-          call cursor(start, 1)
-          let [fence, lang] = matchlist(getline(start),
-            \ '^\s*\([`~]\{3,}\)\s*\%({\s*\.\?\)\?\(\a\+\)\?')[1:2]
-          let end = search('^\s*' . fence . '\s*$', 'nW')
-
-          if end < line
-            call winrestview(view)
-            echohl WarningMsg
-            echom "Not inside fenced code block."
-            echohl None
-            return
-          endif
-
-          let block = getline(start + 1, end - 1)
-          call add(block, "\n")
-
-          call winrestview(view)
-          call SlimuxSendCode(block)
-
-        endfunction
-
-        function! SlimuxEscape_r(text)
-          " clear console line --- not used at the moment
-          let text = "" . a:text
-          " eval(parse(text=readLines()))
-          return text
-        endfunction
-      ]]
-
-      vim.api.nvim_set_keymap('', '[slimux]', '', { noremap = true })
-      vim.api.nvim_set_keymap('', '<leader>s', '[slimux]', { noremap = true })
-
-      vim.api.nvim_set_keymap('', '[slimux]l', ':SlimuxREPLSendLine<cr>', {})
-      vim.api.nvim_set_keymap('v'  , '[slimux]l', ':SlimuxREPLSendSelection<cr>', {})
-      vim.api.nvim_set_keymap('', '[slimux]d', ':call SlimuxSendFenced()<cr>', {})
-      vim.api.nvim_set_keymap('', '[slimux]b', ':SlimuxREPLSendBuffer<cr>', {})
-      vim.api.nvim_set_keymap('', '[slimux]c', ':SlimuxGlobalConfigure<cr>', {})
-      vim.api.nvim_set_keymap('', '[slimux]c', ':SlimuxGlobalConfigure<cr>', {})
-      vim.api.nvim_set_keymap('', '[slimux]r', ':SlimuxShellLast<cr>', {})
-      vim.api.nvim_set_keymap('', '[slimux]k', ':SlimuxSendKeysLast<cr>', {})
-
-      vim.cmd [[
-        augroup loadfile_slimux:
+        augroup slime_augroup:
           autocmd!
-          autocmd FileType python noremap <buffer> <silent> <leader>sf
-            \ :execute ":silent SlimuxShellRun %run -i " . @% <cr>
-          autocmd FileType matlab noremap <buffer> <silent> <leader>sf
-            \ :execute ":silent SlimuxShellRun run('".@% . "')" <cr>
-          autocmd FileType ruby noremap <buffer> <silent> <leader>sf
-            \ :execute ":silent SlimuxShellRun load '" . @% . "'" <cr>
-          autocmd FileType sql noremap <buffer> <silent> <leader>sf
-            \ :execute ":silent SlimuxShellRun \\i " . @% <cr>
-          autocmd FileType r noremap <buffer> <silent> <leader>sf
-            \ :execute ":silent SlimuxShellRun source('" . @% . "', echo=TRUE)" <cr>
-          autocmd FileType r noremap <buffer> <silent> <leader>sw
-            \ :execute ":silent SlimuxShellRun rmarkdown::render('" . @% . "', output_format='all', quiet=TRUE)" <cr>
-          autocmd FileType rmd noremap <buffer> <silent> <leader>sw
-            \ :execute ":silent SlimuxShellRun rmarkdown::render('" . @% . "', output_format='all', quiet=TRUE)" <cr>
-          autocmd FileType hdl noremap <buffer> <silent> <leader>sf
-            \ :execute ":silent SlimuxShellRun sh tools/HardwareSimulator.sh " . expand("%:r") . ".tst" <cr>
-          autocmd FileType asm noremap <buffer> <silent> <leader>sf
-            \ :execute ":silent SlimuxShellRun sh tools/Assembler.sh " . @% . " && sh tools/CPUEmulator.sh " . expand("%:r") . ".tst"  <cr>
-          autocmd FileType markdown noremap <buffer> <silent> <leader>sd
-            \ :call SlimuxSendFenced()<cr>
-          autocmd FileType julia noremap <buffer> <silent> <leader>sf
-            \ :execute ":silent SlimuxShellRun include(\\\"" . @% . "\\\");" <cr>
-          autocmd FileType julia noremap <buffer> <silent> <leader>sw
-            \ :execute ":silent SlimuxShellRun weave(\\\"" . @% . "\\\"; doctype=\\\"md2html\\\", out_path = :pwd, mod = Main)" <cr>
-          autocmd FileType *.jmd noremap <buffer> <silent> <leader>sw
-            \ :execute ":silent SlimuxShellRun weave(\\\"" . @% . "\\\"; doctype=\\\"md2html\\\", out_path = :pwd, mod = Main)" <cr>
-          autocmd FileType lua noremap <buffer> <silent> <leader>sf
-            \ :execute ":silent SlimuxShellRun dofile(\\\"" . @% . "\\\");" <cr>
+
+          autocmd FileType python noremap <buffer> <silent> [slime]f
+            \ :execute ":call slime#send(\"%run -i " . @% . "\r\")" <cr>
+          autocmd FileType matlab noremap <buffer> <silent> [slime]f
+            \ :execute ":call slime#send(\"run '" . @% . "'\r\")" <cr>
+          autocmd FileType sql noremap <buffer> <silent> [slime]f
+            \ :execute ":call slime#send('\\i " . @% . "\r')" <cr>
+          autocmd FileType r noremap <buffer> <silent> [slime]f
+            \ :execute ":call slime#send(\"source('" . @% . "', echo=TRUE)\r\")" <cr>
+          autocmd FileType ruby noremap <buffer> <silent> [slime]f
+            \ :execute ":call slime#send(\"load '" . @% . "'\r\")" <cr>
+          autocmd FileType julia noremap <buffer> <silent> [slime]f
+            \ :execute ":call slime#send('include(\"" . @% . "\");\r')" <cr>
+          autocmd FileType lua noremap <buffer> <silent> [slime]f
+            \ :execute ":call slime#send('dofile(\"" . @% . "\");\r')" <cr>
+
+          autocmd FileType rmd,r noremap <buffer> <silent> [slime]w
+            \ :execute ":call slime#send(\"rmarkdown::render('" . @% . "', output_format='all', quiet=TRUE)\r\")" <cr>
+          autocmd FileType julia noremap <buffer> <silent> [slime]w
+            \ :execute ":call slime#send('weave(\"" . @% . "\"; doctype=\"md2html\", out_path=:pwd, mod=Main)\r')" <cr>
+
+          autocmd FileType markdown noremap <buffer> <silent> [slime]c
+            \ :execute ":call slime#send_cell()" <cr>
+          autocmd FileType markdown let b:slime_cell_delimiter = "```"
+
+          autocmd FileType org noremap <buffer> <silent> [slime]c
+            \ :execute ":call slime#send_cell()" <cr>
+          autocmd FileType org let b:slime_cell_delimiter = "#+"
+
         augroup END
       ]]
     end
@@ -436,8 +419,10 @@ require'packer'.startup {function (use)
   -- find, filter, preview, pick
   use {
     'nvim-telescope/telescope.nvim',
-    config = function ()
-      require'telescope'.setup { }
+    requires = { 'nvim-telescope/telescope-file-browser.nvim' },
+   config = function ()
+      require'telescope'.setup {}
+      require'telescope'.load_extension 'file_browser'
       vim.api.nvim_set_keymap('n', '[telescope]', '', { noremap = true })
       vim.api.nvim_set_keymap('n', '<space>', '[telescope]', {})
       vim.api.nvim_set_keymap('n', '[telescope]/', '<cmd>Telescope file_browser theme=get_ivy<cr>', { noremap = true })
@@ -477,19 +462,22 @@ require'packer'.startup {function (use)
 
           -- diagnostic
           local diagnostic_hidden = {}
-          function DiagnosticToggle(toggle_bufnr)
+          function diagnostic_toggle(toggle_bufnr, revert)
             toggle_bufnr = vim.api.nvim_buf_get_number(toggle_bufnr)
             print("Toggle diagnostics", toggle_bufnr, diagnostic_hidden[toggle_bufnr])
-            if diagnostic_hidden[toggle_bufnr] then
-              vim.diagnostic.show(nil, toggle_bufnr)
+            if (diagnostic_hidden[toggle_bufnr] and not revert) or
+              (not diagnostic_hidden[toggle_bufnr] and revert) then
+              vim.diagnostic.enable(toggle_bufnr, nil)
               diagnostic_hidden[toggle_bufnr] = false
             else
-              vim.diagnostic.hide(nil, toggle_bufnr)
+              vim.diagnostic.disable(toggle_bufnr, nil)
               diagnostic_hidden[toggle_bufnr] = true
             end
           end
+          buf_set_keymap('n', '<leader>d', '<cmd>lua diagnostic_toggle(0)<cr>', opts)
+
           buf_set_keymap('n', '[telescope]l', '<cmd>Telescope diagnostics theme=get_ivy<cr>', opts)
-          buf_set_keymap('n', '<leader>d', '<cmd>lua DiagnosticToggle(0)<cr>', opts)
+
 
           -- formatting
           buf_set_keymap('n', '<leader>f', '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
@@ -507,12 +495,16 @@ require'packer'.startup {function (use)
         lsp.julials.setup { on_attach = on_attach }
         lsp.pyright.setup { on_attach = on_attach }
         lsp.texlab.setup { on_attach = on_attach }
+        lsp.jsonls.setup { on_attach = on_attach }
         lsp.sumneko_lua.setup {
           on_attach = on_attach,
           settings = {
             Lua = {
-              diagnostics = { globals = { 'vim' } },
-            }
+              diagnostics = {
+                globals = { 'vim' },
+                disable = { "lowercase-global" },
+              },
+            },
           },
         }
         lsp.solargraph.setup {
@@ -541,6 +533,7 @@ require'packer'.startup {function (use)
   -- orgmode clone written in Lua
     use {
       'nvim-orgmode/orgmode',
+      requires = { 'nvim-treesitter/nvim-treesitter' },
       config = function ()
         local treesitter_parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
         treesitter_parser_config.org = {
@@ -552,11 +545,17 @@ require'packer'.startup {function (use)
           filetype = 'org',
         }
         require('orgmode').setup {
+          mappings = {
+            org = {
+              org_do_promote = '<h',
+              org_do_demote = '>h',
+            },
+          },
           org_agenda_files = { vim.env.HOME .. '/dev/org/**/*' },
-          org_default_notes_file = vim.env.HOME .. '/dev/org/inbox.org'
+          org_default_notes_file = vim.env.HOME .. '/dev/org/inbox.org',
+          org_todo_keywords = { 'TODO(t)', '|', 'POSTPONED(p)', 'CANCELLED(c)', 'DONE(d)' }
         }
       end,
-      requires = { 'nvim-treesitter/nvim-treesitter' }
     }
     use {
       'akinsho/org-bullets.nvim',
@@ -591,7 +590,8 @@ require'packer'.startup {function (use)
 
       -- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings
       local has_words_before = function ()
-        local line, col = table.unpack(vim.api.nvim_win_get_cursor(0))
+        -- table.unpack is not defined, so we cannot fix the warning.
+        local line, col = unpack(vim.api.nvim_win_get_cursor(0))
         return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
       end
 
@@ -639,6 +639,7 @@ require'packer'.startup {function (use)
           { name = 'orgmode' },
           { name = 'nvim_lua' },
           { name = 'treesitter' },
+          { name = 'neorg' },
         },
       }
 
@@ -733,6 +734,9 @@ require'packer'.startup {function (use)
             interpreter = 'julia',
           },
         },
+        snipruncolors = {
+          SniprunVirtualTextOk = {bg="#66eeff",fg="#000000",ctermbg="61",cterfg="black"},
+        }
       }
     end
   }
@@ -797,7 +801,7 @@ require'packer'.startup {function (use)
           ignore_install = { }, -- List of parsers to ignore installing
           highlight = {
             enable = true,  -- false will disable the whole extension
-            disable = { 'org' },  -- list of language that will be disabled
+            -- disable = { 'org' },  -- list of language that will be disabled
             additional_vim_regex_highlighting = {'org'}, -- Required since TS highlighter doesn't support all syntax features (conceal)
           },
           incremental_selection = {
@@ -834,6 +838,54 @@ require'packer'.startup {function (use)
     end
   }
   ---}}}
+
+  --neorg {{{
+  use {
+    'nvim-neorg/neorg',
+    requires = {
+      'nvim-lua/plenary.nvim',
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-neorg/neorg-telescope',
+    },
+    config = function()
+      local treesitter_parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
+      treesitter_parser_config.norg_meta = {
+        install_info = {
+          url = 'https://github.com/nvim-neorg/tree-sitter-norg-meta',
+          files = { 'src/parser.c' },
+          branch = 'main'
+        },
+      }
+      treesitter_parser_config.norg_table = {
+        install_info = {
+          url = 'https://github.com/nvim-neorg/tree-sitter-norg-table',
+          files = { 'src/parser.c' },
+          branch = 'main'
+        },
+      }
+      require('neorg').setup {
+        -- Tell Neorg what modules to load
+        load = {
+          ['core.defaults'] = {}, -- Load all the default modules
+          ['core.norg.concealer'] = {}, -- Allows for use of icons
+          ['core.norg.dirman'] = { -- Manage your directories with Neorg
+            config = {
+              workspaces = {
+                my_workspace = '~/dev/neorg'
+              }
+            }
+          },
+          ['core.norg.completion'] = {
+            config = {
+              engine = 'nvim-cmp'
+            }
+          },
+          ['core.integrations.telescope'] = {},
+        },
+      }
+    end,
+  }
+  --}}}
   end,
 }
 
@@ -847,8 +899,8 @@ require'packer'.startup {function (use)
 
 ---.vimrc {{{
 --open .vimrc in a horizantal split$
-vim.api.nvim_set_keymap('n', '<leader>ev', ':split $MYVIMRC<cr>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<leader>sv', ':luafile $MYVIMRC<cr>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<leader><f4>', ':split $MYVIMRC<cr>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<leader><f5>', ':luafile $MYVIMRC<cr>:PackerSync<cr>', { noremap = true })
 ---}}}
 
 ---map j and k such that is based on display lines, not physical ones {{{
@@ -948,19 +1000,19 @@ vim.opt.concealcursor = 'nc'
 ---}}}
 
 ---copy/paste mode toggle and shortcuts {{{
-vim.api.nvim_set_keymap('n', '<f4>', ':set invpaste paste?<cr>', {})
-vim.api.nvim_set_keymap('i', '<f4>', '<c-o>:set invpaste paste?<cr>', {})
-if vim.fn.has('mac') then
+-- vim.api.nvim_set_keymap('n', '<f4>', ':set invpaste paste?<cr>', {})
+-- vim.api.nvim_set_keymap('i', '<f4>', '<c-o>:set invpaste paste?<cr>', {})
+if vim.fn.has('mac') == 1 then
   vim.api.nvim_set_keymap('', '<leader>p', '"*p', {})
   vim.api.nvim_set_keymap('', '<leader>y', '"*y', {})
-elseif vim.fn.has('unix') then
+elseif vim.fn.has('unix') == 1 then
   vim.api.nvim_set_keymap('', '<leader>p', '"+p', {})
   vim.api.nvim_set_keymap('', '<leader>y', '"+y', {})
 end
 ---}}}
 
 ---clipboard toogle{{{
-vim.cmd [[
+--[[ vim.cmd [[
   function! ToggleClipboard()
     if &clipboard == 'unnamed'
       set clipboard& clipboard?
@@ -968,7 +1020,7 @@ vim.cmd [[
       set clipboard=unnamed clipboard?
     endif
   endfunction
-]]
+--]]
 vim.api.nvim_set_keymap('', '<f5>', 'ToggleClipboard()', { expr = true })
 ---}}}
 
@@ -1043,6 +1095,9 @@ vim.cmd [[
     "asciidoctor
     autocmd Filetype asciidoctor nnoremap <leader>ll :call ToggleAsciidoctorAutocompile()<cr>
     autocmd Filetype asciidoctor nnoremap <leader>lv :silent AsciidoctorOpenHTML<cr>
+
+    "elisp
+    autocmd BufNewFile,BufRead *.elisp set filetype=elisp
 
   augroup END
 ]]
