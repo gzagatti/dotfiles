@@ -2,11 +2,11 @@
 
 ** Intro
 
-My main motivation to use Emacs is Org-mode. So there is no better way to start, than to implement a [[https://leanpub.com/lit-config/read][literate configuration file]]. The main idea is to provide a self-documenting configuration that tangles narrative and code in the same file.
+Orgmode is my main motivation to use Emacs . So there is no better way to start than to implement a [[https://leanpub.com/lit-config/read][literate configuration file]]. The main idea is to provide a self-documenting configuration that tangles narrative and code in the same file.
 
-Second, my main objective with this configuration file is to bring the user experience as close as possible to the experience that I have using Neovim. As a long time Neovim user, I spent many hours curating its configuration file and know what works best for me.
+With this configuration file, I intend to bring the user experience as close as possible to the experience that I have using Neovim. As a long time Neovim user, I spent many hours curating its configuration file and know what works best for me.
 
-As a beginner Emacs user, I search for inspiration in [[https://github.com/hlissner/doom-emacs][Doom Emacs]]. So, many of the settings and tweaks are borrowed from them. Why did I not just use Doom? Vim taught me that the best way to tame an editor is to curate your own configuration.
+My main souce of inspiration for configuring Emacs is [[https://github.com/hlissner/doom-emacs][Doom Emacs]]. Many of the settings and tweaks are borrowed from them. Why did I not just use Doom? Vim taught me that the best way to tame an editor is to curate your own configuration.
 
 ** Basics
 
@@ -14,173 +14,260 @@ Emacs configuration is written in ~elisp~, so it's useful to know a few things a
 
   1. Everything in elisp is a list, so every command is surrounded by paranthesis ~()~.
 
-  2. Many settings are activated by setting the value of certain variables. We can set the value of a variable with either ~(setq [SYM VAL]...)~ which sets the value of ~SYM~ to ~VAL~, or ~(setq-default [SYM VAL]...)~ which sets the default value of ~SYM~ which is seen in buffers that do not have their own values for the variable.
+  2. Many settings are activated by setting the value of certain variables. We can set the value of a variable with either ~(setq [SYM VAL]...)~ which sets the value of ~SYM~ to ~VAL~, or ~(setq-default [SYM VAL]...)~ which sets the default value of ~SYM~ in buffers that do not have their own values for the variable.
 
-Emacs can be slow to start up if badly configured. So let's start our timer to keep an eye on that.
+If badly configured, Emacs can be slow to start up. So let's start our timer to keep an eye on that.
 
 #+begin_src elisp
-  (defconst emacs-start-time (current-time))
+(defconst emacs-start-time (current-time))
 #+end_src
 
-*** The dirty laundry
+*** Basic settings
 
-I start by tweaking basic settings to improve the baseline user experience. This is mostly a laundry list of settings, the meaning of each setting is best explained in the comments that come before them.
+I start by tweaking basic settings that improve the baseline user experience. This is mostly a laundry list, the meaning of each setting is best explained in the comments that come before them.
 
 #+begin_src elisp
-  ; get rid of the ugly, but helpful startup screen
-  (setq inhibit-startup-screen t)
+;; get rid of the ugly, but helpful startup screen
+(setq inhibit-startup-screen t)
 
-  ; avoid loading old bytecode instead of newer source
-  (setq load-prefer-newer t)
+;; avoid loading old bytecode instead of newer source
+(setq load-prefer-newer t)
 
-  ; line rulers
-  (setq-default display-line-numbers-width 3)
-  (global-display-line-numbers-mode)
+;; line rulers
+(setq linum-format "%3d ")
 
-  ; turn-off the annoying bell
-  (setq ring-bell-function 'ignore)
+;; turn-off the annoying bell
+(setq ring-bell-function 'ignore)
 
-  ; don't prompt for configuration when creating a new file
-  ; DOOM
-  (setq confirm-nonexistent-file-or-buffer nil)
+;; don't prompt for configuration when creating a new file
+;; DOOM
+(setq confirm-nonexistent-file-or-buffer nil)
 
-  ; show current key-sequence in minibuffer ala 'set showcmd' in vim. Any
-  ; feedback after typing is better UX than no feedback at all.
-  ; DOOM
-  (setq echo-keystrokes 0.02)
+;; show current key-sequence in minibuffer ala 'set showcmd' in vim. Any
+;; feedback after typing is better UX than no feedback at all.
+;; DOOM
+(setq echo-keystrokes 0.02)
 
-  ; typing yes/no is obnoxious when y/n will do
-  ; DOOM
-  (advice-add #'yes-or-no-p :override #'y-or-n-p)
-  (defalias 'yes-or-no-p 'y-or-n-p)
+;; typing yes/no is obnoxious when y/n will do
+;; DOOM
+(advice-add #'yes-or-no-p :override #'y-or-n-p)
+(defalias 'yes-or-no-p 'y-or-n-p)
 
-  ; hide menu bar, reduce visual clutter
-  ; DOOM
-  (push '(menu-bar-lines . 0)   default-frame-alist)
-  (push '(tool-bar-lines . 0)   default-frame-alist)
-  (push '(vertical-scroll-bars) default-frame-alist)
-  (setq menu-bar-mode nil tool-bar-mode nil scroll-bar-mode nil)
+;; hide menu bar, reduce visual clutter
+;; DOOM
+(push '(menu-bar-lines . 0)   default-frame-alist)
+(push '(tool-bar-lines . 0)   default-frame-alist)
+(push '(vertical-scroll-bars) default-frame-alist)
+(setq menu-bar-mode nil tool-bar-mode nil scroll-bar-mode nil)
+#+end_src
 
-  ; no backup files, use auto-save instead
-  (setq make-backup-files nil)
+*** Auto-save
+
+Emacs works with the concept of [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Visiting.html][file visit]]. A file is visited when it is loaded in the buffer. The contents of the buffer are only permanently written to the visited location, when a file is explicitly saved by the user.
+
+Behind the scenes, Emacs automatically saves the contents of the buffer to temporary files, unnecessarily polluting the environment. Emacs creates backup files --- suffixed with ~~~ --- when the file is first visited. On top of that, it creates auto-save files --- surrounded with ~#~ --- which are temporary files used to save modifications to the file until it is permanently saved by the user.
+
+If saving is cheap and assuming that changes are permanent unless told otherwise, then files should automatically be saved. Emacs default are undesirable.
+
+First, I adjust backup and lock settings.
+
+#+begin_src elisp
+;; no backup files
+(setq make-backup-files nil)
+
+;; if for some reason, a backup file is created
+;; at least save in a unique location
+(setq backup-directory-alist
+          `(("." . ,(concat user-emacs-directory "_tmp/"))))
+
+;; no lock files
+(setq create-lockfiles nil)
+
+;; automatically update the file if there are any changes
+(global-auto-revert-mode t)
+#+end_src
+
+Second, I tweak auto-saving settings.
+
+#+begin_src elisp
+;; auto-save in the visited file, not in a temporary one
+(setq-default
+  auto-save-default nil        ;; auto-save off by default
+  auto-save-timeout 2          ;; auto-save 2 seconds after typing stopped
+  auto-save-visited-interval 2 ;; auto-save 2 seconds after typing stopped
+  auto-save-interval 200)      ;; auto-save after 200 characters typed
+
+;; if for some reason, an auto-save file is created
+;; at least save it in a single location
+(setq auto-save-file-name-transforms
+  `((".*" ,(concat user-emacs-directory "_tmp/\\1") t)))
+;; https://emacs.stackexchange.com/questions/7729/autosave-scratch-to-a-directory
+;; (setq-local default-directory (concat user-emacs-directory "_tmp"))
+#+end_src
+
+Files should only be auto-saved if it exists in their visited location. Otherwise, auto-save is only triggered after a successful manual save.
+
+#+begin_src elisp
+(define-minor-mode my-auto-save-visited-mode
+  "Toggle automatic saving only for files that exist.
+
+This is a modification of the original function `auto-save-visited-mode'."
+  :group 'auto-save
+  :global t
+  (message "My auto-save")
+  (when my-auto-save-visited-mode
+    (run-with-idle-timer
+      auto-save-visited-interval :repeat
+      #'save-some-buffers :no-prompt
+      (lambda ()
+        (message "Considering %s..." buffer-file-name)
+        (and buffer-file-name
+          (file-exists-p buffer-file-name)
+          (file-writable-p buffer-file-name)
+          (not (auto-save-file-name-p (file-name-base buffer-file-name))))))))
+(my-auto-save-visited-mode t)
+
+
+;; (add-hook 'find-file-hook (lambda ()
+;;   (setq buffer-save-without-query t)
+;;   (message "Saving now %s" (buffer-file-name))
+;;   (when
+;;     (and (file-exists-p (buffer-file-name))
+;;       (file-writable-p (buffer-file-name))
+;;       (not (auto-save-file-name-p (file-name-base (buffer-file-name)))))
+;;     (progn
+;;       (setq auto-save-visited-file-name t)
+;;       (auto-save-mode t)))))
+
+;; (add-hook 'after-save-hook (lambda ()
+;;   (message "Saving now %s" (buffer-file-name))
+;;   (when
+;;     (and (file-exists-p (buffer-file-name))
+;;       (file-writable-p (buffer-file-name))
+;;       (not (auto-save-file-name-p (file-name-base (buffer-file-name)))))
+;;     (progn
+;;       (setq auto-save-visited-file-name t)
+;;       (auto-save-mode t)))))
 #+end_src
 
 *** Mouse
 
-Most of the time, I will use the keyboard to interact with the text editor. But, sometimes the mouse is too convenient to ignore. Thus, why not just turn this modern interface on whenever we can?
+Most of the time, I will use the keyboard to interact with the text editor. But, sometimes the mouse is too convenient to ignore, so I turn it on whenever possible.
 
 #+begin_src elisp
-  (if window-system
-    ; DOOM
-    (setq hscroll-margin 2
-      hscroll-step 1
-      ;; emacs spends too much effort recentering the screen if you scroll the
-      ;; cursor more than N lines past window edges (where N is the settings of
-      ;; `scroll-conservatively'). This is especially slow in larger files
-      ;; during large-scale scrolling commands. If kept over 100, the window is
-      ;; never automatically recentered.
-      scroll-conservatively 101
-      scroll-margin 0
-      scroll-preserve-screen-position t
-      ;; reduce cursor lag by a tiny bit by not auto-adjusting `window-vscroll'
-      ;; for tall lines.
-      auto-window-vscroll nil
-      ;; mouse
-      mouse-wheel-scroll-amount '(1 ((shift) . hscroll))
-      mouse-wheel-scroll-amount-horizontal 2)
-    (progn
-      (xterm-mouse-mode t)
-      (global-set-key [mouse-4] (lambda ()
-        (interactive)
-        (scroll-down 1)))
-      (global-set-key [mouse-5] (lambda ()
-        (interactive)
-        (scroll-up 1)))
-      (defun track-mouse (e))
-      (setq mouse-sel-mode t)))
+(if window-system
+  ;; DOOM
+  (setq hscroll-margin 2
+    hscroll-step 1
+    ;; emacs spends too much effort recentering the screen if you scroll the
+    ;; cursor more than N lines past window edges (where N is the settings of
+    ;; `scroll-conservatively'). This is especially slow in larger files
+    ;; during large-scale scrolling commands. If kept over 100, the window is
+    ;; never automatically recentered.
+    scroll-conservatively 101
+    scroll-margin 0
+    scroll-preserve-screen-position t
+    ;; reduce cursor lag by a tiny bit by not auto-adjusting `window-vscroll'
+    ;; for tall lines.
+    auto-window-vscroll nil
+    ;; mouse
+    mouse-wheel-scroll-amount '(1 ((shift) . hscroll))
+    mouse-wheel-scroll-amount-horizontal 2)
+  (progn
+    (xterm-mouse-mode t)
+    (global-set-key [mouse-4] (lambda ()
+      (interactive)
+      (scroll-down 1)))
+    (global-set-key [mouse-5] (lambda ()
+      (interactive)
+      (scroll-up 1)))
+    (defun track-mouse (e))
+    (setq mouse-sel-mode t)))
 #+end_src
 
 ** Package management
 
-Following Emacs Doom advice, I adopt the [[https://github.com/raxod502/straight.el][~straight.el~]] package management system which is a purely functional package manager. It allows for fine grained package installation and natively supports installation of Git repositories. It thus solves many issues in the default package manager, ~package.el~.
+Following Emacs Doom advice, I adopt the [[https://github.com/raxod502/straight.el][~straight.el~]] for package management. This is a purely functional package manager which allows for fine grained package installation and natively supports installation of Git repositories. It thus solves many issues of the default package manager, ~package.el~.
 
 Set up instructions for ~straight.el~ comes directly from the package's [[https://github.com/raxod502/straight.el#getting-started][~README~ file]].
 
 #+begin_src elisp
-  (setq package-enable-at-startup nil)
+(setq package-enable-at-startup nil)
 
-  (defvar bootstrap-version)
+(defvar bootstrap-version)
 
-  (let ((bootstrap-file (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-  (bootstrap-version 5))
-    (unless (file-exists-p bootstrap-file)
-  (with-current-buffer
-      (url-retrieve-synchronously
-      "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-      'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-      (load bootstrap-file nil 'nomessage))
+(let ((bootstrap-file (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+(bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+(with-current-buffer
+    (url-retrieve-synchronously
+    "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+    'silent 'inhibit-cookies)
+    (goto-char (point-max))
+    (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
 #+end_src
 
-It is also possible to integrate ~straight.el~ with ~use-package~ which is extensively used to install and configure package installation in Emacs. To activate ~use-package~ it is necessary to first install it using ~straight.el~.
+It is also possible to integrate ~straight.el~ with ~use-package~ making it easier to install and to configure package installation in Emacs. To activate ~use-package~ it is necessary to first install it using ~straight.el~.
 
 #+begin_src elisp
-  (straight-use-package 'use-package)
-  (setq straight-use-package-by-default t)
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
 #+end_src
 
 ** Evil mode
 
-The switch to Emacs would not have been possible if it were not for [[https://github.com/emacs-evil/evil][Evil mode]]. This package not only brings Vim keybindings to Emacs, but transforms it into a modal editor. Emacs original interface is one of its big disadvantages. The abuse of the ~[CTRL]~ key and extended keyboard combinations feels clunky. The keyboard strokes are difficult to memorize, and sometimes even to execute. Often, it requires the use of both hands.
+The switch to Emacs would not have been possible if it was not for [[https://github.com/emacs-evil/evil][Evil mode]]. This package not only brings Vim keybindings to Emacs but transforms it into a modal editor. Emacs' original interface is one of its big disadvantages. The abuse of the ~[CTRL]~ key and extended keyboard combinations feels clunky. The keyboard strokes are difficult to memorize, and sometimes even to execute. Often, it requires the use of both hands.
 
 Evil mode contains many settings that can be adjusted before the package is activated, check the [[https://evil.readthedocs.io/en/latest/overview.html][documentation]] for a complete list.
 
 #+begin_src elisp
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-move-beyond-eol t)
-  (setq evil-respect-visual-line-mode t)
-  (setq evil-undo-system 'undo-redo)
-  (setq evil-auto-indent nil)
+(setq evil-want-integration t)
+(setq evil-want-keybinding nil)
+(setq evil-want-C-u-scroll t)
+(setq evil-move-beyond-eol t)
+(setq evil-respect-visual-line-mode t)
+;; (setq evil-undo-system 'undo-redo)
+(setq evil-auto-indent nil)
 #+end_src
 
-On top of that, I also install [[https://github.com/emacs-evil/evil-collection][Evil collection]] which brings Evil to most popular Emacs packages. I activate the collection only on the packages that I use.
+On top of that, I also install [[https://github.com/emacs-evil/evil-collection][Evil collection]] which brings Evil mode to most popular Emacs packages. I activate the collection only on the packages that I use.
 
 #+begin_src elisp
-  (setq evil-collection-mode-list '(
-    magit
-    help
-    org
-  ))
+(setq evil-collection-mode-list '(
+  dired
+  custom
+  magit
+  help
+  neotree
+  org
+))
 #+end_src
 
-Once the pre-activation settings are set, I activate both ~evil~ and ~evil-collection~.
+Once the pre-activation settings are done, I activate both ~evil~ and ~evil-collection~.
 
 #+begin_src elisp
-  (straight-use-package 'evil)
-  (straight-use-package 'evil-collection)
-  (evil-mode 1)
-  (when (require 'evil-collection nil t)
-    (evil-collection-init))
+(straight-use-package 'evil)
+(straight-use-package 'evil-collection)
+(evil-mode 1)
+(when (require 'evil-collection nil t)
+  (evil-collection-init))
 #+end_src
 
-Evil does not automatically set a ~<leader>~ key. Since there is a few combinations that uses this key which I often use in Neovim, I set it up here.
+Evil does not automatically set a ~<leader>~ key, so I set it up. There are a couple of keyboard shortcuts that I often employ with this key.
 
 #+begin_src elisp
-  (evil-set-leader 'visual (kbd ";"))
-  (evil-set-leader 'normal (kbd ";"))
+(evil-set-leader 'visual (kbd ";"))
+(evil-set-leader 'normal (kbd ";"))
 #+end_src
 
-*** Navigate
+*** Navigation
 
-In neovim, I often navigate between windows and, when using tmux, between panes with ~[CTRL]~ plus Vim directional keys ~[h], [j], [k], [l]~. Luckily, these keybindings which integrate with Evil mode are available in [[https://github.com/keith/evil-tmux-navigator/][Github]].
+In neovim, I often navigate between windows and, when using kitty/tmux, between panes with ~[CTRL]~ plus Vim directional keys ~[h], [j], [k], [l]~. Luckily, I adapted these shortcuts for kitty, the repo is available in [[https://github.com/keith/evil-tmux-navigator/][Github]].
 
 #+begin_src elisp
-  (straight-use-package
-    '(navigate :type git :host github :repo  "keith/evil-tmux-navigator"))
-  (require 'navigate)
+(use-package navigate
+  :straight (vim-kitty-navigator :host github :repo "gzagatti/evil-kitty-navigator"))
 #+end_src
 
 *** Edit your ~config.org~ often
@@ -188,17 +275,17 @@ In neovim, I often navigate between windows and, when using tmux, between panes 
 A [[https://learnvimscriptthehardway.stevelosh.com/chapters/07.html][good advice]] given by Steve Losh in /Learn Vimscript the Hard Way/ is to create a binding for quickly editing your configuration file and sourcing it again. I implement his advice in Emacs and bind the shortcuts to the same keys as I have in Neovim.
 
 #+begin_src elisp
-  (evil-define-key 'normal 'global (kbd "<leader>ev")
-    (lambda () (interactive) (
-      window--display-buffer (find-file-noselect "~/.emacs.d/emacs-config.org")
-      (split-window (selected-window) nil 'above) 'window)))
-  (evil-define-key 'normal 'global (kbd "<leader>sv")
-    (lambda () (interactive) (load "~/.emacs.d/init.el")))
+(evil-define-key 'normal 'global (kbd "<leader><f4>")
+  (lambda () (interactive) (
+    window--display-buffer (find-file-noselect "~/.emacs.d/emacs-config.org")
+    (split-window (selected-window) nil 'above) 'window)))
+(evil-define-key 'normal 'global (kbd "<leader><f5>")
+  (lambda () (interactive) (load "~/.emacs.d/init.el")))
 #+end_src
 
 *** Buffer cloning
 
-When spliting windows, Emacs shows a view of the same buffer in another window. However, this can be annoying when we want to have different major modes and/or folds for the file. Emacs allow cloning a buffer indirectly such that the clone is bound to the master buffer and whenever the latter is killed all its children are also killed. The next block creates a convenient Evil ~ex~ command that allow us to quickly clone a buffer.
+When spliting windows, Emacs shows a view of the same buffer in another window. However, this can be annoying when we want to have different major modes and/or folds for the same file. Emacs allow cloning a buffer indirectly such that the clone is bound to the master buffer and whenever the latter is killed all its children are also killed. The next block creates a convenient Evil ~ex~ command that allow us to quickly clone a buffer.
 
 #+begin_src elisp
 (evil-define-command evil-indirect-clone (&optional bang)
@@ -209,211 +296,288 @@ When spliting windows, Emacs shows a view of the same buffer in another window. 
     (let ((clone-buffer (clone-indirect-buffer nil nil t)))
       (window--display-buffer clone-buffer (selected-window) 'window))))
 
-; https://github.com/emacs-evil/evil/blob/master/evil-maps.el
+;; https://github.com/emacs-evil/evil/blob/master/evil-maps.el
 (evil-ex-define-cmd "clone" 'evil-indirect-clone)
 #+end_src
 
 ** Theme
 
+Emacs has great support for themes, despite its configuration feeling outdated when compared to ~css~. For instance, it is possible to use multiple fonts in the same file. Emacs also handles multi-syntax files better than traditional Vim. This is quite convenient when dealing with literate programming since the same text file will usually contain narrative, source code and mathematics.
+
+To start tweaking and adjusting the theme, it is useful to know the command ~(customize-face-other-window)~ in Emacs. This command opens an interactive buffer where it is possible to change the settings for the current session and watch the changes live. Any changes can be printed as ~elisp~ such that they can be incorporated to the config file.
+
+*** Fonts
+
+First, I download icon fonts commonly used in Emacs, which will ensure that packages like ~neotree~ renders correctly.
+
 #+begin_src elisp
-  ;;; theme {{{
-  (straight-use-package 'dracula-theme)                                    ; dracula theme
-  (load-theme 'dracula t)
-  ;;;}}}
+(use-package all-the-icons :straight t)
+#+end_src
 
-  ;; fonts {{{
-  ;; there was a lot of issues with the font due to how emacs was built
-  ;; it is necessary to ensure that it builds with GTK-3 support in Linux
-  (set-face-attribute 'default nil
-                      :font "Cousine for Powerline"
-                      :height 104
-                      :weight 'normal
-                      :width 'normal)
-  ;;}}}
+Next, it is time to select the default font used in most buffers. Since the majority of buffers contain source code, it is desirable to select a monospaced font. To ensure that Emacs can find the correct font in GTK-based systems, it is necessary to ensure that Emacs builds with GTK-3 support --- use the flag  ~--with-x-toolkit=gtk3~ during the build process.
 
-  ;;; powerline {{{
-  (straight-use-package 'powerline)                                        ; emacs powerline
-  (powerline-default-theme)
-  ;;;}}}
+#+begin_src elisp
+(set-face-attribute 'default nil :font "Cousine Nerd Font Mono" :height 104
+  :weight 'normal :width 'normal)
+#+end_src
 
+Apart from the default font, Emacs allows the definition of two additional types of fonts: ~variable-pitch~ and ~fixed-pitch~. The latter corresponds to the monospaced font used in source code, while the former is used for normal text. These fonts are only used in certain modes such as orgmode.
+
+#+begin_src elisp
+(custom-set-faces
+  '(variable-pitch ((t (:family "DejaVu Sans" :height 110 :weight normal))))
+  '(fixed-pitch ((t (:family "Cousine Nerd Font Mono" :height 0.95 :weight normal)))))
+#+end_src
+
+Since my main use case for Emacs is taking notes, I turn ~variable-pitch-mode~ on by default when in ~text-mode~.
+
+#+begin_src elisp
+(add-hook 'text-mode-hook 'variable-pitch-mode)
+#+end_src
+
+*** Themes
+
+I configure two themes. A light theme to use during the day and a dark one for late night sessions.
+
+- Leuven :: this is a bright theme that makes smart use of highlighting much like a highlighter pen to distinguish different syntax elements. Therefore, it does not require the use of too many contrasting font colors resulting in a pleasant experience to the eyes. This is one of Emacs default themes.
+
+#+begin_src elisp
+(load-theme 'leuven t)
+(custom-theme-set-faces
+  'leuven
+  ;; tweak the background to a light shade of gray, as the default ('white') is too bright
+  '(default ((t (:inherit nil :extend nil :stipple nil :background "#f8fbf8" :foreground "#333333" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 102 :width normal :foundry "MONO" :family "Cousine Nerd Font Mono"))))
+  ;; add a shade of gray to org blocks as the default ('yellow') is quite ugly
+  '(org-block ((t (:extend t :background "#f4f4f1" :foreground "#000088" :family "Cousine Nerd Font Mono" :height 0.95))))
+  ;; reduce the font size of org block opening and closing lines to reduce distraction
+  '(org-block-begin-line ((t (:extend t :background "#ddeded" :foreground "#006666" :underline "#A7A6AA" :height 0.85 :family "Cousine nerd font mono"))))
+  '(org-block-end-line ((t (:extend t :background "#ddeded" :foreground "#006666" :overline "#A7A6AA" :height 0.85 :family "Cousine nerd font mono"))))
+  ;; ensure that the org ellipsis is muted
+  '(org-ellipsis ((t (:background nil :foreground "#999999" :box nil :underline nil))))
+  ;; ensure that trailing and tab markers are muted
+  '(whitespace-trailing ((t (:foreground nil :background "#636363"))))
+  '(whitespace-tab ((t (:foreground "#636363" :background nil)))))
+(disable-theme 'leuven)
+#+end_src
+
+- [[https://draculatheme.com][Dracula]] :: this is one the most popular dark themes. It makes extensive use of shades of purple and it is very gentle on the eyes during the night.
+
+#+begin_src elisp
+(use-package dracula-theme
+  :straight (dracula-theme :host github :repo "dracula/emacs"))
+(load-theme 'dracula t)
+(custom-theme-set-faces
+  'dracula
+  ;; change the shade of gray of the org block background as the default is not contrasting enough
+  '(org-block ((t (:extend t :background "#373844" :family "Cousine Nerd Font Mono" :height 0.95))))
+  ;; reduce the font size of org block opening and closing lines to reduce distraction
+  ;; and add some colour to contrast with the rest
+  '(org-block-begin-line ((t (:extend t :background "#004c4c" :foreground "#ddeded" :underline "#A7A6AA" :height 0.85 :family "Cousine nerd font mono"))))
+  '(org-block-end-line ((t (:extend t :background "#004c4c" :foreground "#ddeded" :overline "#A7A6AA" :height 0.85 :family "Cousine nerd font mono"))))
+  ;; ensure that the org ellipsis is muted
+  '(org-ellipsis ((t (:background nil :foreground "#999999" :box nil :underline nil))))
+  ;; ensure that trailing and tab markers are muted
+  '(whitespace-trailing ((t (:foreground nil :background "#636363"))))
+  '(whitespace-tab ((t (:foreground "#636363" :background nil)))))
+(enable-theme 'dracula)
+#+end_src
+
+To easily switch between themes, I define a function that toggles between Leuven and Dracula.
+
+#+begin_src elisp
+;; https://emacs.stackexchange.com/questions/24088/make-a-function-to-toggle-themes
+;; https://emacs.stackexchange.com/questions/48365/custom-theme-set-faces-does-not-work-in-emacs-27#52804
+(defun toggle-theme ()
+  (interactive)
+  (cond
+    ((eq (car custom-enabled-themes) 'leuven) (progn (disable-theme 'leuven) (enable-theme 'dracula)))
+    ((eq (car custom-enabled-themes) 'dracula) (progn (disable-theme'dracula) (enable-theme 'leuven)))))
+#+end_src
+
+*** Powerline
+
+The ~powerline~ package brings Vim-like support to the Emacs mode-line and ensure that my theme configuration propagates nicely to it.
+
+#+begin_src elisp
+(use-package powerline :straight t)
+(powerline-default-theme)
 #+end_src
 
 ** Addional settings
 
 *** Clipboard management
 
-The main objective of this section is to avoid poluting the system clipboard. When editing text in an editor, it is fairly common to copy-and-paste to move sections of the text around. I would like to avoid that they leak into the system clipboard which I prefer to use between applications. Therefore I deactivate the system clipboard by default.
+It is convenient to have direct access to the system clipboard since it allows me to quickly move arbitrary text in and out of Emacs.
+
+# The main objective of this section is to avoid poluting the system clipboard. When editing text in a text editor, it is fairly common to copy-and-paste as way to move sections of the text around. I would like to avoid that these random pieces of text leak to the system clipboard since I prefer to use it to move text between applications. Therefore, I deactivate the system clipboard by default.
 
 #+begin_src elisp
-  (custom-set-variables '(select-enable-clipboard nil))
+(custom-set-variables '(select-enable-clipboard t))
 #+end_src
 
-When needed, I prefix the yank and paste commands with the ~<leader>~ key to perform these operations with the system clipboard.
+Additionally, I emulate copy and paste shortcuts that I often use in Vim the yank and paste commands with the ~<leader>~ key.
 
 #+begin_src  elisp
-  (defun yank-to-clipboard (start end)
-    "Yank to system clipboard."
-    (interactive "r")
-    (if (use-region-p)
-        (progn
-        ; does not check if the option might originally be true
-        (custom-set-variables '(select-enable-clipboard t))
-        (clipboard-kill-ring-save start end)
-        (custom-set-variables '(select-enable-clipboard nil)))))
-  (evil-define-key 'visual 'global (kbd "<leader>y")  'yank-to-clipboard)
+(defun yank-to-clipboard (start end)
+  "Yank to system clipboard."
+  (interactive "r")
+  (if (use-region-p)
+      (progn
+      ;; does not check if the option might originally be true
+      (clipboard-kill-ring-save start end))))
+(evil-define-key 'visual 'global (kbd "<leader>y")  'yank-to-clipboard)
 
-  (defun paste-clipboard ()
-    "Paste from system clipboard."
-    (interactive)
-        (progn
-        ; does not check if the option might originally be true
-        (custom-set-variables '(select-enable-clipboard t))
-        (clipboard-yank)
-        (custom-set-variables '(select-enable-clipboard nil))))
-  (evil-define-key '(normal visual) 'global (kbd "<leader>p") 'paste-clipboard)
-#+end_srC
+(defun paste-clipboard ()
+  "Paste from system clipboard."
+  (interactive)
+      (progn
+      ;; does not check if the option might originally be true
+      (clipboard-yank)))
+(evil-define-key '(normal visual) 'global (kbd "<leader>p") 'paste-clipboard)
+#+end_src
 
 More info on copy-and-paste in Emacs can be found in the [[https://www.emacswiki.org/emacs/CopyAndPastej][Wiki]].
 
 *** Line wrapping
 
+This section basically tries to tame line wrapping in ~text-mode~. I am a big advocate of using line wrapping in ~text-mode~ since the primary unit of text is the paragraph and not the line. Therefore, hard line breaks feel quite arbitrary. It is much better to let the text editor handle line breaks within paragraphs since these can change according to the window size. On top of that, it is much easier to perform version control when investigating changes at the paragraph rather than line level.
+
+Of course, the opposite is true when dealing with source code. In which case, hard line breaks should be enforced and, ideally, text should be edited on a minimum width size.
+
+Most of the configuration is directly borrowed from [[https://github.com/hlissner/doom-emacs/tree/master/modules/editor/word-wrap][Emacs Doom]] where they use the ~adaptive-wrap~ package. I do not have strong opinions about the configuration below, except that it seems to get the job done.
+
 #+begin_src elisp
-  ;;; adaptive-wrap {{{
-  (straight-use-package 'adaptive-wrap)
+(use-package adaptive-wrap :straight t)
 
-  (defvar +word-wrap-extra-indent 'double)
+(defvar +word-wrap-extra-indent 'double)
 
-  (defvar +word-wrap-disabled-modes
-    '(fundamental-mode so-long-mode)
-    "Major-modes where `+global-word-wrap-mode' should not enable `+word-wrap-mode'.")
+(defvar +word-wrap-disabled-modes
+  '(fundamental-mode so-long-mode)
+  "Major-modes where `+global-word-wrap-mode' should not enable `+word-wrap-mode'.")
 
-  (defvar +word-wrap-visual-modes
-    '(org-mode)
-    "Major mode where `+word-wrap-mode' should not enable `adaptive-wrap-prefix-mode'.")
+(defvar +word-wrap-visual-modes
+  '(org-mode)
+  "Major mode where `+word-wrap-mode' should not enable `adaptive-wrap-prefix-mode'.")
 
-  (defvar +word-wrap-text-modes
-    '(text-mode markdown-mode markdown-view-mode gfm-mode gfm-view-mode rst-mode latex-mode LaTex-mode)
-    "Major-modes where `+word-wrap-mode' should not provide extra indentation.")
+(defvar +word-wrap-text-modes
+  '(text-mode markdown-mode markdown-view-mode gfm-mode gfm-view-mode rst-mode latex-mode LaTex-mode)
+  "Major-modes where `+word-wrap-mode' should not provide extra indentation.")
 
-  (defvar +word-wrap--major-mode-is-visual nil)
-  (defvar +word-wrap--major-mode-is-text nil)
-  (defvar +word-wrap--enable-adaptive-wrap-mode nil)
-  (defvar +word-wrap--enable-visual-line-mode nil)
+(defvar +word-wrap--major-mode-is-visual nil)
+(defvar +word-wrap--major-mode-is-text nil)
+(defvar +word-wrap--enable-adaptive-wrap-mode nil)
+(defvar +word-wrap--enable-visual-line-mode nil)
 
-  ;;;###autoload
-  (define-minor-mode +word-wrap-mode
-    "Wrap long lines in the buffer with language-aware indentation.
+;;;###autoload
+(define-minor-mode +word-wrap-mode
+  "Wrap long lines in the buffer with language-aware indentation.
 
-  Wrapped lines will be indented to match the preceding line. In code buffers,
-  lines which are not inside a string or comment will have additional indentation
-  according to the configuration of `+word-wrap-extra-indent'."
-    :init-value nil
-    (if +word-wrap-mode
-      (progn
-        (setq-local +word-wrap--major-mode-is-visual
-          (memq major-mode +word-wrap-visual-modes))
-        (setq-local +word-wrap--major-mode-is-text
-          (memq major-mode +word-wrap-text-modes))
+wrapped lines will be indented to match the preceding line. In code buffers,
+lines which are not inside a string or comment will have additional indentation
+according to the configuration of `+word-wrap-extra-indent'."
+  :init-value nil
+  (if +word-wrap-mode
+    (progn
+      (setq-local +word-wrap--major-mode-is-visual
+        (memq major-mode +word-wrap-visual-modes))
+      (setq-local +word-wrap--major-mode-is-text
+        (memq major-mode +word-wrap-text-modes))
 
-        (setq-local +word-wrap--enable-adaptive-wrap-mode
-          (and (not (bound-and-true-p adaptive-wrap-prefix-mode))
-                (not +word-wrap--major-mode-is-visual)))
+      (setq-local +word-wrap--enable-adaptive-wrap-mode
+        (and (not (bound-and-true-p adaptive-wrap-prefix-mode))
+              (not +word-wrap--major-mode-is-visual)))
 
-        (setq-local +word-wrap--enable-visual-line-mode
-          (not (bound-and-true-p visual-line-mode)))
+      (setq-local +word-wrap--enable-visual-line-mode
+        (not (bound-and-true-p visual-line-mode)))
 
-        (when +word-wrap--enable-adaptive-wrap-mode
-          (adaptive-wrap-prefix-mode +1))
-        (when +word-wrap--enable-visual-line-mode
-          (visual-line-mode +1)))
+      (when +word-wrap--enable-adaptive-wrap-mode
+        (adaptive-wrap-prefix-mode +1))
+      (when +word-wrap--enable-visual-line-mode
+        (visual-line-mode +1)))
 
-        (when +word-wrap--enable-adaptive-wrap-mode
-          (adaptive-wrap-prefix-mode -1))
-        (when +word-wrap--enable-visual-line-mode
-          (visual-line-mode -1))))
+      (when +word-wrap--enable-adaptive-wrap-mode
+        (adaptive-wrap-prefix-mode -1))
+      (when +word-wrap--enable-visual-line-mode
+        (visual-line-mode -1))))
 
-  (defun +word-wrap--enable-global-mode ()
-    "Enable `+word-wrap-mode' for `+word-wrap-global-mode'.
+(defun +word-wrap--enable-global-mode ()
+  "Enable `+word-wrap-mode' for `+word-wrap-global-mode'.
 
-  Wrapping will be automatically enabled in all modes except special mode, or
-  modes explicitly listed in `+word-wrap-disabled-modes'."
-    (unless (or (eq (get major-mode 'mode-class) 'special)
-        (memq major-mode +word-wrap-disabled-modes))
-      (+word-wrap-mode +1)))
+Wrapping will be automatically enabled in all modes except special mode, or
+modes explicitly listed in `+word-wrap-disabled-modes'."
+  (unless (or (eq (get major-mode 'mode-class) 'special)
+      (memq major-mode +word-wrap-disabled-modes))
+    (+word-wrap-mode +1)))
+;;;###autoload
 
-  ;;;###autoload
-  (define-globalized-minor-mode +global-word-wrap-mode
-    +word-wrap-mode +word-wrap--enable-global-mode)
+(define-globalized-minor-mode +global-word-wrap-mode
+  +word-wrap-mode +word-wrap--enable-global-mode)
 
-  (+global-word-wrap-mode +1)
-  ;;;}}}
+(+global-word-wrap-mode +1)
 #+end_src
 
 *** White space
 
 #+begin_src elisp
-  ;; white space {{{
-  ; https://dougie.io/emacs/indentation/
-  (setq-default electric-indent-inhibit t)
-  (setq-default tab-width 2)
-  (setq-default indent-tabs-mode nil)
-  (setq-default evil-shift-width 2)
-  (evil-define-key 'insert 'global (kbd "TAB") 'tab-to-tab-stop)
-  (setq backward-delete-char-untabify-method 'hungry)
-  (setq whitespace-style '(face tabs tab-mark trailing indentation))
-  (global-whitespace-mode)
-  (custom-set-faces
-    '(whitespace-trailing ((t (:foreground nil :background "#636363"))))
-    '(whitespace-tab ((t (:foreground "#636363" :background nil)))))
-  (setq whitespace-display-mappings
-  '((tab-mark 9 [62 32 92 92 92]))) ; print tab as > \\\
-  (evil-define-key 'normal 'global (kbd "<leader>dt") 'whitespace-cleanup)
-  ;;}}}
+;; https://dougie.io/emacs/indentation/
+(setq-default electric-indent-inhibit t)
+(setq-default tab-width 2)
+(setq-default indent-tabs-mode nil)
+(setq-default evil-shift-width 2)
+(evil-define-key 'insert 'global (kbd "TAB") 'tab-to-tab-stop)
+(setq backward-delete-char-untabify-method 'hungry)
+(setq whitespace-style '(face tabs tab-mark trailing indentation))
+(global-whitespace-mode)
+(setq whitespace-display-mappings
+'((tab-mark 9 [62 32 92 92 92]))) ; print tab as > \\\
+(evil-define-key 'normal 'global (kbd "<leader>dt") 'whitespace-cleanup)
+(add-hook 'python-mode-hook '(lambda ()
+  (setq evil-shift-width python-indent-offset)))
 #+end_src
 
 ** Third-party packages
 
 *** Neotree
+
 #+begin_src elisp
-  ;;; neotree {{{
-  (straight-use-package 'neotree)                                          ; file management from within Emacs
-  (require 'neotree)
+  (use-package neotree
+    :straight t
+    :config
+      (setq neo-theme 'icons))
   (global-set-key [f8] 'neotree-toggle)
-  ;;;}}}
 #+end_src
 
 *** Magit
 
 #+begin_src elisp
-  ;;; magit {{{
-  (straight-use-package 'magit)                                            ; a git porcelain
-  ;;;}}}
+;;; magit {{{
+(use-package magit :straight t)                                            ; a git porcelain
+;;;}}}
 #+end_src
 
 *** Ivy
 
 https://oremacs.com/swiper/#hydra-in-the-minibuffer
 
-screencast demo: https://www.youtube.com/watch?v=VvnJQpTFVDc 
+screencast demo: https://www.youtube.com/watch?v=VvnJQpTFVDc
 
 #+begin_src elisp
 (use-package ivy
-  :straight (ivy :type git :host github :repo "abo-abo/swiper"))
+  :straight (ivy :host github :repo "abo-abo/swiper"))
 (use-package counsel
-  :straight (counsel :type git :host github :repo "abo-abo/swiper")
+  :straight (counsel :host github :repo "abo-abo/swiper")
   :after (ivy))
-
 (setq ivy-use-virtual-buffers t)
 (setq ivy-count-format "(%d/%d) ")
 (ivy-mode 1)
-;use helm for the buffer list
+;;use helm for the buffer list
 (evil-ex-define-cmd "buffers" 'ivy-switch-buffer)
 (evil-define-key 'normal 'global
   (kbd "SPC b") 'ivy-switch-buffer)
 (evil-define-key 'normal 'global
-  (kbd "SPC f") 'counsel-find-file)
+  (kbd "SPC /") 'counsel-find-file)
 (evil-define-key 'normal 'global
-  (kbd "SPC /") 'counsel-rg)
+  (kbd "SPC f") 'counsel-rg)
 #+end_src
 
 *** Hydra
@@ -422,24 +586,25 @@ What is hydra https://oremacs.com/2015/01/20/introducing-hydra/
 
 Github repo https://github.com/abo-abo/hydra
 
+call hydra with ~Ctrl-O~ when in ivy
+
 #+begin_src elisp
 (use-package hydra :straight t)
 (use-package ivy-hydra
-  :straight (ivy-hydra :type git :host github :repo "abo-abo/swiper")
+  :straight (ivy-hydra :host github :repo "abo-abo/swiper")
   :after (hydra ivy))
 #+end_src
 
-
 *** Projectile
 
-Main page: https://docs.projectile.mx/projectile/index.html 
+Main page: https://docs.projectile.mx/projectile/index.html
 
 https://docs.projectile.mx/projectile/usage.html
 
 
 #+begin_src elisp
 (use-package projectile
-  :straight (projectile :type git :host github :repo "bbatsov/projectile"))
+  :straight (projectile :host github :repo "bbatsov/projectile"))
 (projectile-mode +1)
 (setq projectile-project-search-path '("~/dev/" "~/phd/"))
 (evil-define-key 'normal 'projectile-mode-map (kbd "SPC p") 'projectile-command-map)
@@ -448,12 +613,24 @@ https://docs.projectile.mx/projectile/usage.html
 *** Which-key mode
 
 #+begin_src elisp
-  (use-package which-key
-    :straight t
-    :config
+(use-package which-key
+  :straight t
+  :config
     (setq which-key-show-early-on-C-h t))
-  (which-key-mode)
+(which-key-mode)
 #+end_src
+
+*** Yasnippet
+
+#+begin_src elisp
+(use-package yasnippet
+  :straight t
+  :config
+    (yas-reload-all)
+  :hook
+    (latex-mode . yas-minor-mode))
+#+end_src
+
 
 *** Company mode
 
@@ -461,61 +638,182 @@ https://github.com/vspinu/company-math
 
 
 #+begin_src elisp
-  (straight-use-package 'company)
-  (straight-use-package 'company-math)
-
-  (add-hook 'after-init-hook (lambda ()
-    (global-company-mode t)
-    (add-to-list 'company-backends 'company-math-symbols-unicode)))
-
-  (defun company-mode-latex-setup ()
-    (setq-local company-backends
-                (append '((company-math-symbols-latex company-latex-commands))
-                        company-backends)))
-
-  (add-hook 'tex-mode-hook 'company-mode-latex-setup)
+(use-package company-math :straight t)
+(use-package company-lsp :straight t)
+(use-package company
+  :straight t
+  :config
+  (add-hook 'after-init-hook '(lambda()
+    (global-company-mode)
+    (setq company-minimum-prefix-length 3)
+    (define-key company-active-map (kbd "<tab>") 'company-select-next)
+    (define-key company-active-map (kbd "<backtab>") 'company-select-previous)
+    (push 'company-math-symbols-unicode company-backends))))
 #+end_src
+
+*** Evil nerd commenter
+
+#+begin_src elisp
+  (use-package evil-nerd-commenter :straight t)
+  (global-set-key (kbd "<leader>c") 'evilnc-comment-or-uncomment-lines)
+#+end_src
+
 
 *** LSP
 
-#+begin_src
-  (straight-use-package 'lsp-mode)
-  (add-hook prog-mode-hook #'lsp)
+#+begin_src elisp
+(setq gc-cons-threshold 100000000)
+(setq read-process-output-max (* 1024 1024)) ;; 1mb
+(use-package lsp-mode
+  :straight t
+  :init
+    (setq lsp-keymap-prefix "C-C l")
+  :hook
+    (julia-mode . lsp)
+    (r-mode . lsp)
+    (latex-mode . lsp)
+    (lsp-mode . lsp-enable-which-key-integration)
+  :commands lsp)
+(use-package lsp-pyright
+  :straight t
+  :ensure t
+  :hook
+    (python-mode . (lambda ()
+      (require 'lsp-pyright)
+      (lsp))))
+(use-package lsp-ui :straight t :commands lsp-ui-mode)
+(use-package lsp-ivy :straight t :commands lsp-ivy-workspace-symbol)
+(use-package lsp-treemacs :straight t :commands lsp-ivy-workspace-symbol)
 #+end_src
 
-*** Ein --- Emacs Ipython Notebool
+*** Polymode
+
+Installing this to work with Ein
+
+#+begin_src elisp
+(use-package polymode :straight t)
+(add-to-list 'polymode-mode-name-aliases '(R . R-mode))
+#+end_src
+
+*** Ein --- Emacs Ipython Notebook
 
 [[http://millejoh.github.io/emacs-ipython-notebook/][Ein manual]]
 
+worth customizing with ~M-x customize group RET ein~
+
 #+begin_src elisp
-  (straight-use-package 'ein)
+(use-package ein
+  :straight (ein :host github :repo "millejoh/emacs-ipython-notebook")
+  :config
+    (setq ein:polymode t)
+    (setq ein:worksheet-enable-undo t)
+    (setq ein:output-area-inlined-images nil))
+
+(define-minor-mode ein-mode-my-map
+  "Custom ein-mode mappings."
+  :keymap (make-sparse-keymap))
+
+(defun ein-kill-region (&optional beg end normal)
+  (interactive
+    (if (use-region-p) (list (region-beginning) (1- (region-end)) nil)
+      (list (line-beginning-position) (line-end-position) t)))
+    (unless (eq major-mode 'fundamental-mode)
+      (let* ((region (pm-innermost-range end))
+        (narrow-beg (max beg (car region)))
+        (narrow-end (min end (cdr region))))
+        (kill-region narrow-beg narrow-end)
+        (if (and normal (not (eq narrow-beg (car region))))
+          (delete-region (1- narrow-beg) narrow-beg)
+          (delete-region narrow-beg (1+ narrow-beg))))))
+
+(evil-define-key 'normal 'ein-mode-my-map
+  "dd" 'ein-kill-region
+  (kbd "<leader>d") 'ein:worksheet-kill-cell
+  (kbd "<leader>k") 'ein:worksheet-goto-prev-input-km
+  (kbd "<leader>j") 'ein:worksheet-goto-next-input-km
+  (kbd "<leader>sl") 'ein:worksheet-execute-cell
+)
+
+(evil-define-key 'visual 'ein-mode-my-map
+  "d" 'ein-kill-region)
+
+(add-hook 'ein:notebook-mode-hook 'ein-mode-my-map)
+
+(evil-define-operator my-evil-write (beg end type file-or-append &optional bang)
+  :motion nil
+  :move-point nil
+  :type line
+  :repeat nil
+  (interactive "<R><fsh><!>")
+  (if (bound-and-true-p ein:notebook-mode)
+    (ein:notebook-save-notebook-command)
+    (evil-write beg end type file-or-append bang)))
+(evil-ex-define-cmd "w[rite]" 'my-evil-write)
+
+(custom-set-variables
+  '(mailcap-download-directory "$HOME/Downloads")
+  '(mailcap-user-mime-data '(
+    ("kitty @ kitten ./imgviewer.py %s" "image/png" nil)
+    ("kitty @ kitten ./imgviewer.py %s" "image/*" nil))))
+#+end_src
+
+*** ESS --- Emacs speaks statistics --- R and other goodies
+
+#+begin_src elisp
+(use-package ess
+  :straight t
+  :config
+    (setq ess-use-flymake nil))
 #+end_src
 
 *** Julia
 
-
 #+begin_src elisp
   (use-package julia-mode
-    :straight (julia-mode :type git :host github :repo "JuliaEditorSupport/julia-emacs"))
+    :straight (julia-mode :host github :repo "JuliaEditorSupport/julia-emacs"))
+  (use-package lsp-julia
+    :straight (lsp-julia :host github :repo "gdkrmr/lsp-julia")
+    :config
+      (setq lsp-julia-default-environment "~/.julia/environments/v1.7"))
 #+end_src
+
+*** Lua
+
+#+begin_src elisp
+  (use-package lua-mode
+    :straight (:host github :repo "immerrr/lua-mode"))
+#+end_src
+
+*** Zotxt
+
+#+begin_src elisp
+(use-package zotxt
+  :straight (:host github :repo "egh/zotxt-emacs"))
+(setq zotxt-default-search-method "title, creator, year")
+#+end_src
+
+testing: @holme2015b
+
+foo @holme2015a @holme2012 @masuda2017
+
 *** Org-mode
 
 #+begin_src elisp
-  ; hide emphasis markup
+  ;; hide emphasis markup
   (setq org-hide-emphasis-markers t)
 
-  ; beautiful unicode bullets
+  ;; beautiful unicode bullets
   (straight-use-package 'org-bullets)
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  (add-hook 'org-mode-hook '(lambda () (org-bullets-mode 1)))
 
-  ; indentation
+  ;; indentation
 
-  ; fold
+  ;; fold
   (setq org-ellipsis " ▼")
   (setq org-startup-folded t)
-  (setq org-hide-block-startup t)
+  (setq org-hide-block-startup nil)
 
-  ; agenda
+  ;; agenda
   (defvar org-my-inbox-file "~/dev/org/inbox.org")
   (defvar org-my-general-files "~/dev/org")
   (setq org-default-notes-file org-my-inbox-file)
@@ -523,7 +821,7 @@ https://github.com/vspinu/company-math
   (setq org-refile-targets (quote ((org-agenda-files :maxlevel .2))))
   (setq org-reverse-note-order t)
 
-  ; tab support
+  ;; tab support
   (setq org-cycle-emulate-tab nil)
 #+end_src
 
@@ -538,18 +836,18 @@ work async
 create a repl; interact with repl
 
 #+begin_src elisp
-  ; languages
-  ; TODO adds a good second to initialization, can we set this as a hook
+  ;; languages
+  ;; TODO adds a good second to initialization, can we set this as a hook
   (use-package jupyter
-    :straight (jupyter :type git :host github :repo "nnicandro/emacs-jupyter")
+    :straight (jupyter :host github :repo "nnicandro/emacs-jupyter")
     :after (ob-jupyter)
     :config
-    (setq org-babel-default-header-args:jupyter-python '((:session . "py")
-                                                         (:async . "yes")
-                                                         (:kernel . "python")))
-    (setq org-babel-default-header-args:jupyter-julia  '((:session . "jl")
-                                                         (:async . "yes")
-                                                         (:kernel . "julia"))))
+      (setq org-babel-default-header-args:jupyter-python '((:session . "py")
+                                                          (:async . "yes")
+                                                          (:kernel . "python")))
+      (setq org-babel-default-header-args:jupyter-julia  '((:session . "jl")
+                                                          (:async . "yes")
+                                                          (:kernel . "julia"))))
   (setq org-confirm-babel-evaluate nil)
   (org-babel-do-load-languages
     'org-babel-load-languages
@@ -560,7 +858,7 @@ create a repl; interact with repl
 #+end_src
 
 #+begin_src elisp
-  ; keys
+  ;; keys
   (evil-define-key 'normal 'global
     (kbd "<leader>oa") 'org-agenda
     (kbd "<leader>oc") 'org-capture
@@ -568,18 +866,21 @@ create a repl; interact with repl
   (define-minor-mode org-mode-my-map
     "Custom org-mode mappings."
     :keymap (make-sparse-keymap))
-  ;  (evil-define-key 'normal 'org-mode-my-map
-  ;    [za] 'org-cycle
-  ;    [zo] 'outline-show-children
-  ;    [zO] 'outline-show-subtree
-  ;    [zc] 'outline-hide-subtree
-  ;    [zC] 'outline-hide-sublevels
-  ;    [zR] 'outline-show-all
-  ;    [zM] 'org-overview
-  ;  )
+  ;;  (evil-define-key 'normal 'org-mode-my-map
+  ;;    [za] 'org-cycle
+  ;;    [zo] 'outline-show-children
+  ;;    [zO] 'outline-show-subtree
+  ;;    [zc] 'outline-hide-subtree
+  ;;    [zC] 'outline-hide-sublevels
+  ;;    [zR] 'outline-show-all
+  ;;    [zM] 'org-overview
+  ;;  )
   (evil-define-key 'insert 'org-mode-my-map
     [tab] 'tab-to-tab-stop
     [s-tab] 'ignore
+  )
+  (evil-define-key 'normal 'org-mode-my-map
+    (kbd "TAB") 'org-cycle
   )
   (defun org-mode-my-setup ()
     (interactive)
@@ -588,14 +889,37 @@ create a repl; interact with repl
       (list (lambda (arg) 'no-indent)))
     (org-indent-mode)
     (org-babel-jupyter-override-src-block "python")
-    (org-babel-jupyter-override-src-block "julia"))
+    (org-babel-jupyter-override-src-block "julia")
+    (variable-pitch-mode t)
+    (setq org-fontify-quote-and-verse-blocks t)
+    (global-linum-mode 0))
 
 
- ; (add-hook 'org-mode-hook 'org-mode-my-map)
- ; (add-hook 'org-mode-hook (lambda ()
- ;   (set (make-local-variable 'electric-indent-functions)
- ;     (list (lambda (arg) 'no-indent)))))
+ ;; (add-hook 'org-mode-hook 'org-mode-my-map)
+ ;; (add-hook 'org-mode-hook (lambda ()
+ ;;   (set (make-local-variable 'electric-indent-functions)
+ ;;     (list (lambda (arg) 'no-indent)))))
   (add-hook 'org-mode-hook 'org-mode-my-setup)
+#+end_src
+
+orgroam
+
+#+begin_src elisp
+;; (use-package org-roam
+;;   :straight (:host github :repo "org-roam/org-roam" :files (:defaults "extensions/*")))
+;; (use-package org-roam-ui
+;;   :straight
+;;     (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+;;     :after org-roam
+;; ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+;; ;;         a hookable mode anymore, you're advised to pick something yourself
+;; ;;         if you don't care about startup time, use
+;; ;;  :hook (after-init . org-roam-ui-mode)
+;;     :config
+;;     (setq org-roam-ui-sync-theme t
+;;           org-roam-ui-follow t
+;;           org-roam-ui-update-on-save t
+;;           org-roam-ui-open-on-start t))
 #+end_src
 
 ** Wrap-up
@@ -603,10 +927,10 @@ create a repl; interact with repl
 How long did we take to fire up Emacs? We compute the elapsed time and print it at the top of our start window which is the ~*scratch*~ buffer.
 
 #+begin_src elisp
-  (let ((elapsed (float-time (time-subtract (current-time) emacs-start-time))))
+(let ((elapsed (float-time (time-subtract (current-time) emacs-start-time))))
 
-  (setq initial-scratch-message
-    (format "; *scratch*\n; config.org loaded in %.3fs" elapsed)))
+(setq initial-scratch-message
+  (format "; *scratch*\n; config.org loaded in %.3fs" elapsed)))
 #+end_src
 
 ** References
@@ -626,17 +950,23 @@ How long did we take to fire up Emacs? We compute the elapsed time and print it 
 - [[https://emacs.christianbaeuerlein.com/my-org-config.html][Great org configuration]]
 - https://github.com/phrb/ob-julia
 - [[https://github.com/noctuid/evil-guide][Evil guide]]
-- [[https://github.com/gregsexton/origami.el][Origami for folding?]]
+- [[https://github.com/gregsexton/origami.el][Origami for folding?]] an example config [[https://www.reddit.com/r/emacs/comments/6fmpwb/evil_and_builtin_folding/]]
+- [[https://ianyepan.github.io/posts/setting-up-use-package/]]
 
 
-*** Vimmish fold
+The tab in tty is mapped to C-i, so we need to remap the ~(kbd "TAB")~ to get things working again.
 
-# vimmish-fold {{{
-#  (straight-use-package 'vimish-fold)                                      ; vim-like text folding
-#  (straight-use-package 'evil-vimish-fold)                                 ; vim keybindings for vimish-fold
-#  (vimish-fold-global-mode 1)
-#  (setq evil-vimish-fold-target-modes '(prog-mode conf-mode text-mode))
-#  (global-evil-vimish-fold-mode 1)
-#  ;;;}}}
-#  ;;}}}
+https://www.emacswiki.org/emacs/TabKey
+
+#+begin_src
+(local-set-key (kbd "TAB") 'tab-to-tab-stop)
+#+end_src
+
+
+[[http://www.emacslife.com/read-lisp-tweak-emacs/beginner-2-understand-emacs-lisp.html]]
+
+add-hook is a function. ​'emacs-lisp-mode-hook​ and ​'turn-on-eldoc-mode​ have single quotes, which tells Emacs to skip evaluating them. They refer to the name of the thing instead of its value. emacs-lisp-mode-hook is a variable that contains a list of functions to run, and turn-on-eldoc-mode is a function that we're adding to that list.
+
+
+The dot (x . y) shows that this is a cons cell, which is something that has two parts. These parts are called the car and the cdr, and can contain symbols, values, lists, and so on. A cons cell like ("abc" . "def") looks like this:
 
