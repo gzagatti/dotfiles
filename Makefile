@@ -3,77 +3,93 @@ workspace := $(HOME)
 
 .PHONY: all
 
-vim:
-	ln -fs $(dotfiles)/vimrc $(workspace)/.vimrc
 
-nvim:
-	mkdir -p $(workspace)/.config/nvim/
-	ln -fs $(dotfiles)/init.lua $(workspace)/.config/nvim
+# SHELLS
+shells/inputrc:
+	ln -fs $(dotfiles)/shells/inputrc $(workspace)/.inputrc
 
-emacs:
-	mkdir -p $(workspace)/.emacs.d/
-	ln -fs $(dotfiles)/init.el $(workspace)/.emacs.d/init.el
-	ln -fs $(dotfiles)/emacs-config.org $(workspace)/.emacs.d/emacs-config.org
+bash: shells/inputrc
+	ln -fs $(dotfiles)/shells/bash_profile $(workspace)/.bash_profile
+	ln -fs $(dotfiles)/shells/bashrc $(workspace)/.bashrc
+
+zsh: shells/inputrc
+	ln -fs $(dotfiles)/shells/zshrc $(workspace)/.zshrc
 
 tmux:
-	ln -fs $(dotfiles)/tmux.conf $(workspace)/.tmux.conf
+	ln -fs $(dotfiles)/shells/tmux.conf $(workspace)/.tmux.conf
 
-bash:
-	ln -fs $(dotfiles)/inputrc $(workspace)/.inputrc
-	ln -fs $(dotfiles)/bash_profile $(workspace)/.bash_profile
-	ln -fs $(dotfiles)/bashrc $(workspace)/.bashrc
+shells: bash zsh tmux
 
-zsh:
-	ln -fs $(dotfiles)/zshrc $(workspace)/.zshrc
+# NVIM
+$(workspace)/.config/nvim:
+	mkdir -p $@
 
-jupyter:
-	mkdir -p $(workspace)/.jupyter/kernels
-	mkdir -p $(workspace)/.local/share/jupyter/kernels
-	ln -fs $(dotfiles)/jupyter_console_config.py $(workspace)/.jupyter/jupyter_console_config.py
-	ln -fs $(dotfiles)/jupyter_notebook_config.py $(workspace)/.jupyter/jupyter_notebook_config.py
+nvim/%: $(workspace)/.config/nvim
+	ln -fs $(dotfiles)/$@ $</$*
 
-python:
-	mkdir -p $(workspace)/.config/matplotlib
-	ln -fs $(dotfiles)/matplotlibrc $(workspace)/.config/matplotlib/matplotlibrc
-
-eclim:
-	ln -fs $(dotfiles)/eclimrc $(workspace)/.eclimrc
-
-git:
-	ln -fs $(dotfiles)/gitconfig $(workspace)/.gitconfig
-
-r:
-	ln -fs $(dotfiles)/Rprofile $(workspace)/.Rprofile
-
-ctags:
-	ln -fs $(dotfiles)/ctags $(workspace)/.ctags
-
-zathura:
-	mkdir -p $(workspace)/.config/zathura
-	ln -fs $(dotfiles)/zathurarc $(workspace)/.config/zathura/zathurarc
-
-alacritty:
-	mkdir -p $(workspace)/.config/alacritty/
-	ln -fs $(dotfiles)/alacritty.yml $(workspace)/.config/alacritty/alacritty.yml
-
-rofi:
-	mkdir -p $(workspace)/.config/rofi
-	ln -fs $(dotfiles)/rofi.rasi $(workspace)/.config/rofi/config.rasi
-	ln -fs $(dotfiles)/rofi-unicodeit $(workspace)/.config/rofi/unicodeit
-
-texlive:
-	mkdir -p $(workspace)/.config/latexmk
-	ln -fs $(dotfiles)/latexmkrc $(workspace)/.config/latexmk/latexmkrc
-
-julia:
-	mkdir -p $(workspace)/.julia/config/
-	ln -fs $(dotfiles)/startup.jl $(workspace)/.julia/config
+nvim: $(shell find nvim -type f)
 
 
+# EMACS
+$(workspace)/.emacs.d:
+	mkdir -p $@
+
+emacs/%: $(workspace)/.emacs.d
+	ln -fs $(dotfiles)/$@ $</$*
+
+emacs: $(shell find emacs -type f)
+
+
+# KITTY
 $(workspace)/.config/kitty/themes:
-	mkdir -p $(workspace)/.config/kitty/themes/
+	mkdir -p $@
 
 kitty/%: $(workspace)/.config/kitty/themes
 	ln -fs $(dotfiles)/$@ $(workspace)/.config/$@
 
 kitty: $(shell find kitty -type f)
+
+
+# ROFI
+$(workspace)/.config/rofi:
+	mkdir -p $@
+
+rofi/%: $(workspace)/.config/rofi
+	ln -fs $(dotfiles)/$@ $</$*
+
+rofi: $(shell find rofi -type f)
+
+
+# SINGLE FILE CONFIGS
+alacritty:
+	mkdir -p $(workspace)/.config/alacritty/
+	ln -fs $(dotfiles)/singles/alacritty.yml $(workspace)/.config/alacritty/alacritty.yml
+
+ctags:
+	ln -fs $(dotfiles)/singles/ctags $(workspace)/.ctags
+
+git:
+	ln -fs $(dotfiles)/singles/gitconfig $(workspace)/.gitconfig
+
+julia:
+	mkdir -p $(workspace)/.julia/config/
+	ln -fs $(dotfiles)/singles/startup.jl $(workspace)/.julia/config
+
+jupyter:
+	mkdir -p $(workspace)/.local/share/jupyter/kernels
+	ln -fs $(dotfiles)/singles/jupyter_console_config.py $(workspace)/.jupyter/jupyter_console_config.py
+
+r:
+	ln -fs $(dotfiles)/singles/Rprofile $(workspace)/.Rprofile
+
+texlive:
+	mkdir -p $(workspace)/.config/latexmk
+	ln -fs $(dotfiles)/singles/latexmkrc $(workspace)/.config/latexmk/latexmkrc
+
+vim:
+	ln -fs $(dotfiles)/singles/vimrc $(workspace)/.vimrc
+
+
+zathura:
+	mkdir -p $(workspace)/.config/zathura
+	ln -fs $(dotfiles)/singles/zathurarc $(workspace)/.config/zathura/zathurarc

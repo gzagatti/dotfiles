@@ -440,28 +440,41 @@ require'packer'.startup {function (use)
     use {
       'neovim/nvim-lspconfig',
       config = function ()
-        local lsp = require'lspconfig'
+        local lspconfig = require'lspconfig'
 
-        -- Use an on_attach function to only map the following keys
-        -- after the language server attaches to the current buffer
+        -- on_attach is only called after the language server
+        -- attaches to the buffer
         local on_attach = function(client, bufnr)
 
-          local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+          print("Attaching ", client.name, " LSP in buffer ", bufnr, "...")
+
+          local function buf_set_keymap(...)
+            vim.api.nvim_buf_set_keymap(bufnr, ...)
+          end
 
           -- Mappings.
           local opts = { noremap=true, silent=true }
 
           -- documentation help
-          buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
-          buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-          buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
+          buf_set_keymap('n', '<leader>gD',
+            '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
+          buf_set_keymap('n', '<leader>gd',
+            '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
+          buf_set_keymap('n', '<leader>gK',
+            '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
 
           -- variable management
-          buf_set_keymap('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-          buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
+          buf_set_keymap('n', '<leader>gn',
+            '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
+          buf_set_keymap('n', '<leader>gr',
+            '<cmd>lua vim.lsp.buf.references()<cr>', opts)
 
           -- diagnostic
+          buf_set_keymap('n', '[telescope]l',
+            '<cmd>Telescope diagnostics theme=get_ivy<cr>', opts)
+
           local diagnostic_hidden = {}
+
           function diagnostic_toggle(toggle_bufnr, revert)
             toggle_bufnr = vim.api.nvim_buf_get_number(toggle_bufnr)
             print("Toggle diagnostics", toggle_bufnr, diagnostic_hidden[toggle_bufnr])
@@ -474,30 +487,33 @@ require'packer'.startup {function (use)
               diagnostic_hidden[toggle_bufnr] = true
             end
           end
-          buf_set_keymap('n', '<leader>d', '<cmd>lua diagnostic_toggle(0)<cr>', opts)
 
-          buf_set_keymap('n', '[telescope]l', '<cmd>Telescope diagnostics theme=get_ivy<cr>', opts)
-
+          buf_set_keymap('n', '<leader>gl',
+            '<cmd>lua diagnostic_toggle(0)<cr>', opts)
 
           -- formatting
-          buf_set_keymap('n', '<leader>f', '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
+          buf_set_keymap('n', '<leader>gf',
+            '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
 
           -- language specific
           if(client.name == 'texlab') then
-            buf_set_keymap('n', '<leader>l', '<cmd>echo \'Building file.\'<cr><cmd>TexlabBuild<cr>', {})
+            buf_set_keymap('n', '<c-c><c-c>',
+              '<cmd>echo \'Building file.\'<cr><cmd>TexlabBuild<cr>', opts)
           end
         end
 
         -- list of servers:
         -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
         -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
-        lsp.html.setup { on_attach = on_attach }
-        lsp.julials.setup { on_attach = on_attach }
-        lsp.pyright.setup { on_attach = on_attach }
-        lsp.texlab.setup { on_attach = on_attach }
-        lsp.jsonls.setup { on_attach = on_attach }
-        lsp.sumneko_lua.setup {
+        local autostart = false
+        lspconfig.html.setup { on_attach = on_attach, autostart = autostart }
+        lspconfig.julials.setup { on_attach = on_attach, autostart = autostart }
+        lspconfig.pyright.setup { on_attach = on_attach, autostart = autostart }
+        lspconfig.texlab.setup { on_attach = on_attach, autostart = autostart }
+        lspconfig.jsonls.setup { on_attach = on_attach, autostart = autostart }
+        lspconfig.sumneko_lua.setup {
           on_attach = on_attach,
+          autostart = autostart,
           settings = {
             Lua = {
               diagnostics = {
@@ -507,8 +523,9 @@ require'packer'.startup {function (use)
             },
           },
         }
-        lsp.solargraph.setup {
+        lspconfig.solargraph.setup {
           on_attach = on_attach,
+          autostart = autostart,
           settings = {
             solargraph = {
               diagnostic = true,
@@ -516,8 +533,9 @@ require'packer'.startup {function (use)
             },
           },
         }
-        lsp.stylelint_lsp.setup {
+        lspconfig.stylelint_lsp.setup {
           on_attach = on_attach,
+          autostart = autostart,
           settings = {
               stylelintplus = {
                 autoFixOnSave = true,
@@ -887,6 +905,9 @@ require'packer'.startup {function (use)
   }
   --}}}
   end,
+  {
+    auto_clean = false,
+  }
 }
 
 -- turn it on for automatic sync and compilation, slows down startup
@@ -906,6 +927,12 @@ vim.api.nvim_set_keymap('n', '<leader><f5>', ':luafile $MYVIMRC<cr>:PackerSync<c
 ---map j and k such that is based on display lines, not physical ones {{{
 vim.api.nvim_set_keymap('', 'j', 'gj', { noremap = true })
 vim.api.nvim_set_keymap('', 'k', 'gk', { noremap = true })
+if (vim.g['kitty_navigator_no_mappings'] == 1) and (vim.g['tmux_navigator_no_mappings'] == 1) then
+  vim.api.nvim_set_keymap('', '<c-h>', '<cmd>wincmd h<cr>', { noremap = true })
+  vim.api.nvim_set_keymap('', '<c-j>', '<cmd>wincmd j<cr>', { noremap = true })
+  vim.api.nvim_set_keymap('', '<c-k>', '<cmd>wincmd k<cr>', { noremap = true })
+  vim.api.nvim_set_keymap('', '<c-l>', '<cmd>wincmd l<cr>', { noremap = true })
+end
 ---}}}
 
 ---moving laterally when concealed {{{

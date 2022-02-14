@@ -112,20 +112,23 @@ if [[ $- == *i* ]]; then
   fi
   ## }}}
 
-  ## slimux {{{
-  # magic environments in order to make slimux work in tmux
-  if [ -d $HOME/.vim/plugged/slimux ]; then
-    case $OSTYPE in
-      Linux*)
-        export EVENT_NOEPOLL=1
-        ;;
-      Darwin*)
-        export EVENT_NOKQUEUE=1
-        export EVENT_NOPOLL=1
-        ;;
-    esac
+  ## kitty {{{
+  if test -n "$KITTY_INSTALLATION_DIR"; then
+    export KITTY_SHELL_INTEGRATION="enabled"
+    autoload -Uz -- "$KITTY_INSTALLATION_DIR"/shell-integration/zsh/kitty-integration
+    kitty-integration
+    unfunction kitty-integration
+    # scroll-and-clear-screen() {
+    #   printf '\n%.0s' {1..$LINES}
+    #   zle clear-screen
+    # }
+    # zle -N scroll-and-clear-screen
+    # bindkey '^[[108;6u' scroll-and-clear-screen # ctrl + shit + l
+    if hash emacs 2>/dev/null; then
+      alias emacs="TERM=xterm-emacs emacs -nw"
+    fi
   fi
-  ## }}}
+  ##}}}
 
   # }}}
 
@@ -167,7 +170,33 @@ if [[ $- == *i* ]]; then
   # inspired by
   # https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples#L51
   precmd_ps1() {
-    local color='%(?.%F{black}.%F{red})'
+
+    # https://gist.github.com/blueyed/c8470c2aad3381c33ea3
+    # https://stackoverflow.com/questions/2507337/how-to-determine-a-terminals-background-color
+    local oldstty=$(stty -g)
+    stty raw -echo min 0 time 1
+    # terminal escape sequence to get the terminal background color
+    # only works in xterms
+    # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Operating-System-Commands
+    printf '\033]11;?\033\\'
+    sleep 0.00000001
+    read -r termbg
+    stty $oldstty
+    local termbg=$(echo $termbg | sed 's/.*\(rgb:[0-9a-f/]*\).*/\1/')
+    local theme=""
+    if [[ $termbg == "rgb:f8f8/fbfb/f8f8" ]]; then
+      theme="leuven"
+    elif [[ $termbg == "rgb:2828/2a2a/3636" ]]; then
+      theme="dracula"
+    fi
+
+    # https://zsh.sourceforge.io/Doc/Release/Prompt-Expansion.html#Visual-effects
+    color=""
+    if [[ $theme == "leuven" ]]; then
+      color='%(?.%K{11}.%K{9}%F{1})'
+    elif [[ $theme == "dracula" ]]; then
+      color='%(?.%F{black}.%F{red})'
+    fi
     local host_info_msg="[%m %n]:%1~ %#"
     local dev_info_msg
 
@@ -196,7 +225,13 @@ if [[ $- == *i* ]]; then
       dev_info_msg="(${dev_info_msg})"
     fi
 
-    PS1="$color${dev_info_msg}${host_info_msg}%F{yellow} "
+    if [[ $theme = "leuven" ]]; then
+      PS1="$color${dev_info_msg}${host_info_msg}%k%f "
+    elif [[ $theme = "dracula" ]]; then
+      PS1="$color${dev_info_msg}${host_info_msg}%F{yellow} "
+    else
+      PS1="$color${dev_info_msg}${host_info_msg} "
+    fi
 
   }
   precmd_functions+=( precmd_ps1 )

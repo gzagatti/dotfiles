@@ -1,5 +1,5 @@
+# dracula theme with minor modifications
 colors:
-# colors after the Dracula theme with minor modifications
   primary:
     background: '0x282a36'
     foreground: '0xbbbbbb'

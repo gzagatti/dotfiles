@@ -19,7 +19,6 @@ if [[ $- == *i* ]]; then
   ## PATH {{{
   # add ~/.local/bin to PATH, before looking for other commands
   export PATH=$HOME/.local/bin:$PATH
-  hash -f
   ## }}}
 
   ## ls {{{
@@ -33,7 +32,6 @@ if [[ $- == *i* ]]; then
   ## brew {{{
   if hash brew &>/dev/null; then
     export PATH=$(brew --prefix)/bin:$(brew --prefix)/sbin:$PATH
-    hash -f
   elif [ -d $HOME/.linuxbrew ]; then
     export HOMEBREW_PREFIX=$HOME/.linuxbrew
     export HOMEBREW_CELLAR=$HOME/.linuxbrew/Cellar
@@ -43,7 +41,6 @@ if [[ $- == *i* ]]; then
     # exporting the PATH slows the initialization quite significantly, would be
     # good to figure an efficient way to do so.
     export PATH=$HOME/.linuxbrew/bin:$HOME/.linuxbrew/sbin:$PATH
-    hash -f
   fi
   ## }}}
 
@@ -96,20 +93,12 @@ if [[ $- == *i* ]]; then
   fi
   ## }}}
 
-  ## slimux {{{
-  # magic environments in order to make slimux work in tmux
-  if [ -d $HOME/.vim/plugged/slimux ]; then
-    case $OSTYPE in
-      Linux*)
-        export EVENT_NOEPOLL=1
-        ;;
-      Darwin*)
-        export EVENT_NOKQUEUE=1
-        export EVENT_NOPOLL=1
-        ;;
-    esac
+  ## kitty {{{
+  if test -n "$KITTY_INSTALLATION_DIR"; then
+    export KITTY_SHELL_INTEGRATION="enabled"
+    source "$KITTY_INSTALLATION_DIR/shell-integration/bash/kitty.bash"
   fi
-  ## }}}
+  ##}}}
 
   # }}}
 
@@ -147,10 +136,37 @@ if [[ $- == *i* ]]; then
 
     echo "$dev_info_msg"
   }
+  function get_termbg() {
+    oldstty=$(stty -g)
+    stty raw -echo min 0 time 1
+    # terminal escape sequence to get the terminal background color
+    # only works in xterms
+    # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Operating-System-Commands
+    printf '\033]11;?\033\\'
+    sleep 0.00000001
+    read -r termbg
+    stty $oldstty
+    local termbg=$(echo $termbg | sed 's/.*\(rgb:[0-9a-f/]*\).*/\1/')
+    if [[ $termbg == "rgb:f8f8/fbfb/f8f8" ]]; then
+      export THEME="leuven"
+    elif [[ $termbg == "rgb:2828/2a2a/3636" ]]; then
+      export THEME="dracula"
+    fi
+  }
+  export THEME=""
+  get_termbg
   function _ps1() {
-    local color='$(if [[ $? == 0 ]]; then echo "\[\e[00;30m\]";else echo "\[\e[00;31m\]"; fi)'
+
     local info='[\h \u]:\W \$'
-    local reset_color='\[\e[0m\] \[\e[33m\]'
+    local color=""
+    local reset_color=' '
+    if [[ $THEME == "leuven" ]]; then
+      color='$(if [[ $? == 0 ]]; then echo "\[\e[48:5:11m\]";else echo "\[\e[38:5:1m\]\[\e[48:5:9m\]"; fi)'
+      reset_color='\[\e[0m\] '
+    elif [[ $THEME == "dracula" ]]; then
+      color='$(if [[ $? == 0 ]]; then echo "\[\e[00;30m\]";else echo "\[\e[00;31m\]"; fi)'
+      reset_color='\[\e[0m\] \[\e[33m\]'
+    fi
     printf %s "$color$(_precmd_ps1)$info$reset_color"
     return 0
   }
