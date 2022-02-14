@@ -68,3 +68,12 @@ texlive:
 julia:
 	mkdir -p $(workspace)/.julia/config/
 	ln -fs $(dotfiles)/startup.jl $(workspace)/.julia/config
+
+
+$(workspace)/.config/kitty:
+	mkdir -p $(workspace)/.config/kitty/themes
+
+kitty/%: $(workspace)/.config/kitty
+	ln -fs $(dotfiles)/$@ $(workspace)/.config/$@
+
+kitty: $(shell find kitty -type f)
