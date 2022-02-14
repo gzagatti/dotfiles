@@ -167,6 +167,7 @@ if [[ $- == *i* ]]; then
     fi
     return
   }
+  export THEME=""
   # inspired by
   # https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples#L51
   precmd_ps1() {
@@ -183,18 +184,17 @@ if [[ $- == *i* ]]; then
     read -r termbg
     stty $oldstty
     local termbg=$(echo $termbg | sed 's/.*\(rgb:[0-9a-f/]*\).*/\1/')
-    local theme=""
     if [[ $termbg == "rgb:f8f8/fbfb/f8f8" ]]; then
-      theme="leuven"
+      THEME="leuven"
     elif [[ $termbg == "rgb:2828/2a2a/3636" ]]; then
-      theme="dracula"
+      THEME="dracula"
     fi
 
     # https://zsh.sourceforge.io/Doc/Release/Prompt-Expansion.html#Visual-effects
     color=""
-    if [[ $theme == "leuven" ]]; then
+    if [[ $THEME == "leuven" ]]; then
       color='%(?.%K{11}.%K{9}%F{1})'
-    elif [[ $theme == "dracula" ]]; then
+    elif [[ $THEME == "dracula" ]]; then
       color='%(?.%F{black}.%F{red})'
     fi
     local host_info_msg="[%m %n]:%1~ %#"
@@ -225,9 +225,9 @@ if [[ $- == *i* ]]; then
       dev_info_msg="(${dev_info_msg})"
     fi
 
-    if [[ $theme = "leuven" ]]; then
+    if [[ $THEME = "leuven" ]]; then
       PS1="$color${dev_info_msg}${host_info_msg}%k%f "
-    elif [[ $theme = "dracula" ]]; then
+    elif [[ $THEME = "dracula" ]]; then
       PS1="$color${dev_info_msg}${host_info_msg}%F{yellow} "
     else
       PS1="$color${dev_info_msg}${host_info_msg} "
