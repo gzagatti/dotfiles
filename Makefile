@@ -70,10 +70,10 @@ julia:
 	ln -fs $(dotfiles)/startup.jl $(workspace)/.julia/config
 
 
-$(workspace)/.config/kitty:
-	mkdir -p $(workspace)/.config/kitty/themes
+$(workspace)/.config/kitty/themes:
+	mkdir -p $(workspace)/.config/kitty/themes/
 
-kitty/%: $(workspace)/.config/kitty
+kitty/%: $(workspace)/.config/kitty/themes
 	ln -fs $(dotfiles)/$@ $(workspace)/.config/$@
 
 kitty: $(shell find kitty -type f)
