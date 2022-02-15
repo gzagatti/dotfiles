@@ -25,20 +25,26 @@ if [[ $- == *i* ]]; then
   export HISTSIZE=$SAVEHIST
   # }}}
 
+  # Theme {{{
+  # https://gist.github.com/thomd/7667642
+  # https://geoff.greer.fm/lscolors/
+  export THEME=""
+  export CLICOLOR=1
+  export LSCOLORS="excxhxDxbxhxhxhxhxfxfx"
+  export LS_COLORS=""
+  if [[ $THEME == "leuven" ]]; then
+    LS_COLORS="no=00:fi=00:di=34::ln=32;102:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
+  elif [[ $THEME == "dracula" ]]; then
+    LS_COLORS="no=00:fi=00:di=34::ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
+  fi
+  # }}}
+
   # Program specific {{{
 
   ## PATH {{{
   # add ~/.local/bin to PATH, before looking for other commands
   export PATH=$HOME/.local/bin:$PATH
   hash -f
-  ## }}}
-
-  ## ls {{{
-  # color scheme
-  # https://geoff.greer.fm/lscolors/
-  export CLICOLOR=1
-  export LSCOLORS="excxhxDxbxhxhxhxhxfxfx"
-  export LS_COLORS="no=00:fi=00:di=34::ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
   ## }}}
 
   ## brew {{{
@@ -167,7 +173,6 @@ if [[ $- == *i* ]]; then
     fi
     return
   }
-  export THEME=""
   # inspired by
   # https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples#L51
   precmd_ps1() {
@@ -194,8 +199,10 @@ if [[ $- == *i* ]]; then
     color=""
     if [[ $THEME == "leuven" ]]; then
       color='%(?.%K{11}.%K{9}%F{1})'
+      LS_COLORS="no=00:fi=00:di=34::ln=32;102:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
     elif [[ $THEME == "dracula" ]]; then
       color='%(?.%F{black}.%F{red})'
+      LS_COLORS="no=00:fi=00:di=34::ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
     fi
     local host_info_msg="[%m %n]:%1~ %#"
     local dev_info_msg

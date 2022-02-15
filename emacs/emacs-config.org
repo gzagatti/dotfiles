@@ -317,7 +317,7 @@ First, I download icon fonts commonly used in Emacs, which will ensure that pack
 Next, it is time to select the default font used in most buffers. Since the majority of buffers contain source code, it is desirable to select a monospaced font. To ensure that Emacs can find the correct font in GTK-based systems, it is necessary to ensure that Emacs builds with GTK-3 support --- use the flag  ~--with-x-toolkit=gtk3~ during the build process.
 
 #+begin_src elisp
-(set-face-attribute 'default nil :font "Cousine Nerd Font Mono" :height 104
+(set-face-attribute 'default nil :font "Cousine Nerd Font" :height 104
   :weight 'normal :width 'normal)
 #+end_src
 
