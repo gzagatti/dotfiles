@@ -48,23 +48,21 @@ if [[ $- == *i* ]]; then
   ## }}}
 
   ## brew {{{
-  if hash brew &>/dev/null; then
-    export PATH=$(brew --prefix)/bin:$(brew --prefix)/sbin:$PATH
-    export FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
-    hash -f
-  elif [ -f $HOME/.linuxbrew/bin/brew ]; then
+  if [ -f $HOME/.linuxbrew/bin/brew ]; then
     export HOMEBREW_PREFIX=$HOME/.linuxbrew
   elif [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
     export HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
+  elif hash brew &>/dev/null && [[ -z "$HOMEBREW_PREFIX" ]]; then
+    export HOMEBREW_PREFIX=$(brew --prefix)
   fi
 
-  if [ -n "$HOMEBREW_PREFIX" ]; then
+  if [[ -n "$HOMEBREW_PREFIX" ]]; then
     export HOMEBREW_CELLAR=$HOMEBREW_PREFIX/Cellar
     export HOMEBREW_REPOSITORY=$HOMEBREW_PREFIX/Homebrew
-    export MANPATH=$HOMEBREW_PREFIX/share/man::
-    export INFOPATH=$HOMEBREW_PREFIX/share/info:
-    export PATH=$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH
-    export FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+    export MANPATH="$HOMEBREW_PREFIX/share/man${MANPATH+:$MANPATH}:"
+    export INFOPATH="$HOMEBREW_PREFIX/share/info:${INFOPATH:-}"
+    export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/bin/sbin${PATH+:$PATH}"
+    export FPATH="$HOMEBREW_PREFIX/share/zsh/site-functions:${FPATH+:$FPATH}"
     hash -f
   fi
   ## }}}
@@ -133,6 +131,40 @@ if [[ $- == *i* ]]; then
     if hash emacs 2>/dev/null; then
       alias emacs="TERM=xterm-emacs emacs -nw"
     fi
+  fi
+  ##}}}
+
+  ## nnn {{{
+  # https://github.com/jarun/nnn
+  if hash nnn 2>/dev/null; then
+    n ()
+    {
+        # Block nesting of nnn in subshells
+        if [ -n $NNNLVL ] && [ "${NNNLVL:-0}" -ge 1 ]; then
+            echo "nnn is already running"
+            return
+        fi
+
+        # The behaviour is set to cd on quit (nnn checks if NNN_TMPFILE is set)
+        # To cd on quit only on ^G, either remove the "export" as in:
+        #    NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
+        #    (or, to a custom path: NNN_TMPFILE=/tmp/.lastd)
+        # or, export NNN_TMPFILE after nnn invocation
+        export NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
+
+        # Unmask ^Q (, ^V etc.) (if required, see `stty -a`) to Quit nnn
+        # stty start undef
+        # stty stop undef
+        # stty lwrap undef
+        # stty lnext undef
+
+        nnn "$@"
+
+        if [ -f "$NNN_TMPFILE" ]; then
+                . "$NNN_TMPFILE"
+                rm -f "$NNN_TMPFILE" > /dev/null
+        fi
+    }
   fi
   ##}}}
 
