@@ -18,29 +18,31 @@ if [[ $- == *i* ]]; then
   # https://gist.github.com/thomd/7667642
   # https://geoff.greer.fm/lscolors/
   function get_termbg() {
-    oldstty=$(stty -g)
-    stty raw -echo min 0 time 1
-    # terminal escape sequence to get the terminal background color
-    # only works in xterms
-    # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Operating-System-Commands
-    printf '\033]11;?\033\\'
-    sleep 0.00000001
-    read -r termbg
-    stty $oldstty
-    local termbg=$(echo $termbg | sed 's/.*\(rgb:[0-9a-f/]*\).*/\1/')
-    if [[ $termbg == "rgb:f8f8/fbfb/f8f8" ]]; then
-      export THEME="leuven"
-    elif [[ $termbg == "rgb:2828/2a2a/3636" ]]; then
-      export THEME="dracula"
+    if [[ "$TERM" == "xterm-"* ]]; then
+      oldstty=$(stty -g)
+      stty raw -echo min 0 time 1
+      # terminal escape sequence to get the terminal background color
+      # only works in xterms
+      # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Operating-System-Commands
+      printf '\033]11;?\033\\'
+      sleep 0.00000001
+      read -r termbg
+      stty $oldstty
+      local termbg=$(echo $termbg | sed 's/.*\(rgb:[0-9a-f/]*\).*/\1/')
+      if [[ $termbg == "rgb:f8f8/fbfb/f8f8" ]]; then
+        export THEME="leuven"
+      elif [[ $termbg == "rgb:2828/2a2a/3636" ]]; then
+        export THEME="dracula"
+      fi
     fi
   }
-  export THEME=""
+  if [[ -z "$THEME" ]]; then export THEME=""; fi
   get_termbg
   export CLICOLOR=1
   export LSCOLORS="excxhxDxbxhxhxhxhxfxfx"
   export LS_COLORS=""
   if [[ $THEME == "leuven" ]]; then
-    LS_COLORS="no=00:fi=00:di=34::ln=32;102:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
+    LS_COLORS="no=00:fi=00:di=34::ln=32;102:so=37;107:pi=1;33:ex=31:bd=37;107:cd=37;107:su=37;107:sg=37;107:tw=35:ow=35"
   elif [[ $THEME == "dracula" ]]; then
     LS_COLORS="no=00:fi=00:di=34::ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
   fi
