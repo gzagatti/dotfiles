@@ -59,6 +59,15 @@ rofi/%: $(workspace)/.config/rofi
 
 rofi: $(shell find rofi -type f)
 
+# NNN
+$(workspace)/.config/nnn/plugins:
+	mkdir -p $@
+
+nnn/%: $(workspace)/.config/nnn/plugins
+	ln -fs $(dotfiles)/$@ $(workspace)/.config/$@
+
+nnn: $(shell find nnn -type f)
+
 
 # SINGLE FILE CONFIGS
 alacritty:
