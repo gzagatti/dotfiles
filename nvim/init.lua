@@ -224,13 +224,34 @@ require'packer'.startup {function (use)
 
   ---tree {{{
   --  file management from within Vim
-  use {
+  --[[ use {
     'kyazdani42/nvim-tree.lua',
     requires = { 'kyazdani42/nvim-web-devicons' },
     config = function()
       vim.api.nvim_set_keymap('', '<f8>', ':NvimTreeToggle<cr>', { noremap = true })
       vim.g['nvim_tree_disable_window_picker'] = 1
       require'nvim-tree'.setup {}
+    end
+  } ]]
+
+  use {
+    'luukvbaal/nnn.nvim',
+    config = function()
+      local builtin = require("nnn").builtin
+      require("nnn").setup {
+        explorer = {
+          cmd = "nnn -G",
+        },
+        auto_open = {
+          empty = true,
+        },
+        mappings = {
+          { "<C-x>", builtin.open_in_split },     -- open file(s) in split
+          { "<C-w>", builtin.cd_to_path },        -- cd to file directory
+        },
+      }
+      vim.api.nvim_set_keymap("", "<f8>", "<cmd>NnnExplorer %:p:h<cr>", { noremap = true })
+      vim.api.nvim_set_keymap("t", "<f8>", "<cmd>NnnExplorer %:p:h<cr>", { noremap = true })
     end
   }
   ---}}}
@@ -241,9 +262,9 @@ require'packer'.startup {function (use)
     'b3nj5m1n/kommentary',
     config = function()
       vim.g.kommentary_create_default_mappings = false
-      vim.api.nvim_set_keymap('n', '<leader>cc', '<plug>kommentary_line_default', {})
-      vim.api.nvim_set_keymap('n', '<leader>c', '<plug>kommentary_motion_default', {})
-      vim.api.nvim_set_keymap('x', '<leader>c', '<plug>kommentary_visual_default', {})
+      vim.api.nvim_set_keymap("n", "<leader>cc", "<plug>kommentary_line_default", {})
+      vim.api.nvim_set_keymap("n", "<leader>c", "<plug>kommentary_motion_default", {})
+      vim.api.nvim_set_keymap("x", "<leader>c", "<plug>kommentary_visual_default", {})
     end
   }
   ---}}}

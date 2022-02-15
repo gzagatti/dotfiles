@@ -12,13 +12,13 @@
 . "$(dirname "$0")"/.nnn-plugin-helper
 
 if [ "$(cmd_exists fzf)" -eq "0" ]; then
-  sel=$(fd . $HOME . --type d | sed "s:^$HOME:~:" | fzf)
+  sel=$(fd . $HOME ./ --type d | awk "{gsub(\"$HOME\",\"~\")}1" | fzf)
 else
   exit 1
 fi
 
 if [ -n "$sel" ]; then
-  sel=$(echo $sel | sed "s:^~:$HOME:")
+  sel=$(echo $sel | awk "{gsub(\"~\",\"$HOME\")}1")
   if ! [ -d "$sel" ]; then
     sel=$(dirname "$sel")
   elif [ "$sel" = "." ]; then
