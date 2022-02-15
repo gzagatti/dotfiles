@@ -255,8 +255,6 @@ if [[ $- == *i* ]]; then
 
   fi
 
-  # }}}
-
   if  [[ $OSTYPE == Darwin* ]]; then
 
     ## turn on/off hidden files visibility {{{
@@ -274,8 +272,10 @@ if [[ $- == *i* ]]; then
 
   fi
 
+  # }}}
+
   # PATH {{{
-  # add ~/bin to PATH
+  # add ~/.local/bin to PATH to the front of the path
   export PATH=$HOME/.local/bin:$PATH
   # removes duplicates from the PATH, given that the above can introduce duplicates
   PATH=`printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}'`

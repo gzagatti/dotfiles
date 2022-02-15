@@ -136,7 +136,6 @@ if [[ $- == *i* ]]; then
 
   ## nnn {{{
   # https://github.com/jarun/nnn
-
   if hash nnn 2>/dev/null; then
     # The behaviour is set to cd on quit (nnn checks if NNN_TMPFILE is set)
     # To cd on quit only on ^G, either remove the "export" as in:
