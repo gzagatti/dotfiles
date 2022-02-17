@@ -9,10 +9,32 @@
 # Shell: POSIX compliant
 # Author: Guilherme Zagatti
 
+# detect whether hidden files are active in nnn
+# not sure how to capture this information
+# INCLUDE_HIDDEN="${INCLUDE_HIDDEN:-0}"
+
+if [ "$PWD" = "$HOME" ]; then
+  DIRS="$HOME"
+else
+  DIRS="$HOME ./"
+fi
+
+if [ "$THEME" = "leuven" ]; then
+    COLOR="--color=light"
+elif [ "$THEME" = "dracula" ]; then
+    COLOR="--color=dark"
+else
+    COLOR="--no-color"
+fi
+
 . "$(dirname "$0")"/.nnn-plugin-helper
 
 if [ "$(cmd_exists fzf)" -eq "0" ]; then
-  sel=$(fd . $HOME ./ --type d | awk "{gsub(\"$HOME\",\"~\")}1" | fzf)
+  # if [ "$INCLUDE_HIDDEN" -eq 0 ]; then
+    sel=$(fd . $DIRS --type d | awk "{gsub(\"$HOME\",\"~\")}1" | fzf $COLOR)
+  # else
+  #   sel=$(fd . $DIRS ./ --type d -H | awk "{gsub(\"$HOME\",\"~\")}1" | fzf $COLOR)
+  # fi
 else
   exit 1
 fi
