@@ -214,7 +214,7 @@ require'packer'.startup {function (use)
       {'kyazdani42/nvim-web-devicons', opt = true},
     },
     config = function ()
-      require'tabline'.setup{}
+      require'tabline'.setup()
       vim.opt.sessionoptions:append('tabpages')
       vim.api.nvim_set_keymap('n', '<leader>1', ':TablineBufferNext<cr>', {})
       vim.api.nvim_set_keymap('n', '<leader>2', ':TablineBufferPrevious<cr>', {})
@@ -246,7 +246,12 @@ require'packer'.startup {function (use)
           empty = true,
         },
         mappings = {
-          { "<C-x>", builtin.open_in_split },     -- open file(s) in split
+          { "<C-x>", function (files)
+              builtin.open_in_split(files)
+              -- go back to nnn buffer
+              vim.cmd [[wincmd W]]
+            end
+          },     -- open file(s) in split
           { "<C-w>", builtin.cd_to_path },        -- cd to file directory
         },
       }
@@ -461,109 +466,118 @@ require'packer'.startup {function (use)
     use {
       'neovim/nvim-lspconfig',
       config = function ()
+
         local lspconfig = require'lspconfig'
 
-        -- on_attach is only called after the language server
-        -- attaches to the buffer
-        local on_attach = function(client, bufnr)
+        local opts = { noremap=true, silent=true }
 
-          print("Attaching ", client.name, " LSP in buffer ", bufnr, "...")
+      -- on_attach is only called after the language server
+      -- attaches to the buffer
+      local on_attach = function(client, bufnr)
 
-          local function buf_set_keymap(...)
-            vim.api.nvim_buf_set_keymap(bufnr, ...)
-          end
+        print("Attaching ", client.name, " LSP in buffer ", bufnr, "...")
 
-          -- Mappings.
-          local opts = { noremap=true, silent=true }
+        -- diagnostic
+        vim.api.nvim_buf_set_keymap(bufnr, 'n', '[telescope]l',
+          '<cmd>Telescope diagnostics theme=get_ivy<cr>', opts)
 
-          -- documentation help
-          buf_set_keymap('n', '<leader>gD',
-            '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
-          buf_set_keymap('n', '<leader>gd',
-            '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-          buf_set_keymap('n', '<leader>gK',
-            '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
+        local diagnostic_hidden = {}
 
-          -- variable management
-          buf_set_keymap('n', '<leader>gn',
-            '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-          buf_set_keymap('n', '<leader>gr',
-            '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-
-          -- diagnostic
-          buf_set_keymap('n', '[telescope]l',
-            '<cmd>Telescope diagnostics theme=get_ivy<cr>', opts)
-
-          local diagnostic_hidden = {}
-
-          function diagnostic_toggle(toggle_bufnr, revert)
-            toggle_bufnr = vim.api.nvim_buf_get_number(toggle_bufnr)
-            print("Toggle diagnostics", toggle_bufnr, diagnostic_hidden[toggle_bufnr])
-            if (diagnostic_hidden[toggle_bufnr] and not revert) or
-              (not diagnostic_hidden[toggle_bufnr] and revert) then
-              vim.diagnostic.enable(toggle_bufnr, nil)
-              diagnostic_hidden[toggle_bufnr] = false
-            else
-              vim.diagnostic.disable(toggle_bufnr, nil)
-              diagnostic_hidden[toggle_bufnr] = true
-            end
-          end
-
-          buf_set_keymap('n', '<leader>gl',
-            '<cmd>lua diagnostic_toggle(0)<cr>', opts)
-
-          -- formatting
-          buf_set_keymap('n', '<leader>gf',
-            '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
-
-          -- language specific
-          if(client.name == 'texlab') then
-            buf_set_keymap('n', '<c-c><c-c>',
-              '<cmd>echo \'Building file.\'<cr><cmd>TexlabBuild<cr>', opts)
+        function diagnostic_toggle(toggle_bufnr, revert)
+          toggle_bufnr = vim.api.nvim_buf_get_number(toggle_bufnr)
+          print("Toggle diagnostics", toggle_bufnr, diagnostic_hidden[toggle_bufnr])
+          if (diagnostic_hidden[toggle_bufnr] and not revert) or
+            (not diagnostic_hidden[toggle_bufnr] and revert) then
+            vim.diagnostic.enable(toggle_bufnr, nil)
+            diagnostic_hidden[toggle_bufnr] = false
+          else
+            vim.diagnostic.disable(toggle_bufnr, nil)
+            diagnostic_hidden[toggle_bufnr] = true
           end
         end
 
-        -- list of servers:
-        -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
-        -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
-        local autostart = false
-        lspconfig.html.setup { on_attach = on_attach, autostart = autostart }
-        lspconfig.julials.setup { on_attach = on_attach, autostart = autostart }
-        lspconfig.pyright.setup { on_attach = on_attach, autostart = autostart }
-        lspconfig.texlab.setup { on_attach = on_attach, autostart = autostart }
-        lspconfig.jsonls.setup { on_attach = on_attach, autostart = autostart }
-        lspconfig.sumneko_lua.setup {
-          on_attach = on_attach,
-          autostart = autostart,
-          settings = {
-            Lua = {
-              diagnostics = {
-                globals = { 'vim' },
-                disable = { "lowercase-global" },
-              },
+        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gl',
+          '<cmd>lua diagnostic_toggle(0)<cr>', opts)
+
+        -- documentation help
+        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gD',
+          '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
+        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gd',
+          '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
+        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gk',
+          '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
+        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gK',
+          '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
+        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gi',
+          '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
+
+        -- variable management
+        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gn',
+          '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
+        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gr',
+          '<cmd>lua vim.lsp.buf.references()<cr>', opts)
+
+        -- formatting
+        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gf',
+          '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
+
+        -- language specific
+        if(client.name == 'texlab') then
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<c-c><c-c>',
+            '<cmd>echo \'Building file.\'<cr><cmd>TexlabBuild<cr>', opts)
+        end
+      end
+
+      -- list of servers:
+      -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
+      -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
+      local autostart = false
+      lspconfig.html.setup { on_attach = on_attach, autostart = autostart }
+      lspconfig.julials.setup { on_attach = on_attach, autostart = autostart }
+      lspconfig.pyright.setup { on_attach = on_attach, autostart = autostart }
+      lspconfig.texlab.setup { on_attach = on_attach, autostart = autostart }
+      lspconfig.jsonls.setup { on_attach = on_attach, autostart = autostart }
+      lspconfig.ccls.setup {
+        on_attach = on_attach,
+        autostart = autostart,
+        init_options = {
+          cache = {
+            directory = ".ccls-cache",
+          }
+        }
+      }
+      lspconfig.sumneko_lua.setup {
+        on_attach = on_attach,
+        autostart = false,
+        settings = {
+          Lua = {
+            diagnostics = {
+              globals = { "vim" },
+              disable = { "lowercase-global" },
             },
           },
-        }
-        lspconfig.solargraph.setup {
-          on_attach = on_attach,
-          autostart = autostart,
-          settings = {
-            solargraph = {
-              diagnostic = true,
-              useBundler = true
-            },
+        },
+      }
+      lspconfig.solargraph.setup {
+        on_attach = on_attach,
+        autostart = autostart,
+        settings = {
+          solargraph = {
+            diagnostic = true,
+            useBundler = true
           },
-        }
-        lspconfig.stylelint_lsp.setup {
-          on_attach = on_attach,
-          autostart = autostart,
-          settings = {
-              stylelintplus = {
-                autoFixOnSave = true,
-                autoFixOnFormat = true
-            },
+        },
+      }
+      lspconfig.stylelint_lsp.setup {
+        on_attach = on_attach,
+        autostart = autostart,
+        settings = {
+            stylelintplus = {
+              autoFixOnSave = true,
+              autoFixOnFormat = true
           },
-        }
+        },
+      }
       end
     }
   ---}}}
@@ -574,16 +588,8 @@ require'packer'.startup {function (use)
       'nvim-orgmode/orgmode',
       requires = { 'nvim-treesitter/nvim-treesitter' },
       config = function ()
-        local treesitter_parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
-        treesitter_parser_config.org = {
-          install_info = {
-            url = 'https://github.com/milisims/tree-sitter-org',
-            revision = 'main',
-            files = {'src/parser.c', 'src/scanner.cc'},
-          },
-          filetype = 'org',
-        }
-        require('orgmode').setup {
+        require'orgmode'.setup_ts_grammar()
+        require'orgmode'.setup {
           mappings = {
             org = {
               org_do_promote = '<h',
@@ -719,7 +725,7 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
-  --asciidoctor {{{
+  ---asciidoctor {{{
   -- asciidoctor support
   use {
     'habamax/vim-asciidoctor',
@@ -856,10 +862,10 @@ require'packer'.startup {function (use)
             enable = true
           },
         }
-        vim.opt.foldmethod = 'expr'
-        vim.foldexpr = require'nvim-treesitter.fold'.get_fold_indic('%d')
-      end
-    }
+      vim.opt.foldmethod = 'expr'
+      vim.opt.foldexpr = 'luaeval(printf(\'require"nvim-treesitter.fold".get_fold_indic(%d)\', v:lnum))'
+    end
+  }
   -- debugging and learning about treesitter
     use {
       'nvim-treesitter/playground',
@@ -867,18 +873,7 @@ require'packer'.startup {function (use)
     }
   ---}}}
 
-  ---theme: dracula {{{
-  use {
-    'dracula/vim',
-    config = function ()
-      vim.cmd [[
-        colorscheme dracula
-      ]]
-    end
-  }
-  ---}}}
-
-  --neorg {{{
+  ---neorg {{{
   use {
     'nvim-neorg/neorg',
     requires = {
@@ -886,7 +881,7 @@ require'packer'.startup {function (use)
       'nvim-treesitter/nvim-treesitter',
       'nvim-neorg/neorg-telescope',
     },
-    config = function()
+    config = function ()
       local treesitter_parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
       treesitter_parser_config.norg_meta = {
         install_info = {
@@ -924,7 +919,51 @@ require'packer'.startup {function (use)
       }
     end,
   }
-  --}}}
+  ---}}}
+
+  ---neogit {{{
+  use {
+    'TimUntersberger/neogit',
+    requires = 'nvim-lua/plenary.nvim',
+    config = function ()
+      require'neogit'.setup {
+        use_magit_keybindings = true,
+        commit_popup = {
+            kind = "split",
+        },
+        -- Change the default way of opening neogit
+        kind = "split",
+        integrations = {
+          -- Neogit only provides inline diffs. If you want a more traditional way to look at diffs, you can use `sindrets/diffview.nvim`.
+          -- The diffview integration enables the diff popup, which is a wrapper around `sindrets/diffview.nvim`.
+          --
+          -- Requires you to have `sindrets/diffview.nvim` installed.
+          -- use {
+          --   'TimUntersberger/neogit',
+          --   requires = {
+          --     'nvim-lua/plenary.nvim',
+          --     'sindrets/diffview.nvim'
+          --   }
+          -- }
+          --
+          diffview = true
+        },
+      }
+    end,
+  }
+  ---}}}
+
+  ---theme: dracula {{{
+  use {
+    'dracula/vim',
+    config = function ()
+      vim.cmd [[
+        colorscheme dracula
+      ]]
+    end
+  }
+  ---}}}
+
   end,
   {
     auto_clean = false,
@@ -942,7 +981,7 @@ require'packer'.startup {function (use)
 ---.vimrc {{{
 --open .vimrc in a horizantal split$
 vim.api.nvim_set_keymap('n', '<leader><f4>', ':split $MYVIMRC<cr>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<leader><f5>', ':luafile $MYVIMRC<cr>:PackerSync<cr>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<leader><f5>', ':luafile $MYVIMRC<cr>:PackerCompile<cr>', { noremap = true })
 ---}}}
 
 ---map j and k such that is based on display lines, not physical ones {{{
