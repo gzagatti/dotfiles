@@ -205,7 +205,7 @@ if [[ $- == *i* ]]; then
   # https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples#L51
   precmd_ps1() {
 
-    if [[ "$TERM" == "xterm-"* ]]; then
+    if [[ "$TERM" == "xterm-"* ]] || [[ "$TERM" == "alacritty" ]]; then
       # https://gist.github.com/blueyed/c8470c2aad3381c33ea3
       # https://stackoverflow.com/questions/2507337/how-to-determine-a-terminals-background-color
       local oldstty=$(stty -g)

@@ -18,7 +18,7 @@ if [[ $- == *i* ]]; then
   # https://gist.github.com/thomd/7667642
   # https://geoff.greer.fm/lscolors/
   function get_termbg() {
-    if [[ "$TERM" == "xterm-"* ]]; then
+    if [[ "$TERM" == "xterm-"* ]] || [[ "$TERM" == "alacritty" ]]; then
       oldstty=$(stty -g)
       stty raw -echo min 0 time 1
       # terminal escape sequence to get the terminal background color
