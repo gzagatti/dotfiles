@@ -409,8 +409,6 @@ The ~powerline~ package brings Vim-like support to the Emacs mode-line and ensur
 
 It is convenient to have direct access to the system clipboard since it allows me to quickly move arbitrary text in and out of Emacs.
 
-# The main objective of this section is to avoid poluting the system clipboard. When editing text in a text editor, it is fairly common to copy-and-paste as way to move sections of the text around. I would like to avoid that these random pieces of text leak to the system clipboard since I prefer to use it to move text between applications. Therefore, I deactivate the system clipboard by default.
-
 #+begin_src elisp
 (custom-set-variables '(select-enable-clipboard t))
 #+end_src
@@ -434,9 +432,10 @@ Additionally, I emulate copy and paste shortcuts that I often use in Vim the yan
       ;; does not check if the option might originally be true
       (clipboard-yank)))
 (evil-define-key '(normal visual) 'global (kbd "<leader>p") 'paste-clipboard)
+
 #+end_src
 
-More info on copy-and-paste in Emacs can be found in the [[https://www.emacswiki.org/emacs/CopyAndPastej][Wiki]].
+More info on copy-and-paste in Emacs can be found in the [[https://www.emacswiki.org/emacs/CopyAndPastej][Wiki]]. Copy and paste will not work in tty Emacs, as described [[https://hugoheden.wordpress.com/2009/03/08/copypaste-with-emacs-in-terminal/][here]]. It is possible to implement it using ~xsel~ or similar programs, but if the terminal emulator has copy/paste functionality there is really no need for that.
 
 *** Line wrapping
 
