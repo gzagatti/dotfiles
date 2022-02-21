@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+
+# Description: Find and list files by mime type in smart context.
+#
+# It should only be used in small directories as search can take time.
+#
+# Inspired on the version by Arun Prakash Jana
+#
+# Shell: POSIX compliant
+# Author: Guilherme Zagatti
+
+. "$(dirname "$0")"/.nnn-plugin-helper
+
+printf "mime (e.g., video/audio/image): "
+read -r mime
+
+printf "%s" "+l" > "$NNN_PIPE"
+fd . --strip-cwd-prefix | file -if- | awk -F: "\$2 ~ /$mime/ { printf \"%s\\0\", \"$PWD/\" \$1; system(\"\") }" > "$NNN_PIPE"
