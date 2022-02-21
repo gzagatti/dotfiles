@@ -533,6 +533,30 @@ modes explicitly listed in `+word-wrap-disabled-modes'."
 (evil-define-key 'normal 'global (kbd "<leader>dt") 'whitespace-cleanup)
 #+end_src
 
+*** Window management
+
+Emacs has the tendency to disrupt your perfectly tuned window configuration whenever the wrong command is invoked. Fortunately, ~winner-mode~ comes to rescue. It maintains a stack of previous window configurations and allows one to undo any window command.
+
+#+begin_src elisp
+(winner-mode)
+#+end_src
+
+I also take advantage of ~winner-mode~ to define a function that allows me toggle between zooming in and out of the current window. When there are multiple windows open, ~window-split-toggle-one-window~ will delete all the other windows allowing me to focus on the current window. Alternatively, when there is only a single window on display, the function will attempt to revert to the previous configuration. (This function is inspired by an answer to a question in [[https://emacs.stackexchange.com/questions/20511/quick-way-to-close-all-but-one-window-and-then-revert-to-previous-window-setup][Stack Exchange]].)
+
+#+begin_src elisp
+(defun window-split-toggle-one-window ()
+  "Make the current window fill the frame.
+
+If there is only one window try reverting to the most recently saved window configuration."
+  (interactive)
+  (if (and winner-mode
+      (eq winner-undo-frame (selected-frame))
+      (not (window-parent)))
+    (winner-undo)
+    (delete-other-windows)))
+(global-set-key (kbd "C-x 1") 'window-split-toggle-one-window)
+#+end_src
+
 ** Third-party packages
 
 *** Neotree
