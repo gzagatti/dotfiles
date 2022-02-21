@@ -392,6 +392,7 @@ To easily switch between themes, I define a function that toggles between Leuven
   (cond
     ((eq (car custom-enabled-themes) 'leuven) (progn (disable-theme 'leuven) (enable-theme 'dracula)))
     ((eq (car custom-enabled-themes) 'dracula) (progn (disable-theme'dracula) (enable-theme 'leuven)))))
+(if (string= (getenv "THEME") "leuven") (progn (disable-theme 'dracula) (enable-theme 'leuven)))
 #+end_src
 
 *** Powerline
