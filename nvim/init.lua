@@ -247,12 +247,14 @@ require'packer'.startup {function (use)
         },
         mappings = {
           { "<C-x>", function (files)
+              -- open file(s) in split
               builtin.open_in_split(files)
               -- go back to nnn buffer
               vim.cmd [[wincmd W]]
             end
-          },     -- open file(s) in split
-          { "<C-w>", builtin.cd_to_path },        -- cd to file directory
+          },
+          -- cd to file directory
+          { "<C-w>", builtin.cd_to_path },
         },
       }
       vim.api.nvim_set_keymap("", "<f8>", "<cmd>NnnExplorer %:p:h<cr>", { noremap = true })
@@ -471,75 +473,74 @@ require'packer'.startup {function (use)
 
         local opts = { noremap=true, silent=true }
 
-      -- on_attach is only called after the language server
-      -- attaches to the buffer
-      local on_attach = function(client, bufnr)
+        -- on_attach is only called after the language server
+        -- attaches to the buffer
+        local on_attach = function(client, bufnr)
 
-        print("Attaching ", client.name, " LSP in buffer ", bufnr, "...")
+          print("Attaching ", client.name, " LSP in buffer ", bufnr, "...")
 
-        -- diagnostic
-        vim.api.nvim_buf_set_keymap(bufnr, 'n', '[telescope]l',
-          '<cmd>Telescope diagnostics theme=get_ivy<cr>', opts)
+          -- diagnostic
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '[telescope]l',
+            '<cmd>Telescope diagnostics theme=get_ivy<cr>', opts)
 
-        local diagnostic_hidden = {}
+          local diagnostic_hidden = {}
 
-        function diagnostic_toggle(toggle_bufnr, revert)
-          toggle_bufnr = vim.api.nvim_buf_get_number(toggle_bufnr)
-          print("Toggle diagnostics", toggle_bufnr, diagnostic_hidden[toggle_bufnr])
-          if (diagnostic_hidden[toggle_bufnr] and not revert) or
-            (not diagnostic_hidden[toggle_bufnr] and revert) then
-            vim.diagnostic.enable(toggle_bufnr, nil)
-            diagnostic_hidden[toggle_bufnr] = false
-          else
-            vim.diagnostic.disable(toggle_bufnr, nil)
-            diagnostic_hidden[toggle_bufnr] = true
+          function diagnostic_toggle(toggle_bufnr, revert)
+            toggle_bufnr = vim.api.nvim_buf_get_number(toggle_bufnr)
+            print("Toggle diagnostics", toggle_bufnr, diagnostic_hidden[toggle_bufnr])
+            if (diagnostic_hidden[toggle_bufnr] and not revert) or
+              (not diagnostic_hidden[toggle_bufnr] and revert) then
+              vim.diagnostic.enable(toggle_bufnr, nil)
+              diagnostic_hidden[toggle_bufnr] = false
+            else
+              vim.diagnostic.disable(toggle_bufnr, nil)
+              diagnostic_hidden[toggle_bufnr] = true
+            end
+          end
+
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gl',
+            '<cmd>lua diagnostic_toggle(0)<cr>', opts)
+
+          -- documentation help
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gD',
+            '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gd',
+            '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gk',
+            '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gK',
+            '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gi',
+            '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
+
+          -- variable management
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gn',
+            '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gr',
+            '<cmd>lua vim.lsp.buf.references()<cr>', opts)
+
+          -- formatting
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gf',
+            '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
+
+          -- language specific
+          if(client.name == 'texlab') then
+            vim.api.nvim_buf_set_keymap(bufnr, 'n', '<c-c><c-c>',
+              '<cmd>echo \'Building file.\'<cr><cmd>TexlabBuild<cr>', opts)
           end
         end
-
-        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gl',
-          '<cmd>lua diagnostic_toggle(0)<cr>', opts)
-
-        -- documentation help
-        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gD',
-          '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
-        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gd',
-          '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gk',
-          '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
-        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gK',
-          '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
-        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gi',
-          '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
-
-        -- variable management
-        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gn',
-          '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gr',
-          '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-
-        -- formatting
-        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gf',
-          '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
-
-        -- language specific
-        if(client.name == 'texlab') then
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<c-c><c-c>',
-            '<cmd>echo \'Building file.\'<cr><cmd>TexlabBuild<cr>', opts)
-        end
-      end
 
       -- list of servers:
       -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
       -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
-      local autostart = false
-      lspconfig.html.setup { on_attach = on_attach, autostart = autostart }
-      lspconfig.julials.setup { on_attach = on_attach, autostart = autostart }
-      lspconfig.pyright.setup { on_attach = on_attach, autostart = autostart }
-      lspconfig.texlab.setup { on_attach = on_attach, autostart = autostart }
-      lspconfig.jsonls.setup { on_attach = on_attach, autostart = autostart }
+      lspconfig.html.setup { on_attach = on_attach, autostart = false }
+      lspconfig.julials.setup { on_attach = on_attach, autostart = false }
+      lspconfig.pyright.setup { on_attach = on_attach, autostart = false }
+      lspconfig.texlab.setup { on_attach = on_attach, autostart = false }
+      lspconfig.jsonls.setup { on_attach = on_attach, autostart = false }
       lspconfig.ccls.setup {
         on_attach = on_attach,
-        autostart = autostart,
+        autostart = false,
         init_options = {
           cache = {
             directory = ".ccls-cache",
@@ -560,7 +561,7 @@ require'packer'.startup {function (use)
       }
       lspconfig.solargraph.setup {
         on_attach = on_attach,
-        autostart = autostart,
+        autostart = false,
         settings = {
           solargraph = {
             diagnostic = true,
@@ -570,7 +571,7 @@ require'packer'.startup {function (use)
       }
       lspconfig.stylelint_lsp.setup {
         on_attach = on_attach,
-        autostart = autostart,
+        autostart = false,
         settings = {
             stylelintplus = {
               autoFixOnSave = true,
