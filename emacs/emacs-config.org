@@ -531,8 +531,6 @@ modes explicitly listed in `+word-wrap-disabled-modes'."
 (setq whitespace-display-mappings
 '((tab-mark 9 [62 32 92 92 92]))) ; print tab as > \\\
 (evil-define-key 'normal 'global (kbd "<leader>dt") 'whitespace-cleanup)
-(add-hook 'python-mode-hook '(lambda ()
-  (setq evil-shift-width python-indent-offset)))
 #+end_src
 
 ** Third-party packages
@@ -631,7 +629,6 @@ https://docs.projectile.mx/projectile/usage.html
     (latex-mode . yas-minor-mode))
 #+end_src
 
-
 *** Company mode
 
 https://github.com/vspinu/company-math
@@ -658,6 +655,26 @@ https://github.com/vspinu/company-math
   (global-set-key (kbd "<leader>c") 'evilnc-comment-or-uncomment-lines)
 #+end_src
 
+*** Python
+
+#+begin_src elisp
+(add-hook 'python-mode-hook '(lambda ()
+  (setq evil-shift-width python-indent-offset)
+  (hs-minor-mode)
+  (display-line-numbers-mode)
+  (setq tab-width 4)))
+#+end_src
+
+*** Julia
+
+#+begin_src elisp
+(use-package julia-mode
+  :straight (julia-mode :host github :repo "JuliaEditorSupport/julia-emacs"))
+(use-package lsp-julia
+  :straight (lsp-julia :host github :repo "gdkrmr/lsp-julia")
+  :config
+    (setq lsp-julia-default-environment "~/.julia/environments/v1.7"))
+#+end_src
 
 *** LSP
 
@@ -764,17 +781,6 @@ worth customizing with ~M-x customize group RET ein~
   :straight t
   :config
     (setq ess-use-flymake nil))
-#+end_src
-
-*** Julia
-
-#+begin_src elisp
-  (use-package julia-mode
-    :straight (julia-mode :host github :repo "JuliaEditorSupport/julia-emacs"))
-  (use-package lsp-julia
-    :straight (lsp-julia :host github :repo "gdkrmr/lsp-julia")
-    :config
-      (setq lsp-julia-default-environment "~/.julia/environments/v1.7"))
 #+end_src
 
 *** Lua
