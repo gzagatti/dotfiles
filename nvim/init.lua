@@ -242,6 +242,9 @@ require'packer'.startup {function (use)
         explorer = {
           cmd = "nnn -G",
         },
+        picker = {
+          cmd = "tmux new-session nnn -Pp -G",
+        },
         auto_open = {
           empty = true,
         },
@@ -365,6 +368,9 @@ require'packer'.startup {function (use)
     config = function()
       vim.g['indentLine_concealcursor'] = 'nc'
       vim.g['indentLine_conceallevel'] = 2
+      vim.cmd [[
+        autocmd TermOpen * IndentLinesDisable
+      ]]
     end
   }
   ---}}}
