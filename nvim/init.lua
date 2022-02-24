@@ -486,6 +486,9 @@ require'packer'.startup {function (use)
       'neovim/nvim-lspconfig',
       config = function ()
 
+        vim.api.nvim_set_keymap('n', 'gS', '<cmd>lua vim.lsp.stop_client(vim.lsp.get_active_clients())<cr>', 
+          { noremap = true})
+
         local lspconfig = require'lspconfig'
 
         local opts = { noremap=true, silent=true }
@@ -515,35 +518,39 @@ require'packer'.startup {function (use)
             end
           end
 
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gl',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ll',
             '<cmd>lua diagnostic_toggle(0)<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gL',
+            '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
 
           -- documentation help
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gD',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD',
             '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gd',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd',
             '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gk',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>k',
             '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gK',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',
             '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gi',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi',
             '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
 
           -- variable management
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gn',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gn',
             '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gr',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr',
             '<cmd>lua vim.lsp.buf.references()<cr>', opts)
 
           -- formatting
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gf',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gQ',
             '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
 
           -- language specific
           if(client.name == 'texlab') then
             vim.api.nvim_buf_set_keymap(bufnr, 'n', '<c-c><c-c>',
               '<cmd>echo \'Building file.\'<cr><cmd>TexlabBuild<cr>', opts)
+            vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gt',
+              '<cmd>echo \'Building file.\'<cr><cmd>TexlabForwardSearch<cr>', opts)
           end
         end
 
@@ -553,8 +560,39 @@ require'packer'.startup {function (use)
       lspconfig.html.setup { on_attach = on_attach, autostart = false }
       lspconfig.julials.setup { on_attach = on_attach, autostart = false }
       lspconfig.pyright.setup { on_attach = on_attach, autostart = false }
-      lspconfig.texlab.setup { on_attach = on_attach, autostart = false }
       lspconfig.jsonls.setup { on_attach = on_attach, autostart = false }
+      -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L168
+      lspconfig.texlab.setup {
+        on_attach = on_attach,
+        autostart = false,
+        settings = {
+          texlab = {
+            build = { args = { "-lualatex", "--shell-escape", "-synctex=1", "%f" } },
+            chktex = { onOpenAndSave = true, },
+            formatterLineLengh = 0,
+            forwardSearch = { executable = 'zathura', args = {  '--synctex-forward', '%l:1:%f', '%p' } },
+          },
+        },
+        commands = {
+          TexlabForwardSearch = {
+            function()
+              local pos = vim.api.nvim_win_get_cursor(0)
+              local params = {
+                textDocument = { uri = vim.uri_from_bufnr(0) },
+                position = { line = pos[1] - 1, character = pos[2] },
+              }
+              vim.lsp.buf_request(0, 'textDocument/forwardSearch', params, function(err, _, _, _)
+                if err then
+                  error(tostring(err))
+                end
+              end)
+            end,
+            description = 'Run synctex forward search',
+          },
+        },
+        tsserver = {},
+        vimls = {},
+      }
       lspconfig.ccls.setup {
         on_attach = on_attach,
         autostart = false,
@@ -564,6 +602,7 @@ require'packer'.startup {function (use)
           }
         }
       }
+      -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L153
       lspconfig.sumneko_lua.setup {
         on_attach = on_attach,
         autostart = false,
@@ -572,6 +611,13 @@ require'packer'.startup {function (use)
             diagnostics = {
               globals = { "vim" },
               disable = { "lowercase-global" },
+              runtime = { version = "LuaJIT", path = vim.split(package.path, ';') },
+              workspace = {
+                library = {
+                  [vim.fn.expand "$VIMRUNTIME/lua"] = true,
+                  [vim.fn.expand "$VIMRUNTIME/lua/vim/lsp"] = true,
+                },
+              },
             },
           },
         },
