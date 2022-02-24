@@ -13,6 +13,8 @@
 # not sure how to capture this information
 # INCLUDE_HIDDEN="${INCLUDE_HIDDEN:-0}"
 
+# maybe consider merging two searches one in $HOME and the other in ./
+# https://askubuntu.com/questions/133386/how-to-merge-and-pipe-results-from-two-different-commands-to-single-command
 if [ "$PWD" = "$HOME" ]; then
   DIRS="$HOME"
 else
@@ -30,11 +32,11 @@ fi
 . "$(dirname "$0")"/.nnn-plugin-helper
 
 if [ "$(cmd_exists fzf)" -eq "0" ]; then
-  # if [ "$INCLUDE_HIDDEN" -eq 0 ]; then
+  if [ "$NNN_INCLUDE_HIDDEN" -eq 1 ]; then
+    sel=$(fd . $DIRS ./ --type d -H | awk "{gsub(\"$HOME\",\"~\")}1" | fzf $COLOR)
+  else
     sel=$(fd . $DIRS --type d | awk "{gsub(\"$HOME\",\"~\")}1" | fzf $COLOR)
-  # else
-  #   sel=$(fd . $DIRS ./ --type d -H | awk "{gsub(\"$HOME\",\"~\")}1" | fzf $COLOR)
-  # fi
+  fi
 else
   exit 1
 fi
