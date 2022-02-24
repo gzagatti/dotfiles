@@ -262,6 +262,7 @@ require'packer'.startup {function (use)
       }
       vim.api.nvim_set_keymap("", "<f8>", "<cmd>NnnExplorer %:p:h<cr>", { noremap = true })
       vim.api.nvim_set_keymap("t", "<f8>", "<cmd>NnnExplorer %:p:h<cr>", { noremap = true })
+      vim.api.nvim_set_keymap("", "[telescope]/", "<cmd>NnnPicker %:p:h<cr>", { noremap = true })
     end
   }
   ---}}}
@@ -272,6 +273,7 @@ require'packer'.startup {function (use)
     'b3nj5m1n/kommentary',
     config = function()
       vim.g.kommentary_create_default_mappings = false
+      require'kommentary.config'.configure_language("default", { prefer_single_line_comments = true, })
       vim.api.nvim_set_keymap("n", "<leader>cc", "<plug>kommentary_line_default", {})
       vim.api.nvim_set_keymap("n", "<leader>c", "<plug>kommentary_motion_default", {})
       vim.api.nvim_set_keymap("x", "<leader>c", "<plug>kommentary_visual_default", {})
@@ -455,11 +457,20 @@ require'packer'.startup {function (use)
     'nvim-telescope/telescope.nvim',
     requires = { 'nvim-telescope/telescope-file-browser.nvim' },
    config = function ()
-      require'telescope'.setup {}
-      require'telescope'.load_extension 'file_browser'
+      require'telescope'.setup {
+        defaults = {
+          mappings = {
+            i = {
+              ["<c-g>"] = "close",
+            },
+            n = {
+              ["<c-g>"] = "close",
+            },
+          },
+        },
+      }
       vim.api.nvim_set_keymap('n', '[telescope]', '', { noremap = true })
       vim.api.nvim_set_keymap('n', '<space>', '[telescope]', {})
-      vim.api.nvim_set_keymap('n', '[telescope]/', '<cmd>Telescope file_browser theme=get_ivy<cr>', { noremap = true })
       vim.api.nvim_set_keymap('n', '[telescope]f', '<cmd>Telescope live_grep theme=get_ivy<cr>', { noremap = true })
       vim.api.nvim_set_keymap('n', '[telescope]y', '<cmd>Telescope registers theme=get_ivy<cr>', { noremap = true })
       vim.api.nvim_set_keymap('n', '[telescope]b', '<cmd>Telescope buffers theme=get_ivy<cr>', { noremap = true })
