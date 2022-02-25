@@ -372,6 +372,7 @@ require'packer'.startup {function (use)
       vim.g['indentLine_conceallevel'] = 2
       vim.cmd [[
         autocmd TermOpen * IndentLinesDisable
+        autocmd Filetype * if &ft ==# "help" | :IndentLinesDisable | endif
       ]]
     end
   }
