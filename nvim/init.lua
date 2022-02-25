@@ -487,7 +487,8 @@ require'packer'.startup {function (use)
       'neovim/nvim-lspconfig',
       config = function ()
 
-        vim.api.nvim_set_keymap('n', 'gS', '<cmd>lua vim.lsp.stop_client(vim.lsp.get_active_clients())<cr>', 
+        ----config {{{
+        vim.api.nvim_set_keymap('n', 'gS', '<cmd>lua vim.lsp.stop_client(vim.lsp.get_active_clients())<cr>',
           { noremap = true})
 
         local lspconfig = require'lspconfig'
@@ -554,14 +555,58 @@ require'packer'.startup {function (use)
               '<cmd>echo \'Building file.\'<cr><cmd>TexlabForwardSearch<cr>', opts)
           end
         end
+        ----}}}
 
-      -- list of servers:
+      ----servers {{{
       -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
       -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
+
+      -----html {{{
+      -- server deployed with npm
       lspconfig.html.setup { on_attach = on_attach, autostart = false }
+      -----}}}
+
+      -----julia {{{
+      -- server deployed with Julia
       lspconfig.julials.setup { on_attach = on_attach, autostart = false }
+      -----}}}
+
+      -----python {{{
+      -- server deployed with Homebrew
       lspconfig.pyright.setup { on_attach = on_attach, autostart = false }
+      -----}}}
+
+      -----json {{{
+      -- server deployed with npm
       lspconfig.jsonls.setup { on_attach = on_attach, autostart = false }
+      -----}}}
+
+      -----text {{{
+      -- server deployed with Homebrew
+      lspconfig.ltex.setup{
+        on_attach = on_attach,
+        autostart = false,
+        settings = {
+          ltex = {
+            disabledRules = {
+              ["en"]    = { "MORFOLOGIK_RULE_EN"    },
+              ["en-AU"] = { "MORFOLOGIK_RULE_EN_AU" },
+              ["en-CA"] = { "MORFOLOGIK_RULE_EN_CA" },
+              ["en-GB"] = { "MORFOLOGIK_RULE_EN_GB" },
+              ["en-NZ"] = { "MORFOLOGIK_RULE_EN_NZ" },
+              ["en-US"] = { "MORFOLOGIK_RULE_EN_US" },
+              ["en-ZA"] = { "MORFOLOGIK_RULE_EN_ZA" },
+              ["es"]    = { "MORFOLOGIK_RULE_ES"    },
+              ["it"]    = { "MORFOLOGIK_RULE_IT_IT" },
+              ["de"]    = { "MORFOLOGIK_RULE_DE_DE" },
+            },
+          },
+        },
+      }
+      -----}}}
+
+      -----latex {{{
+      -- server deployed with Homebrew
       -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L168
       lspconfig.texlab.setup {
         on_attach = on_attach,
@@ -594,6 +639,10 @@ require'packer'.startup {function (use)
         tsserver = {},
         vimls = {},
       }
+      -----}}}
+
+      -----clang {{{
+      -- server deployed with Homebrew
       lspconfig.ccls.setup {
         on_attach = on_attach,
         autostart = false,
@@ -603,6 +652,10 @@ require'packer'.startup {function (use)
           }
         }
       }
+      -----}}}
+
+      -----lua {{{
+      -- server deployed internally
       -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L153
       lspconfig.sumneko_lua.setup {
         on_attach = on_attach,
@@ -623,6 +676,10 @@ require'packer'.startup {function (use)
           },
         },
       }
+      -----}}}
+
+      -----ruby {{{
+      -- server deployed with Homebrew
       lspconfig.solargraph.setup {
         on_attach = on_attach,
         autostart = false,
@@ -633,6 +690,10 @@ require'packer'.startup {function (use)
           },
         },
       }
+      -----}}}
+
+      -----css {{{
+      -- server deployed with Homebrew
       lspconfig.stylelint_lsp.setup {
         on_attach = on_attach,
         autostart = false,
@@ -643,7 +704,10 @@ require'packer'.startup {function (use)
           },
         },
       }
+      -----}}}
+
       end
+      ----}}}
     }
   ---}}}
 
@@ -821,11 +885,6 @@ require'packer'.startup {function (use)
       ]]
     end
   }
-  ---}}}
-
-  ---language-tool {{{
-  -- LanguageTool grammar checker
-    use { 'vigoux/LanguageTool.nvim' }
   ---}}}
 
   ---sniprun {{{
