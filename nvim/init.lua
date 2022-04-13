@@ -236,7 +236,8 @@ require'packer'.startup {function (use)
   } ]]
 
   use {
-    'luukvbaal/nnn.nvim',
+    'gzagatti/nnn.nvim',
+    branch = 'nnn-tweaks',
     config = function()
       local builtin = require("nnn").builtin
       require("nnn").setup {
@@ -250,20 +251,35 @@ require'packer'.startup {function (use)
           empty = true,
         },
         mappings = {
-          { "<C-x>", function (files)
-              -- open file(s) in split
-              builtin.open_in_split(files)
-              -- go back to nnn buffer
-              vim.cmd [[wincmd W]]
+          {"<C-x>", function (files)
+              local nnnwin
+              for _, win in pairs(vim.api.nvim_tabpage_list_wins(0)) do
+                if vim.api.nvim_buf_get_option(vim.api.nvim_win_get_buf(win), "filetype") == "nnn" then
+                  nnnwin = win
+                  break
+                end
+              end
+              for i, file in ipairs(files) do
+                if i == 1 and vim.api.nvim_buf_get_name(0) == "" then
+                  vim.cmd("edit "..file)
+                else
+                  vim.cmd("split "..file)
+                end
+              end
+              vim.api.nvim_set_current_win(nnnwin)
             end
           },
           -- cd to file directory
-          { "<C-w>", builtin.cd_to_path },
+          {"<C-w>", builtin.cd_to_path },
         },
       }
       vim.api.nvim_set_keymap("", "<f8>", "<cmd>NnnExplorer %:p:h<cr>", { noremap = true })
-      vim.api.nvim_set_keymap("t", "<f8>", "<cmd>NnnExplorer %:p:h<cr>", { noremap = true })
       vim.api.nvim_set_keymap("", "[telescope]/", "<cmd>NnnPicker %:p:h<cr>", { noremap = true })
+      vim.cmd [[
+        augroup nnn
+          autocmd FileType * if &ft ==# "nnn" |:tnoremap <buffer> <f8> q| endif
+        augroup end
+      ]]
     end
   }
   ---}}}
