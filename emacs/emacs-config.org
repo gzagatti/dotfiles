@@ -650,13 +650,15 @@ screencast demo: https://www.youtube.com/watch?v=VvnJQpTFVDc
   (kbd "SPC /") 'counsel-find-file)
 (evil-define-key 'normal 'global
   (kbd "SPC f") 'counsel-rg)
+(evil-define-key 'normal 'flymake-mode
+  (kbd "SPC l") 'flymake-show-diagnostics-buffer)
 #+end_src
 
 *** Hydra
 
 What is hydra https://oremacs.com/2015/01/20/introducing-hydra/
 
-Github repo https://github.com/abo-abo/hydra
+GitHub repo https://github.com/abo-abo/hydra
 
 call hydra with ~Ctrl-O~ when in ivy
 
