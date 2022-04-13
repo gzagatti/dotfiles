@@ -215,6 +215,14 @@ It is also possible to integrate ~straight.el~ with ~use-package~ making it easi
 (setq straight-use-package-by-default t)
 #+end_src
 
+# https://github.com/jwiegley/use-package#getting-started
+# :init is for before a package is loaded
+# :config is for after a package is loaded
+
+# https://github.com/jwiegley/use-package#key-binding
+# does not support key bindings for evil, but those can then be setup in :config
+# :bind to bind key maps
+
 ** Evil mode
 
 The switch to Emacs would not have been possible if it was not for [[https://github.com/emacs-evil/evil][Evil mode]]. This package not only brings Vim keybindings to Emacs but transforms it into a modal editor. Emacs' original interface is one of its big disadvantages. The abuse of the ~[CTRL]~ key and extended keyboard combinations feels clunky. The keyboard strokes are difficult to memorize, and sometimes even to execute. Often, it requires the use of both hands.
