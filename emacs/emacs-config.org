@@ -2,7 +2,7 @@
 
 ** Intro
 
-Orgmode is my main motivation to use Emacs . So there is no better way to start than to implement a [[https://leanpub.com/lit-config/read][literate configuration file]]. The main idea is to provide a self-documenting configuration that tangles narrative and code in the same file.
+Orgmode is my main motivation to use Emacs. So there is no better way to start than to implement a [[https://leanpub.com/lit-config/read][literate configuration file]]. The main idea is to provide a self-documenting configuration that tangles narrative and code in the same file.
 
 With this configuration file, I intend to bring the user experience as close as possible to the experience that I have using Neovim. As a long time Neovim user, I spent many hours curating its configuration file and know what works best for me.
 
@@ -10,7 +10,7 @@ My main souce of inspiration for configuring Emacs is [[https://github.com/hliss
 
 ** Basics
 
-Emacs configuration is written in ~elisp~, so it's useful to know a few things about it:
+Emacs' configuration is written in ~elisp~, so it's useful to know a few things about it:
 
   1. Everything in elisp is a list, so every command is surrounded by paranthesis ~()~.
 
@@ -67,7 +67,7 @@ Emacs works with the concept of [[https://www.gnu.org/software/emacs/manual/html
 
 Behind the scenes, Emacs automatically saves the contents of the buffer to temporary files, unnecessarily polluting the environment. Emacs creates backup files --- suffixed with ~~~ --- when the file is first visited. On top of that, it creates auto-save files --- surrounded with ~#~ --- which are temporary files used to save modifications to the file until it is permanently saved by the user.
 
-If saving is cheap and assuming that changes are permanent unless told otherwise, then files should automatically be saved. Emacs default are undesirable.
+If saving is cheap and assuming that changes are permanent unless told otherwise, then files should automatically be saved. Emacs' default are undesirable.
 
 First, I adjust backup and lock settings.
 
@@ -187,7 +187,7 @@ Most of the time, I will use the keyboard to interact with the text editor. But,
 
 ** Package management
 
-Following Emacs Doom advice, I adopt the [[https://github.com/raxod502/straight.el][~straight.el~]] for package management. This is a purely functional package manager which allows for fine grained package installation and natively supports installation of Git repositories. It thus solves many issues of the default package manager, ~package.el~.
+Following Emacs Doom advice, I adopt the [[https://github.com/raxod502/straight.el][~straight.el~]] for package management. This is a purely functional package manager which allows for fine-grained package installation and natively supports installation of Git repositories. It thus solves many issues of the default package manager, ~package.el~.
 
 Set up instructions for ~straight.el~ comes directly from the package's [[https://github.com/raxod502/straight.el#getting-started][~README~ file]].
 
@@ -263,7 +263,7 @@ Evil does not automatically set a ~<leader>~ key, so I set it up. There are a co
 
 *** Navigation
 
-In neovim, I often navigate between windows and, when using kitty/tmux, between panes with ~[CTRL]~ plus Vim directional keys ~[h], [j], [k], [l]~. Luckily, I adapted these shortcuts for kitty, the repo is available in [[https://github.com/keith/evil-tmux-navigator/][Github]].
+In neovim, I often navigate between windows and, when using kitty/tmux, between panes with ~[CTRL]~ plus Vim directional keys ~[h], [j], [k], [l]~. Luckily, I adapted these shortcuts for kitty, the repo is available in [[https://github.com/keith/evil-tmux-navigator/][GitHub]].
 
 #+begin_src elisp
 (use-package navigate
@@ -314,7 +314,7 @@ First, I download icon fonts commonly used in Emacs, which will ensure that pack
 (use-package all-the-icons :straight t)
 #+end_src
 
-Next, it is time to select the default font used in most buffers. Since the majority of buffers contain source code, it is desirable to select a monospaced font. To ensure that Emacs can find the correct font in GTK-based systems, it is necessary to ensure that Emacs builds with GTK-3 support --- use the flag  ~--with-x-toolkit=gtk3~ during the build process.
+Next, it is time to select the default font used in most buffers. Since the majority of buffers contain source code, it is desirable to select a monospaced font. To ensure that Emacs can find the correct font in GTK-based systems, it is necessary to ensure that Emacs builds with GTK-3 support --- use the flag ~--with-x-toolkit=gtk3~ during the build process.
 
 #+begin_src elisp
 (set-face-attribute 'default nil :font "Cousine Nerd Font" :height 104
@@ -339,7 +339,7 @@ Since my main use case for Emacs is taking notes, I turn ~variable-pitch-mode~ o
 
 I configure two themes. A light theme to use during the day and a dark one for late night sessions.
 
-- Leuven :: this is a bright theme that makes smart use of highlighting much like a highlighter pen to distinguish different syntax elements. Therefore, it does not require the use of too many contrasting font colors resulting in a pleasant experience to the eyes. This is one of Emacs default themes.
+- Leuven :: This is a bright theme that makes smart use of highlighting much like a highlighter pen to distinguish different syntax elements. Therefore, it does not require the use of too many contrasting font colors resulting in a pleasant experience to the eyes. This is one of Emacs default themes.
 
 #+begin_src elisp
 (load-theme 'leuven t)
@@ -360,7 +360,7 @@ I configure two themes. A light theme to use during the day and a dark one for l
 (disable-theme 'leuven)
 #+end_src
 
-- [[https://draculatheme.com][Dracula]] :: this is one the most popular dark themes. It makes extensive use of shades of purple and it is very gentle on the eyes during the night.
+- [[https://draculatheme.com][Dracula]] :: This is one of the most popular dark themes. It makes extensive use of shades of purple, and it is very gentle on the eyes during the night.
 
 #+begin_src elisp
 (use-package dracula-theme
