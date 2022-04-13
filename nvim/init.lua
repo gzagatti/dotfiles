@@ -909,24 +909,6 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
-  ---project {{{
-  -- perior project management solution for neovim
-    use {
-      'ahmedkhalf/project.nvim',
-      config = function ()
-        require'project_nvim'.setup {
-          manual_mode = false,
-          silent_chdir = false,
-        }
-        local ok, telescope = pcall(require, 'telescope')
-        if ok then
-          telescope.load_extension('projects')
-          vim.api.nvim_set_keymap('n', '[telescope]p', ':Telescope projects theme=get_ivy<cr>', {noremap = true})
-        end
-      end
-    }
-  ---}}}
-
   ---luadev {{{
   -- REPL/debug console for nvim lua
     use {
