@@ -1013,3 +1013,10 @@ add-hook is a function. ​'emacs-lisp-mode-hook​ and ​'turn-on-eldoc-mode�
 
 The dot (x . y) shows that this is a cons cell, which is something that has two parts. These parts are called the car and the cdr, and can contain symbols, values, lists, and so on. A cons cell like ("abc" . "def") looks like this:
 
+*margins*
+
+#+begin_src elisp
+(setq-default left-margin-width 1 right-margin-width 2) ; Define new widths.
+ (set-window-buffer nil (current-buffer)) ; Use them now.
+#+end_src
+
