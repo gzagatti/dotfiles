@@ -160,7 +160,7 @@ vim.api.nvim_set_keymap('t', '<c-j>', '<C-\\><C-N><C-w>j', { noremap = true })
 vim.api.nvim_set_keymap('t', '<c-k>', '<C-\\><C-N><C-w>k', { noremap = true })
 vim.api.nvim_set_keymap('t', '<c-l>', '<C-\\><C-N><C-w>l', { noremap = true })
 vim.cmd [[
-  au TermOpen * set nonumber
+  au TermOpen * setlocal nonumber
 ]]
 ---}}}
 --}}}
