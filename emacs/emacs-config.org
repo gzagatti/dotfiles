@@ -873,10 +873,11 @@ worth customizing with ~M-x customize group RET ein~
 (use-package ein
   :straight (ein :host github :repo "millejoh/emacs-ipython-notebook")
   :config
-    (setq ein:polymode t)
+    ;; (setq ein:polymode t)
     (setq ein:worksheet-enable-undo t)
     (setq ein:output-area-inlined-images nil)
-    (setq ein:completion-backend 'ein:use-company-backend))
+    (setq ein:completion-backend 'ein:use-company-backend)
+    (setq ein:query-timeout 5000))
 
 (define-minor-mode ein-mode-my-map
   "Custom ein-mode mappings."
@@ -924,6 +925,9 @@ worth customizing with ~M-x customize group RET ein~
   '(mailcap-user-mime-data '(
     ("kitty @ kitten ./imgviewer.py %s" "image/png" nil)
     ("kitty @ kitten ./imgviewer.py %s" "image/*" nil))))
+
+
+;; (add-hook 'write-contents-functions 'ein:content-file-save)
 #+end_src
 
 *** ESS --- Emacs speaks statistics --- R and other goodies
