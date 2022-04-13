@@ -702,7 +702,8 @@ https://docs.projectile.mx/projectile/usage.html
   :config
     (yas-reload-all)
   :hook
-    (latex-mode . yas-minor-mode))
+    (latex-mode . yas-minor-mode)
+    (ess-r-mode . yas-minor-mode))
 #+end_src
 
 *** Company mode
