@@ -569,7 +569,7 @@ require'packer'.startup {function (use)
             vim.api.nvim_buf_set_keymap(bufnr, 'n', '<c-c><c-c>',
               '<cmd>echo \'Building file.\'<cr><cmd>TexlabBuild<cr>', opts)
             vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gt',
-              '<cmd>echo \'Building file.\'<cr><cmd>TexlabForwardSearch<cr>', opts)
+              '<cmd>TexlabForward<cr>', opts)
           end
         end
         ----}}}
@@ -630,31 +630,12 @@ require'packer'.startup {function (use)
         autostart = false,
         settings = {
           texlab = {
-            build = { args = { "-lualatex", "--shell-escape", "-synctex=1", "%f" } },
+            build = { args = { "-lualatex", "-interaction=nonstopmode", "--shell-escape", "-synctex=1", "%f" } },
             chktex = { onOpenAndSave = true, },
             formatterLineLengh = 0,
-            forwardSearch = { executable = 'zathura', args = {  '--synctex-forward', '%l:1:%f', '%p' } },
+            forwardSearch = { executable = 'zathura', args = {  '--synctex-forward=%l:1:%f', '%p' } },
           },
         },
-        commands = {
-          TexlabForwardSearch = {
-            function()
-              local pos = vim.api.nvim_win_get_cursor(0)
-              local params = {
-                textDocument = { uri = vim.uri_from_bufnr(0) },
-                position = { line = pos[1] - 1, character = pos[2] },
-              }
-              vim.lsp.buf_request(0, 'textDocument/forwardSearch', params, function(err, _, _, _)
-                if err then
-                  error(tostring(err))
-                end
-              end)
-            end,
-            description = 'Run synctex forward search',
-          },
-        },
-        tsserver = {},
-        vimls = {},
       }
       -----}}}
 
