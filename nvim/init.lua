@@ -80,6 +80,7 @@ vim.opt.tags='.git/tags,tags,./tags'
 vim.cmd [[
   highlight SignColumn ctermbg=NONE guibg=NONE
 ]]
+vim.opt.signcolumn = 'number'
 ---}}}
 
 ---status line {{{
