@@ -580,6 +580,45 @@ If there is only one window try reverting to the most recently saved window conf
   (global-set-key [f8] 'neotree-toggle)
 #+end_src
 
+*** Treemacs
+
+# #+begin_src elisp
+# (use-package treemacs
+#   :straight t
+#   :ensure t
+#   :defer t
+#   :config
+#     (treemacs-load-theme "all-the-icons")
+#   :bind
+#   (:map global-map
+#     ("<f8>" . treemacs)))
+# (use-package treemacs-evil
+#   :straight t
+#   :after (treemacs evil)
+#   :ensure t)
+# (use-package treemacs-projectile
+#   :straight t
+#   :after (treemacs projectile)
+#   :ensure t)
+# (use-package treemacs-magit
+#   :straight t
+#   :after (treemacs magit)
+#   :ensure t)
+# (use-package treemacs-all-the-icons
+#   :straight t
+#   :after (treemacs all-the-icons)
+#   :ensure t)
+# #+end_src
+
+*** Treesitter
+
+#+begin_src elisp
+(use-package tree-sitter :straight t)
+(use-package tree-sitter-langs :straight t)
+(global-tree-sitter-mode)
+(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+#+end_src
+
 *** Magit
 
 #+begin_src elisp
