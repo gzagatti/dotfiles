@@ -15,7 +15,7 @@ vim.g.maplocalleader = '\\'
 
 ---mouse {{{
 if vim.fn.has('mouse') then
-  vim.opt.mouse= 'a'
+  vim.opt.mouse= 'nv'
 end
 ---}}}
 
