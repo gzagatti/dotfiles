@@ -549,7 +549,7 @@ modes explicitly listed in `+word-wrap-disabled-modes'."
 Emacs has the tendency to disrupt your perfectly tuned window configuration whenever the wrong command is invoked. Fortunately, ~winner-mode~ comes to rescue. It maintains a stack of previous window configurations and allows one to undo any window command.
 
 #+begin_src elisp
-(winner-mode)
+(winner-mode 1)
 #+end_src
 
 I also take advantage of ~winner-mode~ to define a function that allows me toggle between zooming in and out of the current window. When there are multiple windows open, ~window-split-toggle-one-window~ will delete all the other windows allowing me to focus on the current window. Alternatively, when there is only a single window on display, the function will attempt to revert to the previous configuration. (This function is inspired by an answer to a question in [[https://emacs.stackexchange.com/questions/20511/quick-way-to-close-all-but-one-window-and-then-revert-to-previous-window-setup][Stack Exchange]].)
