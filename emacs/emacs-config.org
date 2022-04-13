@@ -748,38 +748,111 @@ https://github.com/vspinu/company-math
 #+begin_src elisp
 (use-package julia-mode
   :straight (julia-mode :host github :repo "JuliaEditorSupport/julia-emacs"))
-(use-package lsp-julia
-  :straight (lsp-julia :host github :repo "gdkrmr/lsp-julia")
-  :config
-    (setq lsp-julia-default-environment "~/.julia/environments/v1.7"))
 #+end_src
+
+*** LanguageTool
+
+# #+begin_src elisp
+# (use-package flymake-languagetool
+#   :straight t
+#   :ensure t
+#   :hook ((text-mode       . flymake-languagetool-load)
+#          (latex-mode      . flymake-languagetool-load)
+#          (org-mode        . flymake-languagetool-load)
+#          (markdown-mode   . flymake-languagetool-load))
+#   :init
+#     (setq flymake-languagetool-server-jar "/home/linuxbrew/.linuxbrew/Cellar/languagetool/5.6/libexec/languagetool-server.jar"))
+# #+end_src
 
 *** LSP
 
 #+begin_src elisp
-(setq gc-cons-threshold 100000000)
-(setq read-process-output-max (* 1024 1024)) ;; 1mb
-(use-package lsp-mode
-  :straight t
-  :init
-    (setq lsp-keymap-prefix "C-C l")
-  :hook
-    (julia-mode . lsp)
-    (r-mode . lsp)
-    (latex-mode . lsp)
-    (lsp-mode . lsp-enable-which-key-integration)
-  :commands lsp)
-(use-package lsp-pyright
+  (setq gc-cons-threshold 100000000)
+  (setq read-process-output-max (* 1024 1024)) ;; 1mb
+  (use-package lsp-mode
+    :straight t
+    :init
+      (setq lsp-auto-touch-files nil)
+    :hook
+      ;; (r-mode . lsp-deferred)
+      ;; (latex-mode . lsp-deferred)
+      (lsp-mode . lsp-enable-which-key-integration)
+    :commands lsp)
+  (use-package lsp-pyright
+    :straight t
+    :ensure t
+    :hook
+      (python-mode . (lambda ()
+        (require 'lsp-pyright))))
+      ;; (python-mode . (lambda ()
+      ;;   (require 'lsp-pyright)
+      ;;   (lsp-deferred))))
+(use-package lsp-julia
+  :straight (lsp-julia :host github :repo "gdkrmr/lsp-julia")
+  :ensure t
+  :config
+    (setq lsp-julia-default-environment "~/.julia/environments/v1.7")
+    :hook
+      (julia-mode . (lambda ()
+        (require 'lsp-julia))))
+      ;; (julia-mode . (lambda ()
+      ;;   (require 'lsp-julia)
+      ;;   (lsp-deferred))))
+
+;; probably better to use language tool separate from lsp, response is better
+;; and this lsp does not work well with texlab
+(use-package lsp-ltex
   :straight t
   :ensure t
+  :config
+    (setq lsp-ltex-version "15.2.0")
+    (setq lsp-ltex-check-frequency "save")
+    ;; https://github.com/emacs-languagetool/lsp-ltex/issues/5#issuecomment-1003393092
+    (setq lsp-ltex-disabled-rules
+      #s(hash-table size 30 data
+        (
+          "en"    ["MORFOLOGIK_RULE_EN"]
+          "en-AU" ["MORFOLOGIK_RULE_EN_AU"]
+          "en-CA" ["MORFOLOGIK_RULE_EN_CA"]
+          "en-GB" ["MORFOLOGIK_RULE_EN_GB"]
+          "en-NZ" ["MORFOLOGIK_RULE_EN_NZ"]
+          "en-US" ["MORFOLOGIK_RULE_EN_US"]
+          "en-ZA" ["MORFOLOGIK_RULE_EN_ZA"]
+          "es"    ["MORFOLOGIK_RULE_ES"]
+          "it"    ["MORFOLOGIK_RULE_IT_IT"]
+          "de"    ["MORFOLOGIK_RULE_DE_DE"]
+        )))
   :hook
-    (python-mode . (lambda ()
-      (require 'lsp-pyright)
-      (lsp))))
-(use-package lsp-ui :straight t :commands lsp-ui-mode)
-(use-package lsp-ivy :straight t :commands lsp-ivy-workspace-symbol)
-(use-package lsp-treemacs :straight t :commands lsp-ivy-workspace-symbol)
+  (text-mode . (lambda ()
+    (require 'lsp-ltex))))
+  ;; (text-mode . (lambda ()
+  ;;   (require 'lsp-ltex)
+  ;;   (lsp-deferred))))
+  (use-package lsp-latex
+    :straight t
+    :ensure t
+    :init
+      (setq lsp-latex-build-args '("-lualatex" "-interaction=nonstopmode" "--shell-escape" "-synctex=1" "-f" "%f"))
+      (setq lsp-latex-forward-search-executable "zathura")
+      (setq lsp-latex-forward-search-args '("--synctex-forward=%l:1:%f" "%p"))
+    :config
+      (evil-define-key 'normal tex-mode-map (kbd "gt") 'lsp-latex-forward-search)
+    :bind
+      (:map lsp-mode-map
+      ("C-c C-c" . lsp-latex-build))
+    :hook
+    (tex-mode . (lambda ()
+      (require 'lsp-latex))))
+  (use-package lsp-ui :straight t :commands lsp-ui-mode)
+  (use-package lsp-ivy :straight t :commands lsp-ivy-workspace-symbol)
+  (evil-define-key 'normal 'lsp-ui-mode (kbd "<f9>") 'lsp-ui-imenu)
+  (evil-define-key 'normal lsp-ui-imenu-mode-map (kbd "<f9>") 'lsp-ui-imenu--kill)
+  ;; https://emacs-lsp.github.io/lsp-mode/page/faq/#how-do-i-force-lsp-mode-to-forget-the-workspace-folders-for-multi-root
+  (advice-add 'lsp :before (lambda (&rest _args) (eval '(setf (lsp-session-server-id->folders (lsp-session)) (ht)))))
+  ;; (use-package lsp-treemacs :straight t :commands lsp-treemacs-errors-list)
 #+end_src
+
+#+RESULTS:
 
 *** Polymode
 
