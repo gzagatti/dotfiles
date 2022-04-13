@@ -287,11 +287,11 @@ A [[https://learnvimscriptthehardway.stevelosh.com/chapters/07.html][good advice
 
 #+begin_src elisp
 (evil-define-key 'normal 'global (kbd "<leader><f4>")
-  (lambda () (interactive) (
+  #'(lambda () (interactive) (
     window--display-buffer (find-file-noselect "~/.emacs.d/emacs-config.org")
     (split-window (selected-window) nil 'above) 'window)))
 (evil-define-key 'normal 'global (kbd "<leader><f5>")
-  (lambda () (interactive) (load "~/.emacs.d/init.el")))
+  #'(lambda () (interactive) (load "~/.emacs.d/init.el")))
 #+end_src
 
 *** Buffer cloning
@@ -675,11 +675,12 @@ https://github.com/vspinu/company-math
 (use-package company
   :straight t
   :config
-  (add-hook 'after-init-hook '(lambda()
+  (add-hook 'after-init-hook #'(lambda()
     (global-company-mode)
     (setq company-minimum-prefix-length 3)
-    (define-key company-active-map (kbd "<tab>") 'company-select-next)
-    (define-key company-active-map (kbd "<backtab>") 'company-select-previous)
+    (define-key company-active-map (kbd "TAB") #'company-complete-common-or-cycle)
+    (define-key company-active-map (kbd "<backtab>")
+      #'(lambda () (interactive) (company-complete-common-or-cycle -1)))
     (push 'company-math-symbols-unicode company-backends))))
 #+end_src
 
@@ -693,7 +694,7 @@ https://github.com/vspinu/company-math
 *** Python
 
 #+begin_src elisp
-(add-hook 'python-mode-hook '(lambda ()
+(add-hook 'python-mode-hook #'(lambda ()
   (setq evil-shift-width python-indent-offset)
   (hs-minor-mode)
   (display-line-numbers-mode)
@@ -846,7 +847,7 @@ foo @holme2015a @holme2012 @masuda2017
 
   ;; beautiful unicode bullets
   (straight-use-package 'org-bullets)
-  (add-hook 'org-mode-hook '(lambda () (org-bullets-mode 1)))
+  (add-hook 'org-mode-hook #'(lambda () (org-bullets-mode 1)))
 
   ;; indentation
 
