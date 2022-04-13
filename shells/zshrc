@@ -59,10 +59,11 @@ if [[ $- == *i* ]]; then
   if [[ -n "$HOMEBREW_PREFIX" ]]; then
     export HOMEBREW_CELLAR=$HOMEBREW_PREFIX/Cellar
     export HOMEBREW_REPOSITORY=$HOMEBREW_PREFIX/Homebrew
+    # ${parameter+alt_value} if parameter set use alt_value else use null string
     export MANPATH="$HOMEBREW_PREFIX/share/man${MANPATH+:$MANPATH}:"
-    export INFOPATH="$HOMEBREW_PREFIX/share/info:${INFOPATH:-}"
-    export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/bin/sbin${PATH+:$PATH}"
-    export FPATH="$HOMEBREW_PREFIX/share/zsh/site-functions:${FPATH+:$FPATH}"
+    export INFOPATH="$HOMEBREW_PREFIX/share/info${INFOPATH+:$INFOPATH}"
+    export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin${PATH+:$PATH}"
+    export FPATH="$HOMEBREW_PREFIX/share/zsh/site-functions${FPATH+:$FPATH}"
     hash -f
   fi
   ## }}}
@@ -91,7 +92,7 @@ if [[ $- == *i* ]]; then
     eval "$(pyenv init --path)"
     eval "$(pyenv init -)"
     eval "$(pyenv virtualenv-init -)"
-    # export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+    alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew'
   fi
   ## }}}
 
