@@ -676,13 +676,13 @@ Main page: https://docs.projectile.mx/projectile/index.html
 https://docs.projectile.mx/projectile/usage.html
 
 
-#+begin_src elisp
-(use-package projectile
-  :straight (projectile :host github :repo "bbatsov/projectile"))
-(projectile-mode +1)
-(setq projectile-project-search-path '("~/dev/" "~/phd/"))
-(evil-define-key 'normal 'projectile-mode-map (kbd "SPC p") 'projectile-command-map)
-#+end_src
+# #+begin_src elisp
+# (use-package projectile
+#   :straight (projectile :host github :repo "bbatsov/projectile"))
+# (projectile-mode +1)
+# (setq projectile-project-search-path '("~/dev/" "~/phd/"))
+# (evil-define-key 'normal 'projectile-mode-map (kbd "SPC p") 'projectile-command-map)
+# #+end_src
 
 *** Which-key mode
 
