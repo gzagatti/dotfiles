@@ -1069,16 +1069,31 @@ require'packer'.startup {function (use)
   use {
     'dracula/vim',
     config = function ()
-      vim.cmd [[
-        colorscheme dracula
-      ]]
+      -- if (vim.env.THEME == 'dracula') or (vim.env.THEME == nil) then
+        vim.cmd [[
+          colorscheme dracula
+        ]]
+      -- end
     end
   }
   ---}}}
 
+  ---theme: parchment {{{
+  -- use {
+  --   'ajgrf/parchment',
+  --   config = function ()
+  --     if (vim.env.THEME == 'leuven') then
+  --       vim.cmd [[
+  --         colorscheme parchment
+  --       ]]
+  --     end
+  --   end
+  -- }
+  ---}}}
+
   end,
   {
-    auto_clean = false,
+    auto_clean = true,
   }
 }
 
