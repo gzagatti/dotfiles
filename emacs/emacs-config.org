@@ -249,6 +249,9 @@ On top of that, I also install [[https://github.com/emacs-evil/evil-collection][
   help
   neotree
   org
+  lsp-ui-imenu
+  flymake
+  xref
 ))
 #+end_src
 
