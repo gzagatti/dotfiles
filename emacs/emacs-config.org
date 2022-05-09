@@ -971,30 +971,32 @@ foo @holme2015a @holme2012 @masuda2017
 *** Org-mode
 
 #+begin_src elisp
-  ;; hide emphasis markup
-  (setq org-hide-emphasis-markers t)
+;; hide emphasis markup
+(setq org-hide-emphasis-markers t)
 
-  ;; beautiful unicode bullets
-  (straight-use-package 'org-bullets)
-  (add-hook 'org-mode-hook #'(lambda () (org-bullets-mode 1)))
+;; beautiful unicode bullets
+(straight-use-package 'org-bullets)
+(add-hook 'org-mode-hook #'(lambda () (org-bullets-mode 1)))
 
-  ;; indentation
+;; indentation
 
-  ;; fold
-  (setq org-ellipsis " ▼")
-  (setq org-startup-folded t)
-  (setq org-hide-block-startup nil)
+;; fold
+(setq org-ellipsis " ▼")
+(setq org-startup-folded t)
+(setq org-hide-block-startup nil)
 
-  ;; agenda
-  (defvar org-my-inbox-file "~/dev/org/inbox.org")
-  (defvar org-my-general-files "~/dev/org")
-  (setq org-default-notes-file org-my-inbox-file)
-  (add-to-list 'org-agenda-files org-my-general-files)
-  (setq org-refile-targets (quote ((org-agenda-files :maxlevel .2))))
-  (setq org-reverse-note-order t)
+;; agenda
+(setq org-default-notes-file "~/dev/org/inbox.org")
+(setq org-agenda-files '("~/dev/org" "~/dev/org/weekly-planners"))
+(setq org-refile-targets (quote ((org-agenda-files :maxlevel .2))))
+(setq org-reverse-note-order t)
 
-  ;; tab support
-  (setq org-cycle-emulate-tab nil)
+;; tab support
+(setq org-cycle-emulate-tab nil)
+
+;; workflow states
+(setq org-todo-keywords
+  '((sequence "TODO(t)" "|" "POSTPONED(p)" "CANCELLED(c)" "DONE(d)")))
 #+end_src
 
 [[https://github.com/nnicandro/emacs-jupyter][Emacs Jupyter]]: an interface to communicate with Jupyter kernels
