@@ -939,7 +939,14 @@ worth customizing with ~M-x customize group RET ein~
 (use-package ess
   :straight t
   :config
-    (setq ess-use-flymake nil))
+    (setq ess-use-flymake nil)
+    (setq ess-keep-dump-files nil)
+    (setq ess-delete-dump-files t)
+    (setq ess-mode-silently-save nil)
+)
+(add-hook 'ess-mode-hook #'(lambda ()
+  (display-line-numbers-mode)
+  (setq tab-width 2)))
 #+end_src
 
 *** Lua
