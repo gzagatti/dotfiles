@@ -527,7 +527,7 @@ require'packer'.startup {function (use)
         require("org-bullets").setup {
             symbols = { "◉", "○", "✸", "✿" }
         }
-      end
+      end,
     }
   ---}}}
 
