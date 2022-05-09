@@ -487,7 +487,7 @@ require'packer'.startup {function (use)
   use {
     'nvim-telescope/telescope.nvim',
     requires = { 'nvim-telescope/telescope-file-browser.nvim' },
-   config = function ()
+    config = function ()
       require'telescope'.setup {
         defaults = {
           mappings = {
@@ -1111,7 +1111,7 @@ require'packer'.startup {function (use)
 }
 
 -- turn it on for automatic sync and compilation, slows down startup
--- otherwise, just call `:PackerSync' to synchronize it all
+-- otherwise, just call `:PackerSync' to synchronize it all when needed
 --require('packer').sync()
 
 --}}}
@@ -1248,7 +1248,7 @@ end
     endif
   endfunction
 --]]
-vim.api.nvim_set_keymap('', '<f5>', 'ToggleClipboard()', { expr = true })
+-- vim.api.nvim_set_keymap('', '<f5>', 'ToggleClipboard()', { expr = true })
 ---}}}
 
 ---line transposition {{{
