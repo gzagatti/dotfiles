@@ -166,6 +166,15 @@ vim.cmd [[
 --}}}
 
 --plugins {{{
+
+-- development plugins
+-- @param path string
+-- @return string
+-- https://github.com/aspeddro/dotfiles/blob/main/.config/nvim/lua/user/packages.lua
+local here = function(path)
+  return vim.fn.expand '~/dev/' .. path
+end
+
 require'packer'.startup {function (use)
 
   ---packer {{{
