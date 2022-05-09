@@ -13,32 +13,25 @@ options(prompt="R > ", digits=7, show.signif.start=TRUE)
 options(menu.graphics = FALSE)
 
 # store packages in user space
-if (!dir.exists("~/.local/lib/R/library")) {
-  dir.create("~/.local/lib/R/library", recursive=TRUE)
+if (!dir.exists(path.expand("~/.local/lib/R/library"))) {
+  dir.create(path.expand("~/.local/lib/R/library"), recursive=TRUE)
 }
-.libPaths(c("~/.local/lib/R/library", .libPaths()))
+.libPaths(c(path.expand("~/.local/lib/R/library"), .libPaths()))
 
-# do not prompt to save workspace when quitting
-utils::assignInNamespace(
-  "q", function(save = "no", status = 0, runLast = TRUE) {
-    .Internal(quit(save, status, runLast))
-  },
-  "base"
-)
-utils::assignInNamespace(
-  "quit", function(save = "no", status = 0, runLast = TRUE) {
-    .Internal(quit(save, status, runLast))
-  },
-  "base"
-)
+# formatting style
+options(languageserver.formatting_style = function(options) {
+    style <- styler::tidyverse_style(strict=FALSE, indent_by = options$tabSize)
+    style$token$force_assignment_op <- NULL
+    style
+})
 
 # only load in interactive sessions
 if (interactive()) {
   # adjust width automatically
-  wideScreen <- function(howWide=as.numeric(strsplit(system('stty size', intern=T), ' ')[[1]])[2]) {
+  wideScreen <- function(howWide) {
      options(width=as.integer(howWide))
   }
-  wideScreen()
+  wideScreen(as.numeric(strsplit(system('stty size', intern=T), ' ')[[1]])[2])
   # load useful tools
   suppressMessages(requireNamespace("devtools"))
   suppressMessages(requireNamespace("usethis"))
