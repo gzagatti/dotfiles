@@ -423,17 +423,6 @@ require'packer'.startup {function (use)
   use { 'danro/rename.vim' }
   ---}}}
 
-  ---vista {{{
-  -- easy tags navigation
-  use {
-    'liuchengxu/vista.vim',
-    config = function()
-      -- need to make it toggle
-      vim.api.nvim_set_keymap('n', '<f9>', ':Vista nvim_lsp<cr>', { noremap = true })
-    end
-  }
-  ---}}}
-
   ---pencil {{{
   -- rethinking Vim as a tool for writing
   use {
@@ -511,217 +500,6 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
-  ---lsp config {{{
-  -- neovim built-in language server
-    use {
-      'neovim/nvim-lspconfig',
-      config = function ()
-
-        ----config {{{
-        vim.api.nvim_set_keymap('n', 'gS', '<cmd>lua vim.lsp.stop_client(vim.lsp.get_active_clients())<cr>',
-          { noremap = true})
-
-        local lspconfig = require'lspconfig'
-
-        local opts = { noremap=true, silent=true }
-
-        -- on_attach is only called after the language server
-        -- attaches to the buffer
-        local on_attach = function(client, bufnr)
-
-          print("Attaching ", client.name, " LSP in buffer ", bufnr, "...")
-
-          -- diagnostic
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '[telescope]l',
-            '<cmd>Telescope diagnostics theme=get_ivy<cr>', opts)
-
-          local diagnostic_hidden = {}
-
-          function diagnostic_toggle(toggle_bufnr, revert)
-            toggle_bufnr = vim.api.nvim_buf_get_number(toggle_bufnr)
-            print("Toggle diagnostics", toggle_bufnr, diagnostic_hidden[toggle_bufnr])
-            if (diagnostic_hidden[toggle_bufnr] and not revert) or
-              (not diagnostic_hidden[toggle_bufnr] and revert) then
-              vim.diagnostic.enable(toggle_bufnr, nil)
-              diagnostic_hidden[toggle_bufnr] = false
-            else
-              vim.diagnostic.disable(toggle_bufnr, nil)
-              diagnostic_hidden[toggle_bufnr] = true
-            end
-          end
-
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ll',
-            '<cmd>lua diagnostic_toggle(0)<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gL',
-            '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
-
-          -- documentation help
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD',
-            '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd',
-            '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>k',
-            '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',
-            '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi',
-            '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
-
-          -- variable management
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gn',
-            '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr',
-            '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-
-          -- formatting
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gQ',
-            '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
-
-          -- language specific
-          if(client.name == 'texlab') then
-            vim.api.nvim_buf_set_keymap(bufnr, 'n', '<c-c><c-c>',
-              '<cmd>echo \'Building file.\'<cr><cmd>TexlabBuild<cr>', opts)
-            vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gt',
-              '<cmd>TexlabForward<cr>', opts)
-          end
-        end
-        ----}}}
-
-      ----servers {{{
-      -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
-      -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
-
-      -----html {{{
-      -- server deployed with npm
-      lspconfig.html.setup { on_attach = on_attach, autostart = false }
-      -----}}}
-
-      -----julia {{{
-      -- server deployed with Julia
-      lspconfig.julials.setup { on_attach = on_attach, autostart = false }
-      -----}}}
-
-      -----python {{{
-      -- server deployed with Homebrew
-      lspconfig.pyright.setup { on_attach = on_attach, autostart = false }
-      -----}}}
-
-      -----json {{{
-      -- server deployed with npm
-      lspconfig.jsonls.setup { on_attach = on_attach, autostart = false }
-      -----}}}
-
-      -----text {{{
-      -- server deployed with Homebrew
-      lspconfig.ltex.setup{
-        on_attach = on_attach,
-        autostart = false,
-        settings = {
-          ltex = {
-            disabledRules = {
-              ["en"]    = { "MORFOLOGIK_RULE_EN"    },
-              ["en-AU"] = { "MORFOLOGIK_RULE_EN_AU" },
-              ["en-CA"] = { "MORFOLOGIK_RULE_EN_CA" },
-              ["en-GB"] = { "MORFOLOGIK_RULE_EN_GB" },
-              ["en-NZ"] = { "MORFOLOGIK_RULE_EN_NZ" },
-              ["en-US"] = { "MORFOLOGIK_RULE_EN_US" },
-              ["en-ZA"] = { "MORFOLOGIK_RULE_EN_ZA" },
-              ["es"]    = { "MORFOLOGIK_RULE_ES"    },
-              ["it"]    = { "MORFOLOGIK_RULE_IT_IT" },
-              ["de"]    = { "MORFOLOGIK_RULE_DE_DE" },
-            },
-          },
-        },
-      }
-      -----}}}
-
-      -----latex {{{
-      -- server deployed with Homebrew
-      -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L168
-      lspconfig.texlab.setup {
-        on_attach = on_attach,
-        autostart = false,
-        settings = {
-          texlab = {
-            build = { args = { "-lualatex", "-interaction=nonstopmode", "--shell-escape", "-synctex=1", "%f" } },
-            chktex = { onOpenAndSave = true, },
-            formatterLineLengh = 0,
-            forwardSearch = { executable = 'zathura', args = {  '--synctex-forward=%l:1:%f', '%p' } },
-          },
-        },
-      }
-      -----}}}
-
-      -----clang {{{
-      -- server deployed with Homebrew
-      lspconfig.ccls.setup {
-        on_attach = on_attach,
-        autostart = false,
-        init_options = {
-          cache = {
-            directory = ".ccls-cache",
-          }
-        }
-      }
-      -----}}}
-
-      -----lua {{{
-      -- server deployed internally
-      -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L153
-      lspconfig.sumneko_lua.setup {
-        on_attach = on_attach,
-        autostart = false,
-        settings = {
-          Lua = {
-            diagnostics = {
-              globals = { "vim" },
-              disable = { "lowercase-global" },
-              runtime = { version = "LuaJIT", path = vim.split(package.path, ';') },
-              workspace = {
-                library = {
-                  [vim.fn.expand "$VIMRUNTIME/lua"] = true,
-                  [vim.fn.expand "$VIMRUNTIME/lua/vim/lsp"] = true,
-                },
-              },
-            },
-          },
-        },
-      }
-      -----}}}
-
-      -----ruby {{{
-      -- server deployed with Homebrew
-      lspconfig.solargraph.setup {
-        on_attach = on_attach,
-        autostart = false,
-        settings = {
-          solargraph = {
-            diagnostic = true,
-            useBundler = true
-          },
-        },
-      }
-      -----}}}
-
-      -----css {{{
-      -- server deployed with Homebrew
-      lspconfig.stylelint_lsp.setup {
-        on_attach = on_attach,
-        autostart = false,
-        settings = {
-            stylelintplus = {
-              autoFixOnSave = true,
-              autoFixOnFormat = true
-          },
-        },
-      }
-      -----}}}
-
-      end
-      ----}}}
-    }
-  ---}}}
-
   ---orgmode {{{
   -- orgmode clone written in Lua
     use {
@@ -758,7 +536,6 @@ require'packer'.startup {function (use)
   use {
     'hrsh7th/nvim-cmp',
     requires = {
-      'neovim/nvim-lspconfig',
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-buffer',
       'hrsh7th/cmp-path',
@@ -768,6 +545,7 @@ require'packer'.startup {function (use)
       'kdheepak/cmp-latex-symbols',
       'hrsh7th/cmp-nvim-lua',
       'ray-x/cmp-treesitter',
+      'ray-x/lsp_signature.nvim',
     },
     config = function ()
 
@@ -828,14 +606,15 @@ require'packer'.startup {function (use)
         },
       }
 
-      local capabilities = require'cmp_nvim_lsp'.update_capabilities(
-        vim.lsp.protocol.make_client_capabilities())
-
-      for _, v in pairs(require'lspconfig'.available_servers()) do
-        require'lspconfig'[v].setup {
-          capabilities = capabilities,
-        }
-      end
+      -- local capabilities = vim.lsp.protocol.make_client_capabilities()
+      -- capabilities = require'cmp_nvim_lsp'.update_capabilities(capabilities)
+      -- print("HERE3")
+      -- for _, v in pairs(require'lspconfig'.available_servers()) do
+      --   require'lspconfig'[v].setup {
+      --     capabilities = capabilities,
+      --   }
+      -- print("HERE3END")
+      -- end
     end
   }
   ---}}}
@@ -962,8 +741,8 @@ require'packer'.startup {function (use)
           ensure_installed = 'all', -- one of 'all', 'maintained', or a list of languages
           ignore_install = { }, -- List of parsers to ignore installing
           highlight = {
-            enable = true,  -- false will disable the whole extension
-            -- disable = { 'org' },  -- list of language that will be disabled
+            enable = true,
+            -- disable = { 'org' },  -- Remove this to use TS highlighter for some of the highlights (Experimental)
             additional_vim_regex_highlighting = {'org'}, -- Required since TS highlighter doesn't support all syntax features (conceal)
           },
           incremental_selection = {
@@ -1075,6 +854,254 @@ require'packer'.startup {function (use)
         },
       }
     end,
+  }
+  ---}}}
+
+  ---lsp config {{{
+  -- neovim built-in language server
+    use {
+      'neovim/nvim-lspconfig',
+      requires = {
+        'hrsh7th/nvim-cmp',
+      },
+      config = function ()
+
+        ----config {{{
+        local lspconfig = require'lspconfig'
+
+        local capabilities = vim.lsp.protocol.make_client_capabilities()
+        capabilities = require("cmp_nvim_lsp").update_capabilities(capabilities)
+
+        local opts = { noremap=true, silent=true }
+
+        vim.api.nvim_set_keymap('n', 'gS', '<cmd>lua vim.lsp.stop_client(vim.lsp.get_active_clients())<cr>',
+          { noremap = true})
+
+        -- on_attach is only called after the language server
+        -- attaches to the buffer
+        local on_attach = function(client, bufnr)
+
+          print("Attaching ", client.name, " LSP in buffer ", bufnr, "...")
+
+          local ok, lsp_signature = pcall(require, "lsp_signature")
+          if ok then lsp_signature.on_attach() end
+
+          -- diagnostic
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '[telescope]l',
+            '<cmd>Telescope diagnostics theme=get_ivy<cr>', opts)
+
+          local diagnostic_hidden = {}
+
+          function diagnostic_toggle(toggle_bufnr, revert)
+            toggle_bufnr = vim.api.nvim_buf_get_number(toggle_bufnr) print("Toggle diagnostics", toggle_bufnr, diagnostic_hidden[toggle_bufnr])
+            if (diagnostic_hidden[toggle_bufnr] and not revert) or
+              (not diagnostic_hidden[toggle_bufnr] and revert) then
+              vim.diagnostic.enable(toggle_bufnr, nil)
+              diagnostic_hidden[toggle_bufnr] = false
+            else
+              vim.diagnostic.disable(toggle_bufnr, nil)
+              diagnostic_hidden[toggle_bufnr] = true
+            end
+          end
+
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ll',
+            '<cmd>lua diagnostic_toggle(0)<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gL',
+            '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
+
+          -- documentation help
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD',
+            '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd',
+            '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>k',
+            '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',
+            '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi',
+            '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
+
+          -- variable management
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gn',
+            '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr',
+            '<cmd>lua vim.lsp.buf.references()<cr>', opts)
+
+          -- formatting
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gQ',
+            '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
+
+          -- language specific
+          if(client.name == 'texlab') then
+            vim.api.nvim_buf_set_keymap(bufnr, 'n', '<c-c><c-c>',
+              '<cmd>echo \'Building file.\'<cr><cmd>TexlabBuild<cr>', opts)
+            vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gt',
+              '<cmd>TexlabForward<cr>', opts)
+          end
+        end
+
+        local function my_config(config)
+          config = config or {}
+          local defaults = {
+            on_attach = on_attach,
+            autostart = false,
+            capabilities = capabilities,
+          }
+          return vim.tbl_deep_extend("keep", config, defaults)
+        end
+        ----}}}
+
+      ----servers {{{
+      -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
+      -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
+
+      -----html {{{
+      -- server deployed with npm
+      lspconfig.html.setup(my_config())
+      -----}}}
+
+      -----julia {{{
+      -- server deployed with Julia
+      lspconfig.julials.setup(my_config())
+      -----}}}
+
+      -----python {{{
+      -- server deployed with Homebrew
+      lspconfig.pyright.setup(my_config())
+      -----}}}
+
+      -----json {{{
+      -- server deployed with npm
+      lspconfig.jsonls.setup(my_config())
+      -----}}}
+
+      -----text {{{
+      -- server deployed with Homebrew
+      lspconfig.ltex.setup(
+        my_config({
+          settings = {
+            ltex = {
+              disabledRules = {
+                ["en"]    = { "MORFOLOGIK_RULE_EN"    },
+                ["en-AU"] = { "MORFOLOGIK_RULE_EN_AU" },
+                ["en-CA"] = { "MORFOLOGIK_RULE_EN_CA" },
+                ["en-GB"] = { "MORFOLOGIK_RULE_EN_GB" },
+                ["en-NZ"] = { "MORFOLOGIK_RULE_EN_NZ" },
+                ["en-US"] = { "MORFOLOGIK_RULE_EN_US" },
+                ["en-ZA"] = { "MORFOLOGIK_RULE_EN_ZA" },
+                ["es"]    = { "MORFOLOGIK_RULE_ES"    },
+                ["it"]    = { "MORFOLOGIK_RULE_IT_IT" },
+                ["de"]    = { "MORFOLOGIK_RULE_DE_DE" },
+              },
+            },
+          },
+        })
+      )
+      -----}}}
+
+      -----latex {{{
+      -- server deployed with Homebrew
+      -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L168
+      lspconfig.texlab.setup(
+        my_config({
+          settings = {
+            texlab = {
+              build = { args = { "-lualatex", "-interaction=nonstopmode", "--shell-escape", "-synctex=1", "%f" } },
+              chktex = { onOpenAndSave = true, },
+              formatterLineLengh = 0,
+              forwardSearch = { executable = 'zathura', args = {  '--synctex-forward=%l:1:%f', '%p' } },
+            },
+          },
+        })
+      )
+      -----}}}
+
+      -----clang {{{
+      -- server deployed with Homebrew
+      lspconfig.ccls.setup(
+        my_config({
+          init_options = {
+            cache = {
+              directory = ".ccls-cache",
+            }
+          }
+        })
+      )
+      -----}}}
+
+      -----lua {{{
+      -- server deployed internally
+      -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L153
+      lspconfig.sumneko_lua.setup(
+        my_config({
+        settings = {
+            Lua = {
+              diagnostics = {
+                globals = { "vim" },
+                disable = { "lowercase-global" },
+                runtime = { version = "LuaJIT", path = vim.split(package.path, ';') },
+                workspace = {
+                  library = {
+                    [vim.fn.expand "$VIMRUNTIME/lua"] = true,
+                    [vim.fn.expand "$VIMRUNTIME/lua/vim/lsp"] = true,
+                  },
+                },
+              },
+            },
+          },
+        })
+      )
+      -----}}}
+
+      -----ruby {{{
+      -- server deployed with Homebrew
+      lspconfig.solargraph.setup(
+        my_config({
+          settings = {
+            solargraph = {
+              diagnostic = true,
+              useBundler = true
+            },
+          },
+        })
+      )
+      -----}}}
+
+      -----css {{{
+      -- server deployed with Homebrew
+      lspconfig.stylelint_lsp.setup(
+        my_config({
+          settings = {
+              stylelintplus = {
+                autoFixOnSave = true,
+                autoFixOnFormat = true
+            },
+          },
+        })
+      )
+      -----}}}
+
+      -----racket {{{
+      lspconfig.racket_langserver.setup(my_config())
+      -----}}}
+
+      -----r {{{
+      lspconfig.r_language_server.setup(my_config())
+      -----}}}
+
+      ----}}}
+      end,
+    }
+  ---}}}
+
+  ---vista {{{
+  -- easy tags navigation
+  use {
+    'liuchengxu/vista.vim',
+    config = function()
+      -- need to make it toggle
+      vim.api.nvim_set_keymap('n', '<f9>', ':Vista nvim_lsp<cr>', { noremap = true })
+    end
   }
   ---}}}
 
