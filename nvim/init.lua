@@ -355,6 +355,7 @@ require'packer'.startup {function (use)
         augroup slime_augroup:
           autocmd!
 
+          "" file execute commands
           autocmd FileType python noremap <buffer> <silent> [slime]f
             \ :execute ":call slime#send(\"%run -i " . @% . "\r\")" <cr>
           autocmd FileType matlab noremap <buffer> <silent> [slime]f
@@ -369,7 +370,10 @@ require'packer'.startup {function (use)
             \ :execute ":call slime#send('include(\"" . @% . "\");\r')" <cr>
           autocmd FileType lua noremap <buffer> <silent> [slime]f
             \ :execute ":call slime#send('dofile(\"" . @% . "\");\r')" <cr>
+          autocmd FileType scheme noremap <buffer> <silent> [slime]f
+            \ :execute ":call slime#send(',require-reloadable \"" . @% . "\"\r')" <cr>
 
+          "" weave commands
           autocmd FileType rmd,r noremap <buffer> <silent> [slime]w
             \ :execute ":call slime#send(\"rmarkdown::render('" . @% . "', output_format='all', quiet=TRUE)\r\")" <cr>
           autocmd FileType julia noremap <buffer> <silent> [slime]w
