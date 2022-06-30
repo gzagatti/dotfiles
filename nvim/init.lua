@@ -1,10 +1,10 @@
--- basic settings {{{
+-- basic settings {{{{{{}}}
 
 ---basic {{{
 vim.opt.encoding = 'utf-8'
 vim.opt.lazyredraw = true
 vim.cmd [[
-  syntax enable
+  syntax on
 ]]
 ---}}}
 
@@ -45,10 +45,6 @@ vim.opt.list = true
 
 ---folding {{{
 vim.opt.foldlevelstart = 0
-vim.cmd [[
-  highlight FoldColumn ctermbg=darkgray guibg=darkgray
-  highlight Folded ctermbg=darkgray guibg=darkgray
-]]
 --}}}
 
 ---searching {{{
@@ -148,10 +144,8 @@ vim.g['loaded_perl_provider'] = 0
 ---}}}
 
 ---theme hack {{{
--- ensures that the theme is alive from the start, not sure why
-vim.cmd [[
-  au ColorScheme dracula highlight Normal ctermfg=253 ctermbg='NONE'
-]]
+vim.opt.termguicolors = true
+vim.opt.guicursor = 'a:blinkon0-Cursor,i-ci:ver100'
 ---}}}
 
 ---terminal {{{
@@ -183,6 +177,7 @@ require'packer'.startup {function (use)
   ---}}}
 
   ---plenary {{{
+  -- lua utilities
   use { 'nvim-lua/plenary.nvim' }
   ---}}}
 
@@ -197,25 +192,6 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
-  ---tmuxline {{{
-  -- simple tmux statusline generator
-  -- use {
-  --   'edkolev/tmuxline.vim'
-  --   config = function ()
-  --   vim.cmd [[
-  --     let g:airline#extensions#tmuxline#enabled = 1
-  --     let g:airline#extensions#tmuxline#enabled = 1
-  --     let g:tmuxline_preset = {
-  --           \'a'    : '#S',
-  --           \'win'  : ['#I', '#W'],
-  --           \'cwin' : ['#I', '#W', '#F'],
-  --           \'y'    : ['%R', '%a', '%Y'],
-  --           \'z'    : '#H'}
-  --   ]]
-  --   end
-  -- }
-  ---}}}
-
   ---tabline {{{
   use {
     'kdheepak/tabline.nvim',
@@ -226,27 +202,16 @@ require'packer'.startup {function (use)
     config = function ()
       require'tabline'.setup()
       vim.opt.sessionoptions:append('tabpages')
-      vim.api.nvim_set_keymap('n', '<leader>1', ':TablineBufferNext<cr>', {})
-      vim.api.nvim_set_keymap('n', '<leader>2', ':TablineBufferPrevious<cr>', {})
+      vim.api.nvim_set_keymap('n', '<leader>2', ':TablineBufferNext<cr>', {})
+      vim.api.nvim_set_keymap('n', '<leader>1', ':TablineBufferPrevious<cr>', {})
     end
   }
   ---}}}
 
   ---tree {{{
-  --  file management from within Vim
-  --[[ use {
-    'kyazdani42/nvim-tree.lua',
-    requires = { 'kyazdani42/nvim-web-devicons' },
-    config = function()
-      vim.api.nvim_set_keymap('', '<f8>', ':NvimTreeToggle<cr>', { noremap = true })
-      vim.g['nvim_tree_disable_window_picker'] = 1
-      require'nvim-tree'.setup {}
-    end
-  } ]]
-
   use {
     'gzagatti/nnn.nvim',
-    branch = 'nnn-tweaks',
+    branch = 'tweaks',
     config = function()
       local builtin = require("nnn").builtin
       require("nnn").setup {
@@ -508,26 +473,41 @@ require'packer'.startup {function (use)
       config = function ()
         require'orgmode'.setup_ts_grammar()
         require'orgmode'.setup {
+          org_indent_mode = 'noindent',
           mappings = {
             org = {
               org_do_promote = '<h',
               org_do_demote = '>h',
+              org_return = '',
             },
           },
-          org_agenda_files = { vim.env.HOME .. '/dev/org/**/*' },
-          org_default_notes_file = vim.env.HOME .. '/dev/org/inbox.org',
-          org_todo_keywords = { 'TODO(t)', '|', 'POSTPONED(p)', 'CANCELLED(c)', 'DONE(d)' }
+          org_agenda_files = { vim.env.HOME .. '/dev/bstorm/**/*' },
+          org_default_notes_file = vim.env.HOME .. '/dev/bstorm/inbox.org',
+          org_todo_keywords = { 
+            'TODO(t)', '|', 'POSTPONED(p)', 'CANCELLED(c)', 'DONE(d)' 
+          }
         }
       end,
     }
+
     use {
       'akinsho/org-bullets.nvim',
       requires = { 'nvim-orgmode/orgmode' },
       config = function ()
         require("org-bullets").setup {
-            symbols = { "◉", "○", "✸", "✿" }
+            concealcursor = true,
+            symbols = {
+              headlines = { "◉", "○", "✸", "✿" },
+            },
         }
       end,
+    }
+  ---}}}
+
+  ---tablemode {{{
+  --- instant table creation
+    use {
+      'dhruvasagar/vim-table-mode',
     }
   ---}}}
 
@@ -591,7 +571,7 @@ require'packer'.startup {function (use)
             end,
             { "i", "s" }
           ),
-          ['<CR>'] = cmp.mapping.confirm { select = true },
+          ["<CR>"] = cmp.mapping.confirm { select = true },
         },
         sources = {
           { name = 'nvim_lsp' },
@@ -605,16 +585,6 @@ require'packer'.startup {function (use)
           { name = 'neorg' },
         },
       }
-
-      -- local capabilities = vim.lsp.protocol.make_client_capabilities()
-      -- capabilities = require'cmp_nvim_lsp'.update_capabilities(capabilities)
-      -- print("HERE3")
-      -- for _, v in pairs(require'lspconfig'.available_servers()) do
-      --   require'lspconfig'[v].setup {
-      --     capabilities = capabilities,
-      --   }
-      -- print("HERE3END")
-      -- end
     end
   }
   ---}}}
@@ -702,14 +672,15 @@ require'packer'.startup {function (use)
   ---}}}
 
   ---luadev {{{
-  -- REPL/debug console for nvim lua
+  -- REPL/debug console for nvim
     use {
-      'bfredl/nvim-luadev',
+      -- 'bfredl/nvim-luadev',
+      here 'nvim-luadev',
       config = function ()
-          vim.api.nvim_set_keymap('n', '<C-x><C-e>', '<plug>(Luadev-RunLine)', {})
-          vim.api.nvim_set_keymap('v', '<C-x><C-e>', '<plug>(Luadev-Run)', {})
-          ---map <leader>lb :SlimuxREPLSendBuffer<cr>
-          ---map <leader>lr :SlimuxShellLast<cr>"
+          vim.api.nvim_set_keymap('n', '<leader>ee', '<plug>(Luadev-RunLine):Luadev<cr>', { silent= true })
+          vim.api.nvim_set_keymap('v', '<leader>ee', '<plug>(Luadev-Run):Luadev<cr>', { silent=true })
+          vim.api.nvim_set_keymap('n', '<leader>ev', '<plug>(Luadev-RunVimLine):Luadev<cr>', { silent= true })
+          vim.api.nvim_set_keymap('v', '<leader>ev', '<plug>(Luadev-RunVim):Luadev<cr>', { silent= true })
       end
     }
   ---}}}
@@ -728,7 +699,7 @@ require'packer'.startup {function (use)
 
   ---syntax-attr {{{
   -- show syntax highlighing attributes under cursor
-  use { 'inkarkat/SyntaxAttr.vim' }
+  use { 'vim-scripts/SyntaxAttr.vim' }
   ---}}}
 
   ---treesiter {{{
@@ -742,7 +713,6 @@ require'packer'.startup {function (use)
           ignore_install = { }, -- List of parsers to ignore installing
           highlight = {
             enable = true,
-            -- disable = { 'org' },  -- Remove this to use TS highlighter for some of the highlights (Experimental)
             additional_vim_regex_highlighting = {'org'}, -- Required since TS highlighter doesn't support all syntax features (conceal)
           },
           incremental_selection = {
@@ -955,6 +925,11 @@ require'packer'.startup {function (use)
       -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
       -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
 
+      -----vim {{{
+      -- server deployed with npm
+      lspconfig.vimls.setup(my_config())
+      -----}}}
+
       -----html {{{
       -- server deployed with npm
       lspconfig.html.setup(my_config())
@@ -1109,38 +1084,32 @@ require'packer'.startup {function (use)
   use {
     'dracula/vim',
     config = function ()
-      -- if (vim.env.THEME == 'dracula') or (vim.env.THEME == nil) then
+      if (vim.env.THEME == 'dracula') or (vim.env.THEME == nil) then
         vim.cmd [[
           colorscheme dracula
         ]]
-      -- end
+      end
     end
   }
   ---}}}
 
-  ---theme: parchment {{{
-  -- use {
-  --   'ajgrf/parchment',
-  --   config = function ()
-  --     if (vim.env.THEME == 'leuven') then
-  --       vim.cmd [[
-  --         colorscheme parchment
-  --       ]]
-  --     end
-  --   end
-  -- }
+  ---theme: leuven {{{
+  use {
+    here 'vim-leuven-theme',
+    config = function ()
+      if (vim.env.THEME == 'leuven') then
+        vim.cmd [[
+          colorscheme leuven
+        ]]
+      end
+    end
+  }
   ---}}}
-
   end,
   {
-    auto_clean = true,
+    auto_clean = false,
   }
 }
-
--- turn it on for automatic sync and compilation, slows down startup
--- otherwise, just call `:PackerSync' to synchronize it all when needed
---require('packer').sync()
-
 --}}}
 
 --key mappings {{{
@@ -1308,6 +1277,36 @@ vim.api.nvim_set_keymap('n', '?', '?\\v', { noremap = true })
 ---}}}
 
 --}}}
+
+-- cmd {{{
+-- reloads a lua module
+function loaded(arglead, _, _)
+  out = {}
+  for k, _ in pairs(package.loaded) do
+    if k:find("^" .. arglead) ~= nil then
+      out[#out + 1] = k
+    end
+  end
+  return out
+end
+
+function reload(modname)
+  local _loaded = loaded(modname, _, _)
+  for _, k in ipairs(_loaded) do
+    if modname == k then
+      package.loaded[modname] = nil
+      require(modname)
+      print("Lua module", modname, "reloaded.")
+      return
+    end
+  end
+  require(modname)
+  print("Lua module", modname, "loaded.")
+  return
+end
+
+vim.cmd [[ command! -nargs=1 -complete=customlist,v:lua.loaded Luareload lua reload(<f-args>) ]]
+-- }}}
 
 -- autocmd {{{
 vim.cmd [[
