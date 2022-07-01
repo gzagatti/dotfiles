@@ -134,7 +134,6 @@ require'packer'.startup {function (use)
           vim.g['kitty_navigator_no_mappings'] = 1
         end
       end,
-      run = 'cp ./*.py ~/.config/kitty/'
     }
 
     -- tmux-navigator
