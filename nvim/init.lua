@@ -1,175 +1,23 @@
--- basic settings {{{{{{}}}
+local package_root = vim.fn.stdpath('data')..'/site/pack'
+local install_path = package_root .. '/packer/start/packer.nvim'
+local compile_path = vim.fn.stdpath('config')..'/plugin/packer_compiled.lua'
 
----basic {{{
-vim.opt.encoding = 'utf-8'
-vim.opt.lazyredraw = true
-vim.cmd [[
-  syntax on
-]]
----}}}
-
----leaders {{{
-vim.g.mapleader = ';'
-vim.g.maplocalleader = '\\'
---}}}
-
----mouse {{{
-if vim.fn.has('mouse') then
-  vim.opt.mouse= 'nv'
+if vim.fn.isdirectory(install_path) == 0 then
+  vim.fn.system({ 'git', 'clone', 'https://github.com/wbthomason/packer.nvim', install_path })
 end
----}}}
-
----autocompletion {{{
-vim.opt.wildmenu = true -- autocomplete feature when cycling through TAB
-vim.opt.wildmode = 'longest:full,full'
-vim.opt.wildignorecase = true
-vim.opt.completeopt = 'menu,menuone,noselect'
----}}}
-
----line ruler {{{
-vim.opt.number = true
-vim.opt.numberwidth = 4
---}}}
-
----white Space {{{
-vim.opt.wrap = true
-vim.opt.shiftround = true
-local indent = 2
-vim.opt.shiftwidth = indent
-vim.opt.softtabstop = indent
-vim.opt.expandtab = true
-vim.opt.backspace = 'indent,eol,start'
-vim.opt.list = true
---vim.opt.listchars = 'tab:>\\trail:.extends:>precedes:>nbsp:%'
---}}}
-
----folding {{{
-vim.opt.foldlevelstart = 0
---}}}
-
----searching {{{
-vim.opt.incsearch = true
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
-vim.opt.hlsearch = false
----}}}
-
----buffers {{{
-vim.opt.switchbuf = 'useopen'
-vim.opt.autowriteall = true
-vim.opt.autoread = true
-vim.cmd [[
-  autocmd FocusGained,CursorHold * if getcmdwintype() == '' | checktime | endif
-]]
----}}}
-
----backup and swap files {{{
-vim.opt.backupdir = vim.env.HOME .. '/.local/share/nvim/swap' -- backup files
-vim.opt.directory = vim.env.HOME .. '/.local/share/nvim/swap' -- swap files
----}}}
-
----tags {{{
-vim.opt.tags='.git/tags,tags,./tags'
----}}}
-
----sign Column {{{
-vim.cmd [[
-  highlight SignColumn ctermbg=NONE guibg=NONE
-]]
-vim.opt.signcolumn = 'number'
----}}}
-
----status line {{{
-vim.opt.laststatus = 2
----}}}
-
----auto save {{{
-vim.cmd [[
-  augroup auto_save
-    autocmd!
-    au CursorHold,InsertLeave * silent! wall
-  augroup END
-]]
----}}}
-
----newtrw{{{
-vim.cmd [[
-  let g:netrw_browsex_viewer= "-"
-  function! s:myNFH(filename)
-    if executable("xdg-open")
-      let cmd = ":!xdg-open "
-    elseif executable("open")
-      let cmd = ":!open "
-    else
-      return 0
-    endif
-    let path = "file://" . expand("%:p:h") . "/" . a:filename
-    execute cmd . shellescape(path, 1)
-    return 1
-  endfunction
-  function! NFH_jpg(filename)
-    call s:myNFH(a:filename)
-  endfunction
-  function! NFH_png(filename)
-    call s:myNFH(a:filename)
-  endfunction
-  function! NFH_svg(filename)
-    call s:myNFH(a:filename)
-  endfunction
-  function! NFH_gif(filename)
-    call s:myNFH(a:filename)
-  endfunction
-  function! NFH_pdf(filename)
-    call s:myNFH(a:filename)
-  endfunction
-]]
----}}}
-
----filetype plugins {{{
-vim.cmd [[
-  filetype plugin indent on
-]]
----}}}
-
----providers {{{
--- python
-vim.g['loaded_python_provider'] = 0
-vim.g['python3_host_prog'] = vim.env.HOME .. "/.pyenv/versions/vim3/bin/python"
-
--- ruby
-vim.g['loaded_ruby_provider'] = 0
-
---perl
-vim.g['loaded_perl_provider'] = 0
----}}}
-
----theme hack {{{
-vim.opt.termguicolors = true
-vim.opt.guicursor = 'a:blinkon0-Cursor,i-ci:ver100'
----}}}
-
----terminal {{{
-vim.api.nvim_set_keymap('t', '<c-h>', '<C-\\><C-N><C-w>h', { noremap = true })
-vim.api.nvim_set_keymap('t', '<c-j>', '<C-\\><C-N><C-w>j', { noremap = true })
-vim.api.nvim_set_keymap('t', '<c-k>', '<C-\\><C-N><C-w>k', { noremap = true })
-vim.api.nvim_set_keymap('t', '<c-l>', '<C-\\><C-N><C-w>l', { noremap = true })
-vim.cmd [[
-  au TermOpen * setlocal nonumber
-]]
----}}}
---}}}
 
 --plugins {{{
-
--- development plugins
--- @param path string
--- @return string
--- https://github.com/aspeddro/dotfiles/blob/main/.config/nvim/lua/user/packages.lua
-local here = function(path)
-  return vim.fn.expand '~/dev/' .. path
-end
+local function load_plugins()
 
 require'packer'.startup {function (use)
+
+  -- development plugins
+  -- @param path string
+  -- @return string
+  -- https://github.com/aspeddro/dotfiles/blob/main/.config/nvim/lua/user/packages.lua
+  local here = function(path)
+    return vim.fn.expand '~/dev/' .. path
+  end
 
   ---packer {{{
   -- package management
@@ -216,7 +64,7 @@ require'packer'.startup {function (use)
       local builtin = require("nnn").builtin
       require("nnn").setup {
         explorer = {
-          cmd = "nnn -G",
+          cmd = "NNN_TMPFILE='' nnn -G",
         },
         picker = {
           cmd = "tmux new-session nnn -Pp -G",
@@ -247,7 +95,12 @@ require'packer'.startup {function (use)
           {"<C-w>", builtin.cd_to_path },
         },
       }
-      vim.api.nvim_set_keymap("", "<f8>", "<cmd>NnnExplorer %:p:h<cr>", { noremap = true })
+      vim.api.nvim_set_keymap(
+        "",
+        "<f8>",
+        ":execute 'NnnExplorer' (expand('%:p') ==? expand('%:.') ? '%:p:h' : '')<cr>",
+        { noremap = true}
+      )
       vim.api.nvim_set_keymap("", "[telescope]/", "<cmd>NnnPicker %:p:h<cr>", { noremap = true })
       vim.cmd [[
         augroup nnn
@@ -363,11 +216,13 @@ require'packer'.startup {function (use)
   use {
     'Yggdroot/indentLine',
     config = function()
+      vim.g.indentLine_defaultGroup = 'LineNr'
       vim.g['indentLine_concealcursor'] = 'nc'
       vim.g['indentLine_conceallevel'] = 2
       vim.cmd [[
         autocmd TermOpen * IndentLinesDisable
         autocmd Filetype * if &ft ==# "help" | :IndentLinesDisable | endif
+        autocmd Filetype * if &ft ==# "NeogitStatus" | :IndentLinesDisable | endif
       ]]
     end
   }
@@ -478,13 +333,12 @@ require'packer'.startup {function (use)
             org = {
               org_do_promote = '<h',
               org_do_demote = '>h',
-              org_return = '',
             },
           },
           org_agenda_files = { vim.env.HOME .. '/dev/bstorm/**/*' },
           org_default_notes_file = vim.env.HOME .. '/dev/bstorm/inbox.org',
-          org_todo_keywords = { 
-            'TODO(t)', '|', 'POSTPONED(p)', 'CANCELLED(c)', 'DONE(d)' 
+          org_todo_keywords = {
+            'TODO(t)', '|', 'POSTPONED(p)', 'CANCELLED(c)', 'DONE(d)'
           }
         }
       end,
@@ -498,6 +352,11 @@ require'packer'.startup {function (use)
             concealcursor = true,
             symbols = {
               headlines = { "◉", "○", "✸", "✿" },
+              checkboxes = {
+                half = {"-", "Normal"},
+                done = { "x", "Normal" },
+                todo = {" ", "Normal"},
+              },
             },
         }
       end,
@@ -599,18 +458,9 @@ require'packer'.startup {function (use)
 
   ---emmet {{{
   -- improves HTML and CSS workflow
-  use { 'mattn/emmet-vim' }
-  ---}}}
-
-  ---vim-markdown {{{
-  -- markdown vim mode
   use {
-    'plasticboy/vim-markdown',
-    config = function ()
-      vim.g['vim_markdown_math'] = 1
-      vim.g['vim_markdown_frontmatter'] = 1
-      vim.g['vim_markdown_folding_style_pythonic'] = 1
-    end
+    'mattn/emmet-vim',
+    ft = {'html', 'css'}
   }
   ---}}}
 
@@ -697,11 +547,6 @@ require'packer'.startup {function (use)
     }
   ---}}}
 
-  ---syntax-attr {{{
-  -- show syntax highlighing attributes under cursor
-  use { 'vim-scripts/SyntaxAttr.vim' }
-  ---}}}
-
   ---treesiter {{{
   -- an incremental parsing system for programming tools
     use {
@@ -713,7 +558,12 @@ require'packer'.startup {function (use)
           ignore_install = { }, -- List of parsers to ignore installing
           highlight = {
             enable = true,
-            additional_vim_regex_highlighting = {'org'}, -- Required since TS highlighter doesn't support all syntax features (conceal)
+            -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+            -- Set to `true` if you depend on 'syntax' being enabled.
+            -- This option may slow down the editor, and cause duplicate highlights.
+            -- Instead of true it can also be a list of languages
+            -- additional_vim_regex_highlighting = { 'org' },
+            additional_vim_regex_highlighting = false,
           },
           incremental_selection = {
             enable = true,
@@ -739,54 +589,6 @@ require'packer'.startup {function (use)
     }
   ---}}}
 
-  ---neorg {{{
-  use {
-    'nvim-neorg/neorg',
-    requires = {
-      'nvim-lua/plenary.nvim',
-      'nvim-treesitter/nvim-treesitter',
-      'nvim-neorg/neorg-telescope',
-    },
-    config = function ()
-      local treesitter_parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
-      treesitter_parser_config.norg_meta = {
-        install_info = {
-          url = 'https://github.com/nvim-neorg/tree-sitter-norg-meta',
-          files = { 'src/parser.c' },
-          branch = 'main'
-        },
-      }
-      treesitter_parser_config.norg_table = {
-        install_info = {
-          url = 'https://github.com/nvim-neorg/tree-sitter-norg-table',
-          files = { 'src/parser.c' },
-          branch = 'main'
-        },
-      }
-      require('neorg').setup {
-        -- Tell Neorg what modules to load
-        load = {
-          ['core.defaults'] = {}, -- Load all the default modules
-          ['core.norg.concealer'] = {}, -- Allows for use of icons
-          ['core.norg.dirman'] = { -- Manage your directories with Neorg
-            config = {
-              workspaces = {
-                my_workspace = '~/dev/neorg'
-              }
-            }
-          },
-          ['core.norg.completion'] = {
-            config = {
-              engine = 'nvim-cmp'
-            }
-          },
-          ['core.integrations.telescope'] = {},
-        },
-      }
-    end,
-  }
-  ---}}}
-
   ---diffview {{{
   use {
     'sindrets/diffview.nvim',
@@ -805,21 +607,7 @@ require'packer'.startup {function (use)
         commit_popup = {
             kind = "split",
         },
-        -- Change the default way of opening neogit
-        -- kind = "split",
         integrations = {
-          -- Neogit only provides inline diffs. If you want a more traditional way to look at diffs, you can use `sindrets/diffview.nvim`.
-          -- The diffview integration enables the diff popup, which is a wrapper around `sindrets/diffview.nvim`.
-          --
-          -- Requires you to have `sindrets/diffview.nvim` installed.
-          -- use {
-          --   'TimUntersberger/neogit',
-          --   requires = {
-          --     'nvim-lua/plenary.nvim',
-          --     'sindrets/diffview.nvim'
-          --   }
-          -- }
-          --
           diffview = true
         },
       }
@@ -1105,11 +893,176 @@ require'packer'.startup {function (use)
     end
   }
   ---}}}
+
   end,
-  {
-    auto_clean = false,
-  }
+  config = {
+    package_root = package_root,
+    compile_path = compile_path,
+    auto_clean = true,
+  },
 }
+end
+--}}}
+
+-- config {{{
+_G.load_config = function()
+
+-- basic settings {{{
+
+---basic {{{
+vim.opt.encoding = 'utf-8'
+vim.opt.lazyredraw = true
+---}}}
+
+---leaders {{{
+vim.g.mapleader = ';'
+vim.g.maplocalleader = '\\'
+--}}}
+
+---mouse {{{
+if vim.fn.has('mouse') then
+  vim.opt.mouse= 'nv'
+end
+---}}}
+
+---autocompletion {{{
+vim.opt.wildmenu = true -- autocomplete feature when cycling through TAB
+vim.opt.wildmode = 'longest:full,full'
+vim.opt.wildignorecase = true
+vim.opt.completeopt = 'menu,menuone,noselect'
+---}}}
+
+---line ruler {{{
+vim.opt.number = true
+vim.opt.numberwidth = 4
+--}}}
+
+---white space {{{
+vim.opt.wrap = true
+vim.opt.shiftround = true
+local indent = 2
+vim.opt.shiftwidth = indent
+vim.opt.softtabstop = indent
+vim.opt.expandtab = true
+vim.opt.backspace = 'indent,eol,start'
+vim.opt.list = true
+--vim.opt.listchars = 'tab:>\\trail:.extends:>precedes:>nbsp:%'
+--}}}
+
+---folding {{{
+vim.opt.foldlevelstart = 0
+--}}}
+
+---searching {{{
+vim.opt.incsearch = true
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+vim.opt.hlsearch = false
+---}}}
+
+---buffers {{{
+vim.opt.switchbuf = 'useopen'
+vim.opt.autowriteall = true
+vim.opt.autoread = true
+vim.cmd [[
+  autocmd FocusGained,CursorHold * if getcmdwintype() == '' | checktime | endif
+]]
+---}}}
+
+---backup and swap files {{{
+vim.opt.backupdir = vim.env.HOME .. '/.local/share/nvim/swap' -- backup files
+vim.opt.directory = vim.env.HOME .. '/.local/share/nvim/swap' -- swap files
+---}}}
+
+---tags {{{
+vim.opt.tags='.git/tags,tags,./tags'
+---}}}
+
+---sign column {{{
+vim.cmd [[
+  highlight SignColumn ctermbg=NONE guibg=NONE
+]]
+vim.opt.signcolumn = 'number'
+---}}}
+
+---status line {{{
+vim.opt.laststatus = 2
+---}}}
+
+---auto save {{{
+vim.cmd [[
+  augroup auto_save
+    autocmd!
+    au CursorHold,InsertLeave * silent! wall
+  augroup END
+]]
+---}}}
+
+---newtrw{{{
+vim.cmd [[
+  let g:netrw_browsex_viewer= "-"
+  function! s:myNFH(filename)
+    if executable("xdg-open")
+      let cmd = ":!xdg-open "
+    elseif executable("open")
+      let cmd = ":!open "
+    else
+      return 0
+    endif
+    let path = "file://" . expand("%:p:h") . "/" . a:filename
+    execute cmd . shellescape(path, 1)
+    return 1
+  endfunction
+  function! NFH_jpg(filename)
+    call s:myNFH(a:filename)
+  endfunction
+  function! NFH_png(filename)
+    call s:myNFH(a:filename)
+  endfunction
+  function! NFH_svg(filename)
+    call s:myNFH(a:filename)
+  endfunction
+  function! NFH_gif(filename)
+    call s:myNFH(a:filename)
+  endfunction
+  function! NFH_pdf(filename)
+    call s:myNFH(a:filename)
+  endfunction
+]]
+---}}}
+
+---filetype plugins {{{
+vim.cmd [[
+  filetype plugin indent on
+]]
+---}}}
+
+---providers {{{
+-- python
+vim.g['loaded_python_provider'] = 0
+vim.g['python3_host_prog'] = vim.env.HOME .. "/.pyenv/versions/vim3/bin/python"
+
+-- ruby
+vim.g['loaded_ruby_provider'] = 0
+
+--perl
+vim.g['loaded_perl_provider'] = 0
+---}}}
+
+---colors {{{
+vim.opt.termguicolors = true
+vim.opt.guicursor = 'a:blinkon0-Cursor,i-ci:ver100'
+---}}}
+
+---terminal {{{
+vim.api.nvim_set_keymap('t', '<c-h>', '<C-\\><C-N><C-w>h', { noremap = true })
+vim.api.nvim_set_keymap('t', '<c-j>', '<C-\\><C-N><C-w>j', { noremap = true })
+vim.api.nvim_set_keymap('t', '<c-k>', '<C-\\><C-N><C-w>k', { noremap = true })
+vim.api.nvim_set_keymap('t', '<c-l>', '<C-\\><C-N><C-w>l', { noremap = true })
+vim.cmd [[
+  au TermOpen * setlocal nonumber
+]]
+---}}}
 --}}}
 
 --key mappings {{{
@@ -1117,7 +1070,7 @@ require'packer'.startup {function (use)
 ---.vimrc {{{
 --open .vimrc in a horizantal split$
 vim.api.nvim_set_keymap('n', '<leader><f4>', ':split $MYVIMRC<cr>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<leader><f5>', ':luafile $MYVIMRC<cr>:PackerCompile<cr>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<leader><f5>', ':source $MYVIMRC<cr>:PackerCompile<cr>', { noremap = true })
 ---}}}
 
 ---map j and k such that is based on display lines, not physical ones {{{
@@ -1234,19 +1187,6 @@ elseif vim.fn.has('unix') == 1 then
 end
 ---}}}
 
----clipboard toogle{{{
---[[ vim.cmd [[
-  function! ToggleClipboard()
-    if &clipboard == 'unnamed'
-      set clipboard& clipboard?
-    else
-      set clipboard=unnamed clipboard?
-    endif
-  endfunction
---]]
--- vim.api.nvim_set_keymap('', '<f5>', 'ToggleClipboard()', { expr = true })
----}}}
-
 ---line transposition {{{
 vim.api.nvim_set_keymap('n', '<s-down>', ':set fdm=manual<cr>:m .+1<cr>:set fdm=marker<cr>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<s-up>', ':set fdm=manual<cr>:m .-2<cr>:set fdm=marker<cr>', { noremap = true })
@@ -1302,7 +1242,6 @@ function reload(modname)
   end
   require(modname)
   print("Lua module", modname, "loaded.")
-  return
 end
 
 vim.cmd [[ command! -nargs=1 -complete=customlist,v:lua.loaded Luareload lua reload(<f-args>) ]]
@@ -1314,7 +1253,6 @@ vim.cmd [[
     autocmd!
 
     "create directory if not exist
-    " https://travisjeffery.com/b/2011/11/saving-files-in-nonexistent-directories-with-vim/
     function! s:auto_mkdir(dir, force)
       if !isdirectory(a:dir)
             \ && (
@@ -1355,3 +1293,9 @@ vim.cmd [[
   augroup END
 ]]
 ---}}}
+
+end
+-- }}}
+
+load_plugins()
+load_config()
