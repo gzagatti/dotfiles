@@ -3,7 +3,9 @@ def main():
 
 
 def handle_result(args, result, target_window_id, boss):
-    boss.active_tab.neighboring_window(args[1])
+    # do nothing if we are fully focused on one window
+    if boss.active_tab._current_layout_name != "stack":
+        boss.active_tab.neighboring_window(args[1])
 
 
 handle_result.no_ui = True
