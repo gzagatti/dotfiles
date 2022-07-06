@@ -39,20 +39,20 @@ if (interactive()) {
   suppressMessages(requireNamespace("colorout"))
   # adjust colorout
   colorout::setOutputColors(
-    normal     = 12,
+    normal     = 7,
     negnum     = 6,
     zero       = 6,
     number     = 6,
-    date       = 13,
+    date       = 5,
     string     = 4,
     const      = 2,
     false      = 3,
     true       = 3,
     infinite   = 6,
     index      = 1,
-    stderror   = 5,
-    warn       = c(1, 8, 9),
-    error      = c(1, 1, 15),
+    stderror   = 7,
+    warn       = if(Sys.getenv("THEME") == "leuven") c(0, 11, 3) else 3,
+    error      = if(Sys.getenv("THEME") == "leuven") c(0, 9, 1) else 1,
     zero.limit = NA,
     verbose=FALSE
   )
