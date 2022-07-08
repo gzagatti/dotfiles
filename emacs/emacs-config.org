@@ -278,7 +278,7 @@ In neovim, I often navigate between windows and, when using kitty/tmux, between 
 
 #+begin_src elisp
 (use-package navigate
-  :straight (vim-kitty-navigator :host github :repo "gzagatti/evil-kitty-navigator"))
+  :straight (evil-kitty-navigate :host github :repo "gzagatti/evil-kitty-navigator"))
 #+end_src
 
 *** Edit your ~config.org~ often
