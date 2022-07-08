@@ -32,5 +32,3 @@ set keymap vi-command
 "\C-n": history-search-forward
 
 # }}}
-
-
