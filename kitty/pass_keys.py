@@ -34,7 +34,7 @@ def handle_result(args, result, target_window_id, boss):
     window = boss.window_id_map.get(target_window_id)
     direction = args[2]
     key_mapping = args[3]
-    vim_id = args[4] if len(args) > 4 else "n?vim"
+    vim_id = args[4] if len(args) > 4 else "(n?vim|emacs)"
 
     if window is None:
         return
