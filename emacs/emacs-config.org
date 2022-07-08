@@ -419,35 +419,36 @@ The ~powerline~ package brings Vim-like support to the Emacs mode-line and ensur
 
 *** Clipboard management
 
-It is convenient to have direct access to the system clipboard since it allows me to quickly move arbitrary text in and out of Emacs.
+I emulate shortcuts that I often use in Vim to yank to and paste from the system clipboard. They use the same shortcuts for yanking (~y~) and pasting (~p~) prefixed with the ~leader~ key. They are a great way to move text in and out of the editor without polluting the internal kill ring.
 
-#+begin_src elisp
-(custom-set-variables '(select-enable-clipboard t))
-#+end_src
-
-Additionally, I emulate copy and paste shortcuts that I often use in Vim the yank and paste commands with the ~<leader>~ key.
+Here, the shortcuts are implemented using the shell command ~xsel~, a technique inspired by [[https://hugoheden.wordpress.com/2009/03/08/copypaste-with-emacs-in-terminal/][Hugo Heden's blog post]]. Note that we invoke shell commands with ~call-process-region~ and ~shell-command-to-string~ both of which expect an existing buffer directory. However, this assumption is not always true. Since yanking and pasting are not really directory specific, we bind the ~default-directory~ to a temporary directory while executing the program.
 
 #+begin_src  elisp
 (defun yank-to-clipboard (start end)
   "Yank to system clipboard."
   (interactive "r")
   (if (use-region-p)
+    (let
+      ((regionp (buffer-substring start end))
+        (default-directory (temporary-file-directory)))
       (progn
-      ;; does not check if the option might originally be true
-      (clipboard-kill-ring-save start end))))
+        (with-temp-buffer
+          (insert regionp)
+          (call-process-region (point-min) (point-max) "xsel" nil nil t "--clipboard" "--input"))
+        (deactivate-mark)))))
 (evil-define-key 'visual 'global (kbd "<leader>y")  'yank-to-clipboard)
 
-(defun paste-clipboard ()
+(defun paste-clipboard (start end)
   "Paste from system clipboard."
-  (interactive)
-      (progn
-      ;; does not check if the option might originally be true
-      (clipboard-yank)))
+  (interactive "r")
+  (let ((default-directory (temporary-file-directory)))
+    (progn
+      (if (use-region-p) (kill-region start end))
+      (insert (shell-command-to-string "xsel --clipboard --output")))))
 (evil-define-key '(normal visual) 'global (kbd "<leader>p") 'paste-clipboard)
-
 #+end_src
 
-More info on copy-and-paste in Emacs can be found in the [[https://www.emacswiki.org/emacs/CopyAndPastej][Wiki]]. Copy and paste will not work in tty Emacs, as described [[https://hugoheden.wordpress.com/2009/03/08/copypaste-with-emacs-in-terminal/][here]]. It is possible to implement it using ~xsel~ or similar programs, but if the terminal emulator has copy/paste functionality there is really no need for that.
+More info on copy-and-paste in Emacs can be found in the [[https://www.emacswiki.org/emacs/CopyAndPastej][Wiki]].
 
 *** Line wrapping
 
