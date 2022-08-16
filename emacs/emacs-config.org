@@ -415,7 +415,7 @@ The ~powerline~ package brings Vim-like support to the Emacs mode-line and ensur
 (powerline-default-theme)
 #+end_src
 
-** Addional settings
+** Additional settings
 
 *** Clipboard management
 
@@ -969,7 +969,7 @@ testing: @holme2015b
 
 foo @holme2015a @holme2012 @masuda2017
 
-*** Org-mode
+*** Orgmode
 
 #+begin_src elisp
 ;; hide emphasis markup
@@ -988,7 +988,7 @@ foo @holme2015a @holme2012 @masuda2017
 
 ;; agenda
 (setq org-default-notes-file "~/dev/org/inbox.org")
-(setq org-agenda-files '("~/dev/org" "~/dev/org/weekly-planners"))
+(setq org-agenda-files '("~/org" "~/org/weekly-planners"))
 (setq org-refile-targets (quote ((org-agenda-files :maxlevel .2))))
 (setq org-reverse-note-order t)
 
@@ -998,6 +998,25 @@ foo @holme2015a @holme2012 @masuda2017
 ;; workflow states
 (setq org-todo-keywords
   '((sequence "TODO(t)" "|" "POSTPONED(p)" "CANCELLED(c)" "DONE(d)")))
+
+;; export to latex
+(custom-set-variables
+ '(org-latex-default-packages-alist
+   '(("AUTO" "inputenc" t
+      ("pdflatex"))
+     ("T1" "fontenc" t
+      ("pdflatex"))
+     ("" "fontspec" t nil)
+     ("" "unicode-math" nil nil)
+     ("" "graphicx" t nil)
+     ("" "longtable" nil nil)
+     ("" "wrapfig" nil nil)
+     ("" "rotating" nil nil)
+     ("normalem" "ulem" t nil)
+     ("" "amsmath" t nil)
+     ("" "capt-of" nil nil)
+     ("" "hyperref" nil nil)))
+  '(org-latex-compiler "lualatex"))
 #+end_src
 
 [[https://github.com/nnicandro/emacs-jupyter][Emacs Jupyter]]: an interface to communicate with Jupyter kernels
@@ -1077,11 +1096,28 @@ create a repl; interact with repl
   (add-hook 'org-mode-hook 'org-mode-my-setup)
 #+end_src
 
-orgroam
+*** Orgroam
 
 #+begin_src elisp
 ;; (use-package org-roam
-;;   :straight (:host github :repo "org-roam/org-roam" :files (:defaults "extensions/*")))
+;;   :ensure t
+;;   :straight (:host github :repo "org-roam/org-roam" :files (:defaults "extensions/*"))
+;;   :custom
+;;   (org-roam-directory (file-truename "~/src/roam"))
+;;   :bind (("C-c n l" . org-roam-buffer-toggle)
+;;          ("C-c n f" . org-roam-node-find)
+;;          ("C-c n g" . org-roam-graph)
+;;          ("C-c n i" . org-roam-node-insert)
+;;          ("C-c n c" . org-roam-capture)
+;;          ;; Dailies
+;;          ("C-c n j" . org-roam-dailies-capture-today))
+;;   :config
+;;   ;; If you're using a vertical completion framework, you might want a more informative completion interface
+;;   (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+;;   (org-roam-db-autosync-mode)
+;;   ;; If using org-roam-protocol
+;;   (require 'org-roam-protocol))
+;; 
 ;; (use-package org-roam-ui
 ;;   :straight
 ;;     (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
