@@ -1,7 +1,7 @@
 # https://man.cx/latexmk
 # causes trouble when latex is updating and there are scaffolding files
 # $cleanup_mode=2;
-$clean_ext="out bbl fdb_latexmk run.xml synctex* _minted-%R/* _minted-%R";
-$latex="latex --shell-escape -synctex=1 %O %S";
-$pdflatex="pdflatex --shell-escape -synctex=1 %O %S";
-$lualatex="lualatex --shell-escape -synctex=1 %O %S";
+$clean_ext="out bbl fdb_latexmk run.xml synctex* _minted-%R/* _minted-%R figlist nav snm";
+$latex="latex --shell-escape -halt-on-error -synctex=1 %O %S";
+$pdflatex="pdflatex --shell-escape -halt-on-error -synctex=1 %O %S";
+$lualatex="lualatex --shell-escape -halt-on-error -synctex=1 %O %S";
