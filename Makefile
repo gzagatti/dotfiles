@@ -3,16 +3,15 @@ workspace := $(HOME)
 
 .PHONY: all
 
-
 # SHELLS
-shells/inputrc:
+inputrc:
 	ln -fs $(dotfiles)/shells/inputrc $(workspace)/.inputrc
 
-bash: shells/inputrc
+bash: inputrc
 	ln -fs $(dotfiles)/shells/bash_profile $(workspace)/.bash_profile
 	ln -fs $(dotfiles)/shells/bashrc $(workspace)/.bashrc
 
-zsh: shells/inputrc
+zsh: inputrc
 	ln -fs $(dotfiles)/shells/zshrc $(workspace)/.zshrc
 
 tmux:
@@ -68,6 +67,14 @@ nnn/%: $(workspace)/.config/nnn/plugins
 
 nnn: $(shell find nnn -type f)
 
+# BINARIES
+$(workspace)/.local/bin:
+	mkdir -p $@
+
+bin/%: $(workspace)/.local/bin
+	ln -fs $(dotfiles)/$@ $(workspace)/.local/$@
+
+bin: $(wildcard bin/*)
 
 # SINGLE FILE CONFIGS
 alacritty:
