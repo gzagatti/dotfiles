@@ -16,7 +16,7 @@ require'packer'.startup {function (use)
   -- @return string
   -- https://github.com/aspeddro/dotfiles/blob/main/.config/nvim/lua/user/packages.lua
   local here = function(path)
-    return vim.fn.expand '~/dev/' .. path
+    return vim.fn.expand '~/src/' .. path
   end
 
   ---packer {{{
@@ -56,7 +56,7 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
-  ---tree {{{
+  ---nnn {{{
   use {
     'gzagatti/nnn.nvim',
     branch = 'tweaks',
@@ -99,9 +99,8 @@ require'packer'.startup {function (use)
         "",
         "<f8>",
         ":execute 'NnnExplorer' (expand('%:p') ==? expand('%:.') ? '%:p:h' : '')<cr>",
-        { noremap = true}
+        { noremap = true, silent = true }
       )
-      vim.api.nvim_set_keymap("", "[telescope]/", "<cmd>NnnPicker %:p:h<cr>", { noremap = true })
       vim.cmd [[
         augroup nnn
           autocmd FileType * if &ft ==# "nnn" |:tnoremap <buffer> <f8> q| endif
@@ -215,10 +214,12 @@ require'packer'.startup {function (use)
   use {
     'Yggdroot/indentLine',
     config = function()
-      vim.g.indentLine_defaultGroup = 'LineNr'
-      vim.g['indentLine_concealcursor'] = 'nc'
-      vim.g['indentLine_conceallevel'] = 2
+      vim.g['indentLine_defaultGroup'] = 'IndentLine'
+      vim.g['indentLine_concealcursor'] = 'c'
+      vim.g['indentLine_conceallevel'] = 0
       vim.cmd [[
+        autocmd ColorScheme leuven highlight IndentLine guifg='#dadad7' ctermfg=253'
+        autocmd ColorScheme dracula highlight IndentLine guifg='#2f3751' ctermfg=253'
         autocmd TermOpen * IndentLinesDisable
         autocmd Filetype * if &ft ==# "help" | :IndentLinesDisable | endif
         autocmd Filetype * if &ft ==# "NeogitStatus" | :IndentLinesDisable | endif
@@ -247,12 +248,12 @@ require'packer'.startup {function (use)
   use {
     'gzagatti/vim-pencil',
     config = function ()
-      vim.g['pencil#conceallevel'] = 2
-      vim.g['pencil#concealcursor'] = 'nc'
+      vim.g['pencil#conceallevel'] = 0
+      vim.g['pencil#concealcursor'] = 'c'
       vim.cmd [[
         augroup pencil
           autocmd!
-          autocmd FileType tex call pencil#init({'wrap': 'soft'})
+          autocmd FileType tex,org call pencil#init({'wrap': 'soft'})
         augroup END
       ]]
     end
@@ -264,11 +265,16 @@ require'packer'.startup {function (use)
   use {
     'junegunn/goyo.vim',
     config = function ()
+      vim.g.goyo_width = "120"
+      vim.g.goyo_height = "90%"
+      vim.api.nvim_set_keymap('n', '<leader>go', '<cmd>Goyo<cr>', { noremap = true })
       vim.cmd [[
         function! s:GoyoEnter()
-          silent !tmux set -w status off
-          silent !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
-          nnoremap <f8> :NvimTreeToggle<cr>:Goyo x<cr>
+          if executable('tmux') && strlen($TMUX)
+            silent !tmux set -w status off
+            silent !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
+          endif
+          lua require('lualine').hide()
           autocmd VimResized * exe "normal \<c-w>="
           set noshowmode
           set noshowcmd
@@ -276,9 +282,11 @@ require'packer'.startup {function (use)
 
 
         function! s:GoyoLeave()
-          silent !tmux set -w status on
-          silent !tmux list-panes -F '\#F' | grep -q Z && tmux resize-pane -Z
-          nnoremap <f8> :NvimTreeToggle<cr>
+          if executable('tmux') && strlen($TMUX)
+            silent !tmux set -w status on
+            silent !tmux list-panes -F '\#F' | grep -q Z && tmux resize-pane -Z
+          endif
+          lua require('lualine').hide({unhide=true})
           set showmode
           set showcmd
         endfunction
@@ -288,6 +296,11 @@ require'packer'.startup {function (use)
       ]]
     end
   }
+  ---}}}
+
+  ---easy align {{{
+  -- vim alignment
+  use { 'junegunn/vim-easy-align' }
   ---}}}
 
   ---telescope {{{
@@ -310,6 +323,7 @@ require'packer'.startup {function (use)
       }
       vim.api.nvim_set_keymap('n', '[telescope]', '', { noremap = true })
       vim.api.nvim_set_keymap('n', '<space>', '[telescope]', {})
+      vim.api.nvim_set_keymap('n', '[telescope]/', '<cmd>Telescope find_files theme=get_ivy<cr>', { noremap = true })
       vim.api.nvim_set_keymap('n', '[telescope]f', '<cmd>Telescope live_grep theme=get_ivy<cr>', { noremap = true })
       vim.api.nvim_set_keymap('n', '[telescope]y', '<cmd>Telescope registers theme=get_ivy<cr>', { noremap = true })
       vim.api.nvim_set_keymap('n', '[telescope]b', '<cmd>Telescope buffers theme=get_ivy<cr>', { noremap = true })
@@ -334,32 +348,23 @@ require'packer'.startup {function (use)
               org_do_demote = '>h',
             },
           },
-          org_agenda_files = { vim.env.HOME .. '/dev/bstorm/**/*' },
-          org_default_notes_file = vim.env.HOME .. '/dev/bstorm/inbox.org',
+          org_agenda_files = {
+            vim.env.HOME .. '/org/**/*',
+          },
+          org_default_notes_file = vim.env.HOME .. '/org/inbox.orgbundle/text.org',
           org_todo_keywords = {
             'TODO(t)', '|', 'POSTPONED(p)', 'CANCELLED(c)', 'DONE(d)'
           }
         }
       end,
     }
+  ---}}}
 
-    use {
-      'akinsho/org-bullets.nvim',
-      requires = { 'nvim-orgmode/orgmode' },
-      config = function ()
-        require("org-bullets").setup {
-            concealcursor = true,
-            symbols = {
-              headlines = { "◉", "○", "✸", "✿" },
-              checkboxes = {
-                half = {"-", "Normal"},
-                done = { "x", "Normal" },
-                todo = {" ", "Normal"},
-              },
-            },
-        }
-      end,
-    }
+  ---org-goodies{{{
+  use {
+    here 'org-goodies.nvim',
+    requires = { 'nvim-orgmode/orgmode' },
+  }
   ---}}}
 
   ---tablemode {{{
@@ -375,7 +380,7 @@ require'packer'.startup {function (use)
     'hrsh7th/nvim-cmp',
     requires = {
       'hrsh7th/cmp-nvim-lsp',
-      'hrsh7th/cmp-buffer',
+      -- 'hrsh7th/cmp-buffer',
       'hrsh7th/cmp-path',
       'hrsh7th/cmp-cmdline',
       'hrsh7th/vim-vsnip',
@@ -383,7 +388,6 @@ require'packer'.startup {function (use)
       'kdheepak/cmp-latex-symbols',
       'hrsh7th/cmp-nvim-lua',
       'ray-x/cmp-treesitter',
-      'ray-x/lsp_signature.nvim',
     },
     config = function ()
 
@@ -435,7 +439,7 @@ require'packer'.startup {function (use)
           { name = 'nvim_lsp' },
           { name = 'vsnip' },
           { name = 'latex_symbols' },
-          { name = 'buffer' },
+          -- { name = 'buffer' },
           { name = 'path' },
           { name = 'orgmode' },
           { name = 'nvim_lua' },
@@ -639,9 +643,6 @@ require'packer'.startup {function (use)
         local on_attach = function(client, bufnr)
 
           print("Attaching ", client.name, " LSP in buffer ", bufnr, "...")
-
-          local ok, lsp_signature = pcall(require, "lsp_signature")
-          if ok then lsp_signature.on_attach() end
 
           -- diagnostic
           vim.api.nvim_buf_set_keymap(bufnr, 'n', '[telescope]l',
@@ -867,6 +868,65 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
+  ---hologram {{{
+  -- image viewer for Neovim
+  use {
+    here  'hologram.nvim',
+    config = function()
+      require'hologram'.setup()
+    end,
+  }
+  ---}}}
+
+  ---clipboard image {{{
+  -- paste image from clipboard
+  use {
+    here 'clipboard-image.nvim',
+    config = function()
+      require'clipboard-image'.setup {
+        default = {
+          img_dir = {"%:p:h"},
+          img_dir_txt = ".",
+        },
+        org = {
+          img_dir = {"%:p:h", "assets"},
+          img_dir_txt = "./assets",
+          img_name = function()
+            local img_dir = vim.fn.expand("%:p:h") .. "/assets"
+            img_dir = io.popen('ls "'..img_dir..'" 2>/dev/null')
+            local files = {}
+            if img_dir ~= nil then
+              for filename in img_dir:lines() do
+                filename = filename:match("(.+)%..+$")
+                if filename ~= nil then files[filename] = true end
+              end
+              img_dir.close()
+            end
+            repeat
+              uuid = vim.fn.call("system", {"uuidgen"}):sub(10, 13)
+            until files[uuid] == nil
+            return uuid
+          end,
+          affix = "[[%s]]",
+          img_size = "600x400",
+        }
+      }
+    end,
+  }
+  --}}}
+
+  ---nabla {{{
+  -- equation rendering
+  -- TODO support LaTex equations
+  -- TODO support visual selection
+  -- use {
+  --   'jbyuki/nabla.nvim',
+  --   config = function()
+  --     vim.api.nvim_set_keymap('n', '<leader>gE', "<cmd>lua require'nabla'.popup()<cr>", { noremap=true })
+  --   end,
+  -- }
+  --}}}
+
   ---theme: dracula {{{
   use {
     'dracula/vim',
@@ -911,6 +971,11 @@ _G.load_config = function()
 ---basic {{{
 vim.opt.encoding = 'utf-8'
 vim.opt.lazyredraw = true
+---}}}
+
+---colors {{{
+vim.opt.termguicolors = true
+vim.opt.guicursor = 'a:blinkon0-Cursor,i-ci:ver100'
 ---}}}
 
 ---leaders {{{
@@ -1048,11 +1113,6 @@ vim.g['loaded_ruby_provider'] = 0
 vim.g['loaded_perl_provider'] = 0
 ---}}}
 
----colors {{{
-vim.opt.termguicolors = true
-vim.opt.guicursor = 'a:blinkon0-Cursor,i-ci:ver100'
----}}}
-
 ---terminal {{{
 vim.api.nvim_set_keymap('t', '<c-h>', '<C-\\><C-N><C-w>h', { noremap = true })
 vim.api.nvim_set_keymap('t', '<c-j>', '<C-\\><C-N><C-w>j', { noremap = true })
@@ -1167,11 +1227,11 @@ vim.cmd [[
 
   nnoremap <expr> <silent> <buffer> l <SID>ForwardSkipConceal(v:count1)
   nnoremap <expr> <silent> <buffer> h <SID>BackwardSkipConceal(v:count1)
-  nnoremap <expr> <leader>h <SID>ToggleConceal()
+  nnoremap <expr> <leader>hc <SID>ToggleConceal()
 ]]
 
-vim.opt.conceallevel = 2
-vim.opt.concealcursor = 'nc'
+vim.opt.conceallevel = 0
+vim.opt.concealcursor = 'c'
 ---}}}
 
 ---copy/paste mode toggle and shortcuts {{{
