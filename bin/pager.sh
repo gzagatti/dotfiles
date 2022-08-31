@@ -11,7 +11,9 @@ else
 fi
 
 # 63<&0 :: sends stdin 0 to stdin 63
-# sed </dev/fd/63 -e "s/'$'\x1b'']8;;file:[^\]*[\]//g" -e "/^ *\$/d" :: reads stdin 63, remove graphics and remove any empty lines at end of file
+# sed </dev/fd/63 :: reads stdin 63
+# -e "s/'$'\x1b'']8;;file:[^\]*[\]//g" :: removes graphics
+# -e :a -e "/^\n*\$/{\$d;N;ba" -e "}" :: removes empty lines, source: https://unix.stackexchange.com/questions/552188/how-to-remove-empty-lines-from-beginning-and-end-of-file
 # sleep 0.01 :: waits for the command to complete
 # printf "'$'\x1b'']2;" :: removes [Process exited 0] from display
 exec nvim 63<&0 0</dev/null \
@@ -23,4 +25,5 @@ exec nvim 63<&0 0</dev/null \
     -c "set scrollback=100000 laststatus=0" \
     -c "autocmd TermEnter * stopinsert" \
     -c "autocmd TermClose * ${AUTOCMD_TERMCLOSE_CMD}" \
-    -c 'terminal sed </dev/fd/63 -e "s/'$'\x1b'']8;;file:[^\]*[\]//g" -e "/^ *\$/d" && sleep 0.01 && printf "'$'\x1b'']2;"'
+    -c 'terminal sed </dev/fd/63 -e "s/'$'\x1b'']8;;file:[^\]*[\]//g" -e :a -e "/^\n*\$/{\$d;N;ba" -e "}" && sleep 0.01 && printf "'$'\x1b'']2;"'
+
