@@ -7,7 +7,7 @@ if [ "$#" -eq 3 ]; then
     CURSOR_COLUMN=${3:-1}
     AUTOCMD_TERMCLOSE_CMD="call cursor(max([0,${INPUT_LINE_NUMBER}-1])+${CURSOR_LINE}, ${CURSOR_COLUMN})"
 else
-    AUTOCMD_TERMCLOSE_CMD="execute 'set modifiable' | execute '%s#\(\$\n\s*\)\+\%\$##' | execute 'normal G'"
+    AUTOCMD_TERMCLOSE_CMD="execute 'set modifiable' | execute '%s#\(\$\n\s*\)\+\%\$##e' | execute 'normal G'"
 fi
 
 # 63<&0 :: sends stdin 0 to stdin 63
