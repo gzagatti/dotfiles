@@ -78,10 +78,13 @@ if [[ $- == *i* ]]; then
   ## text editor {{{
   if hash nvim 2>/dev/null; then
     export EDITOR=$(which nvim)
+    export VISUAL=$(which nvim)
   elif hash vim 2>/dev/null; then
     export EDITOR=$(which vim)
+    export VISUAL=$(which vim)
   else
     export EDITOR=$(which vi)
+    export VISUAL=$(which vi)
   fi
   ## }}}
 
@@ -140,7 +143,7 @@ if [[ $- == *i* ]]; then
     #    (or, to a custom path: NNN_TMPFILE=/tmp/.lastd)
     # or, export NNN_TMPFILE after nnn invocation
     export NNN_TMPFILE="$HOME/.config/nnn/.lastd"
-    export NNN_PLUG="/:fcd;p:preview-tui;m:mimelist"
+    export NNN_PLUG="/:fcd;p:preview-tui;m:mimelist;f:followln"
     export NNN_FIFO="/tmp/nnn.fifo"
     export NNN_OPENER="nuke"
     n(){
