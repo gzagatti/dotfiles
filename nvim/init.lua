@@ -624,6 +624,7 @@ require'packer'.startup {function (use)
       'neovim/nvim-lspconfig',
       requires = {
         'hrsh7th/nvim-cmp',
+        'barreiroleo/ltex-extra.nvim'
       },
       config = function ()
 
@@ -681,6 +682,10 @@ require'packer'.startup {function (use)
           vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi',
             '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
 
+          -- code action
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gA',
+            '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
+
           -- variable management
           vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gn',
             '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
@@ -692,11 +697,21 @@ require'packer'.startup {function (use)
             '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
 
           -- language specific
-          if(client.name == 'texlab') then
+          if (client.name == 'texlab') then
             vim.api.nvim_buf_set_keymap(bufnr, 'n', '<c-c><c-c>',
               '<cmd>echo \'Building file.\'<cr><cmd>TexlabBuild<cr>', opts)
             vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gt',
               '<cmd>TexlabForward<cr>', opts)
+          end
+
+          if (client.name == "ltex") then
+            tmpdir = vim.api.nvim_eval[[tempname()]] .. "-ltex"
+            require'ltex_extra'.setup {
+              load_langs = { 'en-US' },
+              init_check = false,
+              path = tmpdir,
+              log_level = "info"
+            }
           end
         end
 
@@ -748,9 +763,9 @@ require'packer'.startup {function (use)
           settings = {
             ltex = {
               disabledRules = {
-                ["en"]    = { "MORFOLOGIK_RULE_EN"    },
-                ["en-GB"] = { "MORFOLOGIK_RULE_EN_GB" },
-                ["en-US"] = { "MORFOLOGIK_RULE_EN_US" },
+                ["en"]    = { "MORFOLOGIK_RULE_EN",    "PROFANITY"    },
+                ["en-GB"] = { "MORFOLOGIK_RULE_EN_GB", "PROFANITY" },
+                ["en-US"] = { "MORFOLOGIK_RULE_EN_US", "PROFANITY" },
                 ["es"]    = { "MORFOLOGIK_RULE_ES"    },
                 ["it"]    = { "MORFOLOGIK_RULE_IT_IT" },
                 ["de"]    = { "MORFOLOGIK_RULE_DE_DE" },
