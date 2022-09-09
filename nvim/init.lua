@@ -628,6 +628,8 @@ require'packer'.startup {function (use)
       config = function ()
 
         ----config {{{
+        vim.lsp.set_log_level("INFO")
+
         local lspconfig = require'lspconfig'
 
         local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -712,6 +714,7 @@ require'packer'.startup {function (use)
       ----servers {{{
       -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
       -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
+      -- to check start options: :help lsp.start
 
       -----vim {{{
       -- server deployed with npm
@@ -746,18 +749,38 @@ require'packer'.startup {function (use)
             ltex = {
               disabledRules = {
                 ["en"]    = { "MORFOLOGIK_RULE_EN"    },
-                ["en-AU"] = { "MORFOLOGIK_RULE_EN_AU" },
-                ["en-CA"] = { "MORFOLOGIK_RULE_EN_CA" },
                 ["en-GB"] = { "MORFOLOGIK_RULE_EN_GB" },
-                ["en-NZ"] = { "MORFOLOGIK_RULE_EN_NZ" },
                 ["en-US"] = { "MORFOLOGIK_RULE_EN_US" },
-                ["en-ZA"] = { "MORFOLOGIK_RULE_EN_ZA" },
                 ["es"]    = { "MORFOLOGIK_RULE_ES"    },
                 ["it"]    = { "MORFOLOGIK_RULE_IT_IT" },
                 ["de"]    = { "MORFOLOGIK_RULE_DE_DE" },
               },
             },
           },
+          get_language_id = function(bufnr, filetype)
+              buf_name = vim.api.nvim_buf_get_name(bufnr)
+              if buf_name:match(".sty$") then
+                -- set the language-id, to one for which ltex parsing is disabled
+                -- see allowed ids: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
+                return "lua"
+              else
+                -- from nvim-lspconfig/lua/lua/lspconfig/server_configurations/ltex.lua
+                language_id_mapping = {
+                    bib = 'bibtex',
+                    plaintex = 'tex',
+                    rnoweb = 'sweave',
+                    rst = 'restructuredtext',
+                    tex = 'latex',
+                    xhtml = 'xhtml',
+                }
+              local language_id = language_id_mapping[filetype]
+                if language_id then
+                  return language_id
+                else
+                  return filetype
+                end
+              end
+          end
         })
       )
       -----}}}
