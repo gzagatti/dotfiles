@@ -1,0 +1,67 @@
+/*
+  about:support > Profile Folder > Open Directory
+  https://firefox-source-docs.mozilla.org/devtools-user/settings/index.html
+  open Developer settings; select "Enable browser chrome and add-on debugging toolboxes" and "Enable remote debugging"
+*/
+
+:root {
+  --tab-min-height: 0 !important;
+}
+
+#tabs-newtab-button {
+  visibility: collapse !important;
+}
+
+.tabbrowser-tab {
+  visibility: collapse;
+}
+
+#titlebar {
+  margin-top: -8px;
+}
+
+#titlebar-spacer {
+  background-color: var(--chrome-secondary-background-color);
+}
+
+.titlebar-button {
+  height: 27px !important;
+}
+
+.titlebar-buttonbox-container {
+  margin-bottom: -10.5px;
+  margin-top: 4px;
+  margin-right: 5px;
+}
+
+.titlebar-color {
+  background-color: var(--toolbar-bgcolor);
+}
+
+#nav-bar {
+  box-shadow: none !important;
+  opacity: 0;
+  height: 0;
+  min-height: 5px !important;
+}
+
+#nav-bar:hover {
+  opacity: 1;
+  height: initial;
+  min-height: 20px !important;
+}
+
+#nav-bar:hover #urlbar[breakout] {
+  /* #nav-bar min-height changes the default; we must restore it once hovered */
+  /* see: https://github.com/WesleyBranton/Remove-Firefox-Megabar/blob/master/remove_megabar.css */
+  /* see: https://www.userchrome.org/megabar-styling-firefox-address-bar.html */
+  --urlbar-toolbar-height: 40px !important;
+}
+
+#sidebar-box {
+  font-size: 12px !important;
+}
+
+#sidebar-box #sidebar-header {
+  font-size: 12px !important;
+}
