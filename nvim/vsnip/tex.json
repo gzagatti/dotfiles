@@ -1,0 +1,11 @@
+{
+  "block_math": {
+    "prefix": ["\\["],
+    "body": [
+      "\\[",
+      "$0",
+      "\\]"
+    ],
+    "description": "block math template."
+  }
+}

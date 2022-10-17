@@ -148,6 +148,18 @@ require'packer'.startup {function (use)
     }
   ---}}}
 
+  ---leap {{{
+  use {
+    'ggandor/leap.nvim',
+    require = { 'tpope/vim-repeat' },
+    config = function()
+        require'leap'.add_default_mappings()
+        vim.keymap.del({'x', 'o'}, 'x')
+        vim.keymap.del({'x', 'o'}, 'X')
+    end
+  }
+  ---}}}
+
   ---slime {{{
   -- multiplexer integration
   use {
@@ -230,7 +242,29 @@ require'packer'.startup {function (use)
 
   ---surround {{{
   -- surround text with pairs of elements
-  use { 'tpope/vim-surround' }
+  use {
+    'tpope/vim-surround',
+    require = { 'tpope/vim-repeat' },
+    config = function()
+      vim.g.surround_no_mappings = 0
+      vim.api.nvim_set_keymap('n', 'ds', '<Plug>Dsurround', { noremap = true })
+      vim.api.nvim_set_keymap('n', 'cs', '<Plug>Csurround', { noremap = true })
+      vim.api.nvim_set_keymap('n', 'ys', '<Plug>Ysurround', { noremap = true })
+      vim.api.nvim_set_keymap('n', 'yS', '<Plug>YSurround', { noremap = true })
+      vim.api.nvim_set_keymap('n', 'yss', '<Plug>Yssurround', { noremap = true })
+      vim.api.nvim_set_keymap('n', 'ySS', '<Plug>YSsurround', { noremap = true })
+      vim.api.nvim_set_keymap('x', 'Y', '<Plug>VSurround', { noremap = true })
+      vim.api.nvim_set_keymap('x', 'gY', '<Plug>VgSurround', { noremap = true })
+      vim.api.nvim_set_keymap('i', '<c-s>', '<Plug>Isurround', { noremap = true })
+      -- surrounds text with escaped delimiters `\` (char 92), e.g. foo -> \( foo \)
+      -- prompts for delimiter with `\1delimiter: \1`
+      -- replaces first character `\r^.\r\\\\&` and removes second character `\r.$\r`
+      -- removes first character `\r^.\r` and replaces second character `\r.$\r\\\\&`
+      -- see manual for more details :help surround-customizing
+      vim.g.surround_92 = "\1delimiter: \r^.\r\\\\&\r.$\r\1 \r \1\r^.\r\r.$\r\\\\&\1"
+    end
+
+  }
   ---}}}
 
   ---matchit {{{
@@ -323,7 +357,12 @@ require'packer'.startup {function (use)
       }
       vim.api.nvim_set_keymap('n', '[telescope]', '', { noremap = true })
       vim.api.nvim_set_keymap('n', '<space>', '[telescope]', {})
-      vim.api.nvim_set_keymap('n', '[telescope]/', '<cmd>Telescope find_files theme=get_ivy<cr>', { noremap = true })
+      vim.api.nvim_set_keymap(
+          'n',
+          '[telescope]/',
+          "<cmd>lua require'telescope.builtin'.find_files(require'telescope.themes'.get_ivy({no_ignore=false}))<cr>",
+          { noremap = true }
+      )
       vim.api.nvim_set_keymap('n', '[telescope]f', '<cmd>Telescope live_grep theme=get_ivy<cr>', { noremap = true })
       vim.api.nvim_set_keymap('n', '[telescope]y', '<cmd>Telescope registers theme=get_ivy<cr>', { noremap = true })
       vim.api.nvim_set_keymap('n', '[telescope]b', '<cmd>Telescope buffers theme=get_ivy<cr>', { noremap = true })
@@ -380,16 +419,17 @@ require'packer'.startup {function (use)
     'hrsh7th/nvim-cmp',
     requires = {
       'hrsh7th/cmp-nvim-lsp',
-      -- 'hrsh7th/cmp-buffer',
+      'hrsh7th/cmp-buffer',
       'hrsh7th/cmp-path',
       'hrsh7th/cmp-cmdline',
       'hrsh7th/vim-vsnip',
       'hrsh7th/cmp-vsnip',
-      'kdheepak/cmp-latex-symbols',
+      'gzagatti/cmp-latex-symbols',
       'hrsh7th/cmp-nvim-lua',
-      'ray-x/cmp-treesitter',
     },
     config = function ()
+
+      vim.g.vsnip_snippet_dir = vim.env.XDG_CONFIG_HOME.."/nvim/vsnip"
 
       local cmp = require('cmp')
 
@@ -412,41 +452,47 @@ require'packer'.startup {function (use)
         },
         mapping = {
           ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            elseif vim.fn["vsnip#available"](1) == 1 then
-              feedkey("<Plug>(vsnip-expand-or-jump)", "")
-            elseif has_words_before() then
-              cmp.complete()
-            else
-              fallback() -- The fallback function sends a already mapped key. In this case, it's probably `<Tab>`.
-            end
+              if cmp.visible() then
+                cmp.select_next_item()
+              elseif vim.fn["vsnip#available"](1) == 1 then
+                feedkey("<Plug>(vsnip-expand-or-jump)", "")
+              elseif has_words_before() then
+                cmp.complete()
+              else
+                fallback()
+              end
             end,
             { "i", "s" }
           ),
           ["<S-Tab>"] = cmp.mapping(function()
-            if cmp.visible() then
-              cmp.select_prev_item()
-            elseif vim.fn["vsnip#jumpable"](-1) == 1 then
-              feedkey("<Plug>(vsnip-jump-prev)", "")
-            end
+              if cmp.visible() then
+                cmp.select_prev_item()
+              elseif vim.fn["vsnip#jumpable"](-1) == 1 then
+                feedkey("<Plug>(vsnip-jump-prev)", "")
+              else
+                fallback()
+              end
             end,
             { "i", "s" }
           ),
           ["<CR>"] = cmp.mapping.confirm { select = true },
+          ["<C-Space>"] = cmp.mapping.complete(),
         },
-        sources = {
+        sources = cmp.config.sources({
           { name = 'nvim_lsp' },
           { name = 'vsnip' },
-          { name = 'latex_symbols' },
-          -- { name = 'buffer' },
           { name = 'path' },
-          { name = 'orgmode' },
           { name = 'nvim_lua' },
-          { name = 'treesitter' },
           { name = 'neorg' },
-        },
+          -- override trigger characters, so they don't interfere with snippets
+          { name = 'orgmode', trigger_characters = {} },
+          { name = 'latex_symbols' },
+          { name = 'buffer', keyword_length = 3 },
+        }, {
+        }),
       }
+
+
     end
   }
   ---}}}
@@ -634,7 +680,7 @@ require'packer'.startup {function (use)
         local lspconfig = require'lspconfig'
 
         local capabilities = vim.lsp.protocol.make_client_capabilities()
-        capabilities = require("cmp_nvim_lsp").update_capabilities(capabilities)
+        capabilities = require("cmp_nvim_lsp").default_capabilities()
 
         local opts = { noremap=true, silent=true }
 
@@ -964,6 +1010,35 @@ require'packer'.startup {function (use)
   --   end,
   -- }
   --}}}
+
+  ---neorg {{{
+  use {
+      'nvim-neorg/neorg',
+      requires = { 'nvim-lua/plenary.nvim', 'nvim-treesitter/nvim-treesitter' },
+      config = function()
+        require('neorg').setup{
+          load = {
+            ["core.defaults"] = {},
+            ["core.norg.dirman"] = {
+              config = {
+                workspaces = {
+                  norg = "~/norg",
+                },
+                index = "inbox.norg",
+                autochdir = true,
+              }
+            },
+            ["core.gtd.base"] = {
+              config = {
+                workspace = "norg",
+              },
+            },
+            ["core.norg.qol.toc"] = {},
+          }
+        }
+      end,
+  }
+  ---}}}
 
   ---theme: dracula {{{
   use {
@@ -1386,6 +1461,9 @@ vim.cmd [[
 
     "elisp
     autocmd BufNewFile,BufRead *.elisp set filetype=elisp
+
+    "direnv
+    autocmd BufNewFile,BufRead .envrc set filetype=sh
 
   augroup END
 ]]

@@ -1,0 +1,20 @@
+{
+  "begin_src": {
+    "prefix": ["beg", "#+beg"],
+    "body": [
+      "#+begin_src${1}",
+      "$0",
+      "#+end_src"
+    ],
+    "description": "#+begin_src template."
+  },
+  "block_math": {
+    "prefix": ["\\["],
+    "body": [
+      "\\[",
+      "$0",
+      "\\]"
+    ],
+    "description": "block math template."
+  }
+}

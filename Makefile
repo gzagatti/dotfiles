@@ -3,6 +3,15 @@ workspace := $(HOME)
 
 .PHONY: all
 
+# NIX
+$(workspace)/.config/nixpkgs:
+	mkdir -p $@
+
+nix/%: $(workspace)/.config/nixpkgs
+	ln -fs $(dotfiles)/$@ $</$*
+
+nix: $(shell find nix -type f)
+
 # SHELLS
 inputrc:
 	ln -fs $(dotfiles)/shells/inputrc $(workspace)/.inputrc
@@ -23,8 +32,11 @@ shells: bash zsh tmux
 $(workspace)/.config/nvim:
 	mkdir -p $@
 
-nvim/%: $(workspace)/.config/nvim
-	ln -fs $(dotfiles)/$@ $</$*
+$(workspace)/.config/nvim/vsnip: $(workspace)/.config/nvim
+	mkdir -p $@
+
+nvim/%: $(workspace)/.config/nvim/vsnip
+	ln -fs $(dotfiles)/$@ $(workspace)/.config/$@
 
 nvim: $(shell find nvim -type f)
 
@@ -105,7 +117,12 @@ texlive:
 vim:
 	ln -fs $(dotfiles)/singles/vimrc $(workspace)/.vimrc
 
-
 zathura:
 	mkdir -p $(workspace)/.config/zathura
 	ln -fs $(dotfiles)/singles/zathurarc $(workspace)/.config/zathura/zathurarc
+
+gtk:
+	mkdir -p $(workspace)/.config/gtk-3.0
+	mkdir -p $(workspace)/.config/gtk-4.0
+	ln -fs $(dotfiles)/singles/gtk.css $(workspace)/.config/gtk-3.0/gtk.css
+	ln -fs $(dotfiles)/singles/gtk.css $(workspace)/.config/gtk-4.0/gtk.css
