@@ -3,15 +3,6 @@ workspace := $(HOME)
 
 .PHONY: all
 
-# NIX
-$(workspace)/.config/nixpkgs:
-	mkdir -p $@
-
-nix/%: $(workspace)/.config/nixpkgs
-	ln -fs $(dotfiles)/$@ $</$*
-
-nix: $(shell find nix -type f)
-
 # SHELLS
 inputrc:
 	ln -fs $(dotfiles)/shells/inputrc $(workspace)/.inputrc
@@ -28,65 +19,69 @@ tmux:
 
 shells: bash zsh tmux
 
+# NIX
+nixfiles := $(shell find nix -type f -printf "$(workspace)/.config/%P\n")
+
+nix: $(nixfiles)
+
+$(nixfiles): $(workspace)/.config/%: nix/%
+	mkdir -p $(dir $@)
+	ln -fs $(dotfiles)/$^ $@
+
 # NVIM
-$(workspace)/.config/nvim:
-	mkdir -p $@
+nvimfiles := $(shell find nvim -type f -printf "$(workspace)/.config/%p\n")
 
-$(workspace)/.config/nvim/vsnip: $(workspace)/.config/nvim
-	mkdir -p $@
+nvim: $(nvimfiles)
 
-nvim/%: $(workspace)/.config/nvim/vsnip
-	ln -fs $(dotfiles)/$@ $(workspace)/.config/$@
-
-nvim: $(shell find nvim -type f)
-
+$(nvimfiles): $(workspace)/.config/%: %
+	mkdir -p $(dir $@)
+	ln -fs $(dotfiles)/$^ $@
 
 # EMACS
-$(workspace)/.emacs.d:
-	mkdir -p $@
+emacsfiles := $(shell find emacs -type f -printf "$(workspace)/.emacs.d/%p\n")
 
-emacs/%: $(workspace)/.emacs.d
-	ln -fs $(dotfiles)/$@ $</$*
+emacs: $(emacsfiles)
 
-emacs: $(shell find emacs -type f)
-
+$(emacsfiles): $(workspace)/.emacs.d/%: %
+	mkdir -p $(dir $@)
+	ln -fs $(dotfiles)/$^ $@
 
 # KITTY
-$(workspace)/.config/kitty/themes:
-	mkdir -p $@
+kittyfiles := $(shell find kitty -type f -printf "$(workspace)/.config/%p\n")
 
-kitty/%: $(workspace)/.config/kitty/themes
-	ln -fs $(dotfiles)/$@ $(workspace)/.config/$@
+kitty: $(kittyfiles)
 
-kitty: $(shell find kitty -type f)
-
+$(kittyfiles): $(workspace)/.config/%: %
+	mkdir -p $(dir $@)
+	ln -fs $(dotfiles)/$^ $@
 
 # ROFI
-$(workspace)/.config/rofi:
-	mkdir -p $@
+rofifiles := $(shell find rofi -type f -printf "$(workspace)/.config/%p\n")
 
-rofi/%: $(workspace)/.config/rofi
-	ln -fs $(dotfiles)/$@ $</$*
+rofi: $(rofifiles)
 
-rofi: $(shell find rofi -type f)
+$(rofifiles): $(workspace)/.config/%: %
+	mkdir -p $(dir $@)
+	ln -fs $(dotfiles)/$^ $@
 
 # NNN
-$(workspace)/.config/nnn/plugins:
-	mkdir -p $@
+nnnfiles := $(shell find nnn -type f -printf "$(workspace)/.config/%p\n")
 
-nnn/%: $(workspace)/.config/nnn/plugins
-	ln -fs $(dotfiles)/$@ $(workspace)/.config/$@
+nnn: $(nnnfiles)
 
-nnn: $(shell find nnn -type f)
+$(nnnfiles): $(workspace)/.config/%: %
+	mkdir -p $(dir $@)
+	ln -fs $(dotfiles)/$^ $@
 
 # BINARIES
-$(workspace)/.local/bin:
-	mkdir -p $@
+binfiles := $(shell find bin -type f -printf "$(workspace)/.local/%p\n")
 
-bin/%: $(workspace)/.local/bin
-	ln -fs $(dotfiles)/$@ $(workspace)/.local/$@
+bin: $(binfiles)
 
-bin: $(wildcard bin/*)
+$(binfiles): $(workspace)/.local/%: %
+	mkdir -p $(dir $@)
+	ln -fs $(dotfiles)/$^ $@
+
 
 # SINGLE FILE CONFIGS
 alacritty:
