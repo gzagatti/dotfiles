@@ -36,6 +36,7 @@ texlive/%:
 	mkdir -p $(workspace)/.config/latexmk
 	ln -fs $(dotfiles)/$@ $(workspace)/.config/latexmk/$(@F)
 
+# symlinks to ~/
 ctags/%   \
 git/%     \
 r/%       \
@@ -44,6 +45,7 @@ vim/%     \
 :
 	ln -fs $(dotfiles)/$@ $(workspace)/.$(@F)
 
+# symlinks to ~/.config/
 alacritty/%  \
 kitty/%      \
 nnn/%        \
@@ -66,6 +68,7 @@ tmux: inputrc $(wildcard shells/tmux*)
 jupyter: $(wildcard jupyter/*)
 	mkdir -p $(workspace)/.local/share/jupyter/kernels
 
+# find files in the listed directories
 .SECONDEXPANSION:
 alacritty \
 bin       \
