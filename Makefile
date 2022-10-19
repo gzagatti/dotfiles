@@ -32,10 +32,6 @@ nix/%:
 	mkdir -p $(workspace)/$(@D:nix/%=%)
 	ln -fs $(dotfiles)/$@ $(workspace)/.config/$(@:nix/%=%)
 
-texlive/%:
-	mkdir -p $(workspace)/.config/latexmk
-	ln -fs $(dotfiles)/$@ $(workspace)/.config/latexmk/$(@F)
-
 # symlinks to ~/
 ctags/%   \
 git/%     \
@@ -48,6 +44,7 @@ vim/%     \
 # symlinks to ~/.config/
 alacritty/%  \
 kitty/%      \
+latexmk/%    \
 nnn/%        \
 nvim/%       \
 rofi/%       \
@@ -83,7 +80,7 @@ nnn       \
 nvim      \
 r         \
 rofi      \
-texlive   \
+latexmk   \
 vim       \
 zathura   \
 : %: $$(shell find % -type f)
