@@ -506,10 +506,45 @@ require'packer'.startup {function (use)
           { name = 'orgmode', trigger_characters = {} },
           { name = 'latex_symbols' },
           { name = 'buffer', keyword_length = 3 },
-        }, {
         }),
       }
 
+      function cmp_sources_list(arglead, _, _)
+        -- the API does not allow for the retrieval of sources from cmdline
+        local global_sources = require'cmp.config'.global.sources
+        local out = {}
+        for i = 1,#global_sources do
+          if global_sources[i].name:find("^" .. arglead) ~= nil then
+           out[#out + 1] = global_sources[i].name
+          end
+        end
+        return out
+      end
+
+      function disable_cmp_source(name)
+          local current_sources = cmp.get_config().sources
+          local new_sources = {}
+          for i = 1,#current_sources do
+            if current_sources[i].name ~= name then
+              new_sources[i] = current_sources[i]
+            end
+          end
+          cmp.setup.buffer({sources = new_sources})
+      end
+
+      function enable_cmp_source(name)
+          local global_sources = require'cmp.config'.global.sources
+          local new_sources = cmp.get_config().sources
+          for i = 1,#global_sources do
+            if global_sources[i].name == name then
+              new_sources[#new_sources+1] = global_sources[i]
+            end
+          end
+          cmp.setup.buffer({sources = new_sources})
+      end
+
+      vim.cmd [[ command! -nargs=1 -complete=customlist,v:lua.cmp_sources_list CmpDisable lua disable_cmp_source(<f-args>) ]]
+      vim.cmd [[ command! -nargs=1 -complete=customlist,v:lua.cmp_sources_list CmpEnable lua enable_cmp_source(<f-args>) ]]
 
     end
   }
@@ -1417,7 +1452,7 @@ vim.api.nvim_set_keymap('n', '?', '?\\v', { noremap = true })
 -- cmd {{{
 -- reloads a lua module
 function loaded(arglead, _, _)
-  out = {}
+  local out = {}
   for k, _ in pairs(package.loaded) do
     if k:find("^" .. arglead) ~= nil then
       out[#out + 1] = k
