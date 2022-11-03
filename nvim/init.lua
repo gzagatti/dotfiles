@@ -618,6 +618,7 @@ require'packer'.startup {function (use)
   -- an incremental parsing system for programming tools
     use {
       'nvim-treesitter/nvim-treesitter',
+      run = ':TSUpdate',
       config = function ()
         require'nvim-treesitter.install'.update()
         require'nvim-treesitter.configs'.setup {
