@@ -1099,6 +1099,11 @@ vim.g.maplocalleader = '\\'
 ---mouse {{{
 if vim.fn.has('mouse') then
   vim.opt.mouse= 'nv'
+  -- do not scroll in insert
+  vim.api.nvim_set_keymap('i', '<Up>', '<nop>', { noremap = true })
+  vim.api.nvim_set_keymap('i', '<Down>', '<nop>', { noremap = true })
+  vim.api.nvim_set_keymap('i', '<Right>', '<nop>', { noremap = true })
+  vim.api.nvim_set_keymap('i', '<Left>', '<nop>', { noremap = true })
 end
 ---}}}
 
