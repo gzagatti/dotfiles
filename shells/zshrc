@@ -68,6 +68,12 @@ if [[ $- == *i* ]]; then
   fi
   ## }}}
 
+  ## direnv {{{
+  if hash direnv 2>/dev/null; then
+    eval "$(direnv hook zsh)"
+  fi
+  ## }}}
+
   ## text editor {{{
   if hash nvim 2>/dev/null; then
     export EDITOR=$(which nvim)
@@ -241,9 +247,13 @@ if [[ $- == *i* ]]; then
     local host_info_msg="[%m %n]:%1~ %#"
     local dev_info_msg
 
+    if [[ -n $IN_NIX_SHELL ]]; then
+      dev_info_msg="${dev_info_msg}nix-shell"
+    fi
+
     local pyenv_info_msg=`_devenv_info pyenv py`
     if [[ -n $pyenv_info_msg ]]; then
-        dev_info_msg="${pyenv_info_msg}"
+        dev_info_msg="${dev_info_msg}${pyenv_info_msg}"
     fi
 
     local rbenv_info_msg=`_devenv_info rbenv rb`
