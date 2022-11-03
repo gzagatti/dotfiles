@@ -1,0 +1,41 @@
+/*
+shrink headerbars
+see: https://unix.stackexchange.com/questions/257163/reduce-title-bar-height-in-gnome-3-gtk-3
+*/
+headerbar {
+    min-height: 0px;
+    padding-left: 2px; /* same as childrens vertical margins for nicer proportions */
+    padding-right: 2px;
+    background-color: #2d2d2d;
+    padding-top: 1px;
+}
+
+headerbar entry,
+headerbar spinbutton,
+headerbar button,
+headerbar separator {
+    margin: 0px; /* same as headerbar side padding for nicer proportions */
+    margin-bottom: 0px;
+}
+
+/* shrink ssd titlebars */
+.default-decoration {
+    min-height: 0px; /* let the entry and button drive the titlebar size */
+    padding: 0px;
+    background-color: #2d2d2d;
+}
+
+/* tweak these two props to reduce button size */
+.default-decoration .titlebutton {
+    min-height: 5px;
+    min-width: 5px;
+}
+
+window.ssd headerbar.titlebar {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-right: 6px;
+    padding-left: 6px;
+    min-height: 0px;
+}
+
