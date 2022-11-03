@@ -264,7 +264,7 @@ require'packer'.startup {function (use)
     'tpope/vim-surround',
     require = { 'tpope/vim-repeat' },
     config = function()
-      vim.g.surround_no_mappings = 0
+      vim.g.surround_no_mappings = 1
       vim.api.nvim_set_keymap('n', 'ds', '<Plug>Dsurround', { noremap = true })
       vim.api.nvim_set_keymap('n', 'cs', '<Plug>Csurround', { noremap = true })
       vim.api.nvim_set_keymap('n', 'ys', '<Plug>Ysurround', { noremap = true })
