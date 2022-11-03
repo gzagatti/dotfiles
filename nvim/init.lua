@@ -730,6 +730,10 @@ require'packer'.startup {function (use)
             '<cmd>lua diagnostic_toggle(0)<cr>', opts)
           vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gL',
             '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gn',
+            '<cmd>lua vim.diagnostic.goto_next()<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gp',
+            '<cmd>lua vim.diagnostic.goto_prev()<cr>', opts)
 
           -- documentation help
           vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD',
@@ -748,7 +752,7 @@ require'packer'.startup {function (use)
             '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
 
           -- variable management
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gn',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'rn',
             '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
           vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr',
             '<cmd>lua vim.lsp.buf.references()<cr>', opts)
