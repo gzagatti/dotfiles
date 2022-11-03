@@ -367,7 +367,9 @@ I configure two themes. A light theme to use during the day and a dark one for l
   '(org-ellipsis ((t (:background nil :foreground "#999999" :box nil :underline nil))))
   ;; ensure that trailing and tab markers are muted
   '(whitespace-trailing ((t (:foreground nil :background "#636363"))))
-  '(whitespace-tab ((t (:foreground "#636363" :background nil)))))
+  '(whitespace-tab ((t (:foreground "#636363" :background nil))))
+  ;; remove background from latex in org
+  '(org-latex-and-related ((t (:foreground "#336699" :background "#f8fbf8")))))
 (disable-theme 'leuven)
 #+end_src
 
@@ -980,6 +982,12 @@ foo @holme2015a @holme2012 @masuda2017
 (add-hook 'org-mode-hook #'(lambda () (org-bullets-mode 1)))
 
 ;; indentation
+;; see: https://orgmode.org/manual/Org-Indent-Mode.html
+(setq org-startup-indented nil)
+
+;; latex highlight
+;; see: https://stackoverflow.com/questions/17239273/org-mode-buffer-latex-syntax-highlighting
+(setq org-highlight-latex-and-related '(latex script entities))
 
 ;; fold
 (setq org-ellipsis " ▼")
