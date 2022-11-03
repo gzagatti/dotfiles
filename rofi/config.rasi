@@ -6,7 +6,8 @@ configuration {
 * {
     font: "Cousine Nerd Font 12";
     foreground: #f8f8f2;
-    background-color: #282a36;
+    background: #282a36;
+    background-color: @background;
     active-background: #6272a4;
     urgent-background: #ff5555;
     selected-background: @active-background;
