@@ -1,0 +1,29 @@
+{
+  "function": {
+    "prefix": ["function"],
+    "body": [
+      "function${1:(${2})}",
+      "$0",
+      "end"
+    ],
+    "description": "If statement."
+  },
+  "if": {
+    "prefix": ["if"],
+    "body": [
+      "if $1 then",
+      "$0",
+      "end"
+    ],
+    "description": "If statement."
+  },
+  "for": {
+    "prefix": ["for"],
+    "body": [
+      "for $1 do",
+      "$0",
+      "end"
+    ],
+    "description": "For loop."
+  }
+}
