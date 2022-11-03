@@ -1512,7 +1512,8 @@ vim.cmd [[
     autocmd BufNewFile,BufRead *.jmd set filetype=jmd.markdown
 
     "latex
-    autocmd BufWipeout *.tex execute ":!cd " . expand("<afile>:h") . "; latexmk -c " . expand("<afile>:t")
+    autocmd BufNewFile,BufRead *.tex set filetype=tex
+    autocmd BufDelete *.tex silent! execute ":!cd " . expand("<afile>:h") . "; latexmk -c " . expand("<afile>:t")
 
     "asciidoctor
     autocmd Filetype asciidoctor nnoremap <leader>ll :call ToggleAsciidoctorAutocompile()<cr>
