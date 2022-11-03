@@ -1147,7 +1147,7 @@ vim.opt.softtabstop = indent
 vim.opt.expandtab = true
 vim.opt.backspace = 'indent,eol,start'
 vim.opt.list = true
---vim.opt.listchars = 'tab:>\\trail:.extends:>precedes:>nbsp:%'
+vim.opt.listchars = { tab = ':>\\', trail = '.', extends = '>', precedes = '>', nbsp = '%'}
 --}}}
 
 ---folding {{{
