@@ -1046,7 +1046,12 @@ require'packer'.startup {function (use)
             return uuid
           end,
           affix = "[[%s]]",
-          img_size = "600x400",
+          img_handler = function(img)
+            os.execute(string.format(
+              'mogrify -quality 95 -resize "600x400>" "%s"',
+              img.path
+            ))
+          end
         }
       }
     end,
