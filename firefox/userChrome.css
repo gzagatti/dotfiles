@@ -2,6 +2,7 @@
   about:support > Profile Folder > Open Directory
   https://firefox-source-docs.mozilla.org/devtools-user/settings/index.html
   open Developer settings; select "Enable browser chrome and add-on debugging toolboxes" and "Enable remote debugging"
+  access developer tools; sandwich > More tools > Browser toolbox
 */
 
 :root {
@@ -17,25 +18,16 @@
 }
 
 #titlebar {
-  margin-top: -8px;
+  margin-bottom: -3px;
 }
 
 #titlebar-spacer {
   background-color: var(--chrome-secondary-background-color);
 }
 
-.titlebar-button {
-  height: 27px !important;
-}
-
 .titlebar-buttonbox-container {
-  margin-bottom: -10.5px;
   margin-top: 4px;
   margin-right: 5px;
-}
-
-.titlebar-color {
-  background-color: var(--toolbar-bgcolor);
 }
 
 #nav-bar {
@@ -49,6 +41,7 @@
   opacity: 1;
   height: initial;
   min-height: 20px !important;
+  background-color: #101010 !important;
 }
 
 #nav-bar:hover #urlbar[breakout] {
@@ -64,4 +57,8 @@
 
 #sidebar-box #sidebar-header {
   font-size: 12px !important;
+}
+
+#sidebar-splitter {
+  width: 0px !important;
 }
