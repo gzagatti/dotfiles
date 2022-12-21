@@ -1,12 +1,29 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
 
-  nixgl = import <nixgl> {} ;
 
-  /* gl-kitty = pkgs.writeShellScriptBin "kitty" ''
-      ${nixgl.auto.nixGLDefault}/bin/nixGL ${pkgs.kitty}/bin/kitty "$@"
-    '' ; */
+  # issues: OpenGL
+  # the motivation for nixGL; https://discourse.nixos.org/t/design-discussion-about-nixgl-opengl-cuda-opencl-wrapper-for-nix/2453
+  # nixGL/Home Manager issue; https://github.com/guibou/nixGL/issues/44
+  # nixGL/Home Manager issue; https://github.com/guibou/nixGL/issues/114
+  # nixGL causes all software ran under it to gain nixGL status; https://github.com/guibou/nixGL/issues/116
+  # solution: wrap packages with nixGL
+  # nixGL customizes LD_LIBRARY_PATH and related envs so that nixpkgs find a compatible OpenGL driver
+  # add channel; nix-channel --add https://github.com/guibou/nixGL/archive/main.tar.gz nixgl
+  # customising packages in config; https://gsc.io/70266391-48a6-49be-ab5d-acb5d7f17e76-nixos/doc/nixos-manual/html/sec-package-management.html#sec-customising-packages
+  nixgl = import <nixgl> {} ;
+  nixGLWrap = pkg: pkgs.runCommand "${pkg.name}-nixgl-wrapper" {} ''
+    mkdir $out
+    ln -s ${pkg}/* $out
+    rm $out/bin
+    mkdir $out/bin
+    for bin in ${pkg}/bin/*; do
+      wrapped_bin=$out/bin/$(basename $bin)
+      echo "exec ${lib.getExe nixgl.auto.nixGLDefault} $bin \"\$@\"" > $wrapped_bin
+      chmod +x $wrapped_bin
+    done
+  '';
 
 in
 
@@ -25,20 +42,25 @@ in
   # You can update Home Manager without changing this value. See
   # the Home Manager release notes for a list of state version
   # changes in each release.
-  home.stateVersion = "22.05";
-
+  home.stateVersion = "22.11";
 
   home.packages = [
 
+    # nixgl
+    nixgl.auto.nixGLDefault
+
+    # terminal
+    (nixGLWrap pkgs.kitty)
+
     # browser
     pkgs.firefox
-    pkgs.luakit
+    pkgs.vivaldi
 
     # text editor
     pkgs.emacs
 
     # doc
-    pkgs.libreoffice
+    (nixGLWrap pkgs.libreoffice)
     pkgs.okular
     pkgs.zathura
 
@@ -48,15 +70,15 @@ in
     pkgs.pandoc
 
     # reference
-    pkgs.calibre
+    (nixGLWrap pkgs.calibre)
     pkgs.font-manager
     pkgs.zotero
 
     # image
     pkgs.gimp
     pkgs.gpick
-    pkgs.gthumb
-    pkgs.inkscape
+    (nixGLWrap pkgs.gthumb)
+    (nixGLWrap pkgs.inkscape)
     pkgs.peek
 
     # image utils
@@ -114,6 +136,7 @@ in
     pkgs.rubyPackages_3_1.solargraph
     pkgs.sumneko-lua-language-server
     pkgs.texlab
+    pkgs.nodePackages.pyright
 
     # misc
     pkgs.gsettings-desktop-schemas
@@ -121,29 +144,15 @@ in
     pkgs.python310Packages.jupyterlab
     pkgs.qgis
 
-    # GL applications
-    # https://discourse.nixos.org/t/design-discussion-about-nixgl-opengl-cuda-opencl-wrapper-for-nix/2453/6
-    # https://github.com/guibou/nixGL/issues/114
-    # nix-channel --add https://github.com/guibou/nixGL/archive/main.tar.gz nixgl
-    # https://pmiddend.github.io/posts/nixgl-on-ubuntu/
-    # https://nixos.wiki/wiki/Tensorflow
-    # https://discourse.nixos.org/t/using-nixgl-to-fix-opengl-applications-on-non-nixos-distributions/9940
-    # hardware.opengl.setLdLibraryPath = true; # seems only to apply to NixOS
-    # nixGL kitty; need to figure how to automatically call with nixGL
-    nixgl.auto.nixGLDefault
-    # pkgs.kitty
-    pkgs.kitty
-    # gl-kitty
-
     # TODO doesn't work
+    # layers and layers of wrapping; Zoom does not seem to play nicely with nixGL
+    # https://github.com/NixOS/nixpkgs/issues/94958
     # pkgs.zoom-us
-    # pkgs.nodePackages.pyright
     # doesn't install tlmgr
     # pkgs.texlive.combined.scheme-small
     # pkgs.biber
 
   ];
-
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
