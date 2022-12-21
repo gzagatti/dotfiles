@@ -1,7 +1,8 @@
 /*
-  about:support > Profile Folder > Open Directory
+  about:support > Profile Folder > Open Directory; chrome > userChrome.css
+  about:config > toolkit.legacyUserProfileCustomizations.stylesheets > true
   https://firefox-source-docs.mozilla.org/devtools-user/settings/index.html
-  open Developer settings; select "Enable browser chrome and add-on debugging toolboxes" and "Enable remote debugging"
+  to debug; open Developer settings; select "Enable browser chrome and add-on debugging toolboxes" and "Enable remote debugging"
   access developer tools; sandwich > More tools > Browser toolbox
 */
 
