@@ -497,8 +497,8 @@ require'packer'.startup {function (use)
           ["<C-Space>"] = cmp.mapping.complete(),
         },
         sources = cmp.config.sources({
-          { name = 'nvim_lsp' },
           { name = 'vsnip' },
+          { name = 'nvim_lsp' },
           { name = 'path' },
           { name = 'nvim_lua' },
           { name = 'neorg' },
