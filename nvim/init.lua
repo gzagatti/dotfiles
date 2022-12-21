@@ -1029,6 +1029,31 @@ require'packer'.startup {function (use)
   use {
     here 'clipboard-image.nvim',
     config = function()
+
+      local function uuid_name()
+        local img_dir = vim.fn.expand("%:p:h") .. "/assets"
+        img_dir = io.popen('ls "'..img_dir..'" 2>/dev/null')
+        local files = {}
+        if img_dir ~= nil then
+          for filename in img_dir:lines() do
+            filename = filename:match("(.+)%..+$")
+            if filename ~= nil then files[filename] = true end
+          end
+          img_dir.close()
+        end
+        repeat
+          uuid = vim.fn.call("system", {"uuidgen"}):sub(10, 13)
+        until files[uuid] == nil
+        return uuid
+      end
+
+      local function resize(img)
+        os.execute(string.format(
+          'mogrify -quality 95 -resize "600x400>" "%s"',
+          img.path
+        ))
+      end
+
       require'clipboard-image'.setup {
         default = {
           img_dir = {"%:p:h"},
@@ -1037,31 +1062,30 @@ require'packer'.startup {function (use)
         org = {
           img_dir = {"%:p:h", "assets"},
           img_dir_txt = "./assets",
-          img_name = function()
-            local img_dir = vim.fn.expand("%:p:h") .. "/assets"
-            img_dir = io.popen('ls "'..img_dir..'" 2>/dev/null')
-            local files = {}
-            if img_dir ~= nil then
-              for filename in img_dir:lines() do
-                filename = filename:match("(.+)%..+$")
-                if filename ~= nil then files[filename] = true end
-              end
-              img_dir.close()
-            end
-            repeat
-              uuid = vim.fn.call("system", {"uuidgen"}):sub(10, 13)
-            until files[uuid] == nil
-            return uuid
-          end,
+          img_name = uuid_name,
           affix = "[[%s]]",
-          img_handler = function(img)
-            os.execute(string.format(
-              'mogrify -quality 95 -resize "600x400>" "%s"',
-              img.path
-            ))
-          end
+          img_handler = resize,
+        },
+        tex = {
+          img_dir = {"%:p:h", "assets"},
+          img_dir_txt = "./assets",
+          img_name = uuid_name,
+          affix = "\\includegraphics{%s}",
+          img_handler = resize,
         }
       }
+
+      vim.api.nvim_create_user_command(
+        'PastePNG',
+        function(opts) require'clipboard-image.paste'.paste_img({img_format='png'}) end,
+        { nargs = 0 }
+      )
+      vim.api.nvim_create_user_command(
+        'PasteJPG',
+        function(opts) require'clipboard-image.paste'.paste_img({img_format='jpg'}) end,
+        { nargs = 0 }
+      )
+
     end,
   }
   --}}}
