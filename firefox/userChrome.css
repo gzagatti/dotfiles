@@ -14,6 +14,10 @@
   visibility: collapse !important;
 }
 
+#alltabs-button {
+  visibility: collapse;
+}
+
 .tabbrowser-tab {
   visibility: collapse;
 }
@@ -41,8 +45,9 @@
 #nav-bar:hover {
   opacity: 1;
   height: initial;
-  min-height: 20px !important;
+  min-height: 40px !important;
   background-color: #101010 !important;
+  margin-bottom: 5px;
 }
 
 #nav-bar:hover #urlbar[breakout] {
