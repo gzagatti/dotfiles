@@ -1,1 +1,22 @@
-#header { display: none; }
+/*
+  enable support; vivaldi://experiments/ > "Allow for using CSS modifications"
+  debug; vivaldi://inspect/#apps
+  load css; settings > "Appearance" > "Custom UI Modifications" > "Select Folder"
+  https://gabevilela.vivaldi.net/2020/12/26/guide-customizing-vivaldis-ui-with-css-mods/
+
+*/
+#header {
+  display: none;
+}
+
+.mainbar {
+  opacity: 0;
+  height: 0;
+  min-height: 10px;
+}
+
+.mainbar:hover {
+  opacity: 1;
+  height: initial;
+  min-height: 40px !important;
+}
