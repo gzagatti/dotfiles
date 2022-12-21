@@ -1,0 +1,16 @@
+{
+  "pdb": {
+    "prefix": ["pdb"],
+    "body": [
+      "import pdb; pdb.set_trace()"
+    ],
+    "description": "Pdb set trace."
+  },
+  "ipdb": {
+    "prefix": ["ipdb"],
+    "body": [
+      "import ipdb; ipdb.set_trace()"
+    ],
+    "description": "IPdb set trace."
+  }
+}

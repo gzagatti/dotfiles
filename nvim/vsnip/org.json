@@ -8,6 +8,15 @@
     ],
     "description": "#+begin_src template."
   },
+  "begin_quote": {
+    "prefix": ["quo", "#+quo"],
+    "body": [
+      "#+begin_quote",
+      "$0",
+      "#+end_quote"
+    ],
+    "description": "#+begin_quote template."
+  },
   "block_math": {
     "prefix": ["\\["],
     "body": [
@@ -16,5 +25,12 @@
       "\\]"
     ],
     "description": "block math template."
+  },
+  "inline_math": {
+    "prefix": ["\\("],
+    "body": [
+      "\\( $1 \\)$0"
+    ],
+    "description": "inline math template."
   }
 }
