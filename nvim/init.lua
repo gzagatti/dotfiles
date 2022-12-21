@@ -848,7 +848,15 @@ require'packer'.startup {function (use)
 
       -----python {{{
       -- server deployed with Homebrew
-      lspconfig.pyright.setup(my_config())
+      lspconfig.pyright.setup(
+        my_config({
+            settings = {
+              python = {
+                venvPath = "~/.pyenv/versions"
+              }
+            }
+        })
+      )
       -----}}}
 
       -----json {{{
