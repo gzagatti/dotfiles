@@ -289,4 +289,15 @@ if [[ $- == *i* ]]; then
   PATH=`printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}'`
   # }}}
 
+   # Program specific {{{
+
+  # direnv {{{
+  # the hook has to appear at the end
+  if hash direnv 2>/dev/null; then
+    eval "$(direnv hook bash)"
+  fi
+  # }}}
+
+  # }}}
+
 fi
