@@ -20,3 +20,25 @@
   height: initial;
   min-height: 40px !important;
 }
+
+/*
+  highlight tab bar favicons in white for better contrast in dark mode
+  highlight active favicon in pink
+  https://forum.vivaldi.net/topic/48030/some-questions-about-tab-icons/9
+*/
+.tab-position .tab-header .favicon {
+  filter: drop-shadow(1px 0 0 rgba(246, 246, 246, 0.5)) drop-shadow(-1px 0 0 rgba(246, 246, 246, 0.5)) drop-shadow(0 1px 0 rgba(246, 246, 246, 0.5)) drop-shadow(0 -1px 0 rgba(246, 246, 246, 0.5));
+}
+
+.tab-position .tab.active .tab-header .favicon {
+  filter: drop-shadow(1px 0 0 rgba(249, 57, 185, 0.75)) drop-shadow(-1px 0 0 rgba(249, 57, 185, 0.75)) drop-shadow(0 1px 0 rgba(249, 57, 185, 0.75)) drop-shadow(0 -1px 0 rgba(249, 57, 185, 0.75)) !important;
+}
+
+/*
+  different background for stack to visually distinguish them in tab bar
+*/
+.svg-tab-stack {
+  background-color: #2d2d2d;
+  opacity: 0.7;
+  z-index: -1;
+}
