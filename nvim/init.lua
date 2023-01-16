@@ -41,6 +41,7 @@ require'packer'.startup {function (use)
   ---}}}
 
   ---vim-oscyank {{{
+  -- copy text through SSH with OSC52
   use {
     'ojroques/vim-oscyank',
     config = function()
