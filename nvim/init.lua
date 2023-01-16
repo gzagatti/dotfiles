@@ -393,7 +393,7 @@ require'packer'.startup {function (use)
   ---orgmode {{{
   -- orgmode clone written in Lua
     use {
-      'nvim-orgmode/orgmode',
+      here 'orgmode',
       requires = { 'nvim-treesitter/nvim-treesitter' },
       config = function ()
         require'orgmode'.setup_ts_grammar()
@@ -672,9 +672,9 @@ require'packer'.startup {function (use)
             enable = true,
             keymaps = {
               init_selection = 'gnn',
-              node_incremental = 'grn',
-              scope_incremental = 'grc',
-              node_decremental = 'grm',
+              node_incremental = 'n',
+              scope_incremental = 'gs',
+              node_decremental = 'N',
             },
           },
           indent = {
@@ -852,7 +852,7 @@ require'packer'.startup {function (use)
         my_config({
             settings = {
               python = {
-                venvPath = "~/.pyenv/versions"
+                venvPath = vim.env.HOME .. '/.pyenv/versions'
               }
             }
         })
@@ -1016,12 +1016,12 @@ require'packer'.startup {function (use)
 
   ---hologram {{{
   -- image viewer for Neovim
-  use {
-    here  'hologram.nvim',
-    config = function()
-      require'hologram'.setup()
-    end,
-  }
+  -- use {
+  --   here  'hologram.nvim',
+  --   config = function()
+  --     require'hologram'.setup()
+  --   end,
+  -- }
   ---}}}
 
   ---clipboard image {{{
@@ -1546,7 +1546,7 @@ vim.cmd [[
     " to get the syntax highlighing working in markdown, you need to add a
     " syntax for Julia which does not come default with NeoVim
     " https://github.com/JuliaEditorSupport/julia-vim/tree/master/syntax
-    autocmd BufNewFile,BufRead *.jmd set filetype=jmd.markdown
+    autocmd BufNewFile,BufRead *.jmd set filetype=markdown
 
     "latex
     autocmd BufNewFile,BufRead *.tex set filetype=tex

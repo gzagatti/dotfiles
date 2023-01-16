@@ -1,0 +1,38 @@
+{
+  "function": {
+    "prefix": ["function"],
+    "body": [
+      "function $1(${2})",
+      "$0",
+      "end"
+    ],
+    "description": "Funtion statement."
+  },
+  "if": {
+    "prefix": ["if"],
+    "body": [
+      "if $1",
+      "$0",
+      "end"
+    ],
+    "description": "If statement."
+  },
+  "for": {
+    "prefix": ["for"],
+    "body": [
+      "for $1 in $2",
+      "$0",
+      "end"
+    ],
+    "description": "For loop."
+  },
+  "let": {
+    "prefix": ["let"],
+    "body": [
+      "let $1",
+      "$0",
+      "end"
+    ],
+    "description": "Let block."
+  }
+}
