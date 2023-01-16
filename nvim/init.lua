@@ -78,10 +78,10 @@ require'packer'.startup {function (use)
       local builtin = require("nnn").builtin
       require("nnn").setup {
         explorer = {
-          cmd = "NNN_TMPFILE='' nnn -G",
+          cmd = "NNN_TMPFILE='' nnn",
         },
         picker = {
-          cmd = "tmux new-session nnn -Pp -G",
+          cmd = "tmux new-session nnn -Pp",
         },
         auto_open = {
           empty = true,
