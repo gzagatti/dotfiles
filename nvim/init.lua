@@ -40,6 +40,19 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
+  ---vim-oscyank {{{
+  use {
+    'ojroques/vim-oscyank',
+    config = function()
+      vim.cmd [[
+        augroup oscyank
+          autocmd TextYankPost * if v:event.operator is 'y' && v:event.regname is '+' | execute 'OSCYankReg +' | endif
+        augroup end
+      ]]
+    end
+  }
+  ---}}}
+
   ---tabline {{{
   use {
     'kdheepak/tabline.nvim',
