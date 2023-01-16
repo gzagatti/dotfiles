@@ -417,7 +417,7 @@ require'packer'.startup {function (use)
   ---orgmode {{{
   -- orgmode clone written in Lua
     use {
-      here 'orgmode',
+      'gzagatti/orgmode',
       requires = { 'nvim-treesitter/nvim-treesitter' },
       config = function ()
         require'orgmode'.setup_ts_grammar()
@@ -442,10 +442,10 @@ require'packer'.startup {function (use)
   ---}}}
 
   ---org-goodies{{{
-  use {
-    here 'org-goodies.nvim',
-    requires = { 'nvim-orgmode/orgmode' },
-  }
+  -- use {
+  --   here 'org-goodies.nvim',
+  --   requires = { 'nvim-orgmode/orgmode' },
+  -- }
   ---}}}
 
   ---tablemode {{{
@@ -471,7 +471,7 @@ require'packer'.startup {function (use)
     },
     config = function ()
 
-      vim.g.vsnip_snippet_dir = vim.env.XDG_CONFIG_HOME.."/nvim/vsnip"
+      vim.g.vsnip_snippet_dir = vim.env.HOME..".config/nvim/vsnip"
 
       local cmp = require('cmp')
 
@@ -650,7 +650,7 @@ require'packer'.startup {function (use)
   -- REPL/debug console for nvim
     use {
       -- 'bfredl/nvim-luadev',
-      here 'nvim-luadev',
+      'gzagatti/nvim-luadev',
       config = function ()
           vim.api.nvim_set_keymap('n', '<leader>ee', '<plug>(Luadev-RunLine):Luadev<cr>', { silent= true })
           vim.api.nvim_set_keymap('v', '<leader>ee', '<plug>(Luadev-Run):Luadev<cr>', { silent=true })
@@ -1050,7 +1050,7 @@ require'packer'.startup {function (use)
   ---clipboard image {{{
   -- paste image from clipboard
   use {
-    here 'clipboard-image.nvim',
+    'gzagatti/clipboard-image.nvim',
     config = function()
 
       local function uuid_name()
@@ -1140,7 +1140,7 @@ require'packer'.startup {function (use)
 
   ---theme: leuven {{{
   use {
-    here 'vim-leuven-theme',
+    'gzagatti/vim-leuven-theme',
     config = function ()
       if (vim.env.THEME == 'leuven') then
         vim.cmd [[
