@@ -239,6 +239,16 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
+  ---kitty-runner {{{
+  -- kitty multiplexer integration
+    use { 
+      'jghauser/kitty-runner.nvim',
+      config = function()
+        require("kitty-runner").setup()
+      end
+    }
+  ---}}}
+
   ---indentLine {{{
   -- displays thin vertical lines at each indentation level for code indented with spaces
   use {
@@ -501,7 +511,6 @@ require'packer'.startup {function (use)
           { name = 'nvim_lsp' },
           { name = 'path' },
           { name = 'nvim_lua' },
-          { name = 'neorg' },
           -- override trigger characters, so they don't interfere with snippets
           { name = 'orgmode', trigger_characters = {} },
           { name = 'latex_symbols' },
@@ -1101,35 +1110,6 @@ require'packer'.startup {function (use)
   --   end,
   -- }
   --}}}
-
-  ---neorg {{{
-  use {
-      'nvim-neorg/neorg',
-      requires = { 'nvim-lua/plenary.nvim', 'nvim-treesitter/nvim-treesitter' },
-      config = function()
-        require('neorg').setup{
-          load = {
-            ["core.defaults"] = {},
-            ["core.norg.dirman"] = {
-              config = {
-                workspaces = {
-                  norg = "~/norg",
-                },
-                index = "inbox.norg",
-                autochdir = true,
-              }
-            },
-            ["core.gtd.base"] = {
-              config = {
-                workspace = "norg",
-              },
-            },
-            ["core.norg.qol.toc"] = {},
-          }
-        }
-      end,
-  }
-  ---}}}
 
   ---theme: dracula {{{
   use {
