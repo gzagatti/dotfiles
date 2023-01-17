@@ -1,0 +1,9 @@
+layout_pyenv() {
+    if [ -n "$(which pyenv)" ]; then
+        local virtualenv=$(realpath "$(pyenv root)/versions/$1")
+        source "$(dirname $(dirname "$virtualenv"))/bin/activate"
+        export PYENV_VERSION="$1"
+        export PYENV_VIRTUAL_ENV="$virtualenv"
+        export VIRTUAL_ENV="$virtualenv"
+    fi
+}
