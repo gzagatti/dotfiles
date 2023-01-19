@@ -486,8 +486,6 @@ require'packer'.startup {function (use)
           ["<Tab>"] = cmp.mapping(function(fallback)
               if cmp.visible() then
                 cmp.select_next_item()
-              elseif vim.fn["vsnip#available"](1) == 1 then
-                feedkey("<Plug>(vsnip-expand-or-jump)", "")
               elseif has_words_before() then
                 cmp.complete()
               else
@@ -499,8 +497,6 @@ require'packer'.startup {function (use)
           ["<S-Tab>"] = cmp.mapping(function()
               if cmp.visible() then
                 cmp.select_prev_item()
-              elseif vim.fn["vsnip#jumpable"](-1) == 1 then
-                feedkey("<Plug>(vsnip-jump-prev)", "")
               else
                 fallback()
               end
@@ -521,6 +517,11 @@ require'packer'.startup {function (use)
           { name = 'buffer', keyword_length = 3 },
         }),
       }
+
+      vim.api.nvim_set_keymap('i', '<right>', 'vsnip#jumpable(1) ? "<Plug>(vsnip-jump-next)" : "<nop>"', { expr = true, noremap = true })
+      vim.api.nvim_set_keymap('s', '<right>', 'vsnip#jumpable(1) ? "<Plug>(vsnip-jump-next)" : "<nop>"', { expr = true, noremap = true })
+      vim.api.nvim_set_keymap('i', '<left>', 'vsnip#jumpable(-1) ? "<Plug>(vsnip-jump-prev)" : "<nop>"', { expr = true, noremap = true })
+      vim.api.nvim_set_keymap('s', '<left>', 'vsnip#jumpable(-1) ? "<Plug>(vsnip-jump-prev)" : "<nop>"', { expr = true, noremap = true })
 
       function cmp_sources_list(arglead, _, _)
         -- the API does not allow for the retrieval of sources from cmdline
