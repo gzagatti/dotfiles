@@ -253,16 +253,6 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
-  ---kitty-runner {{{
-  -- kitty multiplexer integration
-    use { 
-      'jghauser/kitty-runner.nvim',
-      config = function()
-        require("kitty-runner").setup()
-      end
-    }
-  ---}}}
-
   ---indentLine {{{
   -- displays thin vertical lines at each indentation level for code indented with spaces
   use {
