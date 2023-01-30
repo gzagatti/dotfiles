@@ -19,15 +19,16 @@ else
 end
 
 let theme = get(ENV, "THEME", "")
+  function leuven_colors(repl)
+    # prefer magenta in the shell prompt
+    repl.shell_color = Base.text_colors[5]
+  end
+  atreplinit(leuven_colors)
   if theme == "leuven"
     # colors are sourced from Base.text_colors
     # see: https://github.com/JuliaLang/julia/blob/master/base/client.jl
     ENV["JULIA_ERROR_COLOR"] = 1
     ENV["JULIA_WARN_COLOR"] = 3
-    function leuven_colors(repl)
-      repl.shell_color = Base.text_colors[5]
-    end
-    atreplinit(leuven_colors)
   end
 end
 
