@@ -3,24 +3,30 @@
 let
 
 
-  # issues: OpenGL
+  # to add channel; nix-channel --add https://github.com/guibou/nixGL/archive/main.tar.gz nixgl
+  # to customise packages in config; https://gsc.io/70266391-48a6-49be-ab5d-acb5d7f17e76-nixos/doc/nixos-manual/html/sec-package-management.html#sec-customising-packages
+
   # the motivation for nixGL; https://discourse.nixos.org/t/design-discussion-about-nixgl-opengl-cuda-opencl-wrapper-for-nix/2453
-  # nixGL/Home Manager issue; https://github.com/guibou/nixGL/issues/44
-  # nixGL/Home Manager issue; https://github.com/guibou/nixGL/issues/114
-  # nixGL causes all software ran under it to gain nixGL status; https://github.com/guibou/nixGL/issues/116
-  # solution: wrap packages with nixGL
-  # nixGL customizes LD_LIBRARY_PATH and related envs so that nixpkgs find a compatible OpenGL driver
-  # add channel; nix-channel --add https://github.com/guibou/nixGL/archive/main.tar.gz nixgl
-  # customising packages in config; https://gsc.io/70266391-48a6-49be-ab5d-acb5d7f17e76-nixos/doc/nixos-manual/html/sec-package-management.html#sec-customising-packages
   nixgl = import <nixgl> {} ;
-  nixGLWrap = pkg: pkgs.runCommand "${pkg.name}-nixgl-wrapper" {} ''
+  nixGuiWrap = pkg: pkgs.runCommand "${pkg.name}-nixgui-wrapper" {} ''
     mkdir $out
     ln -s ${pkg}/* $out
     rm $out/bin
     mkdir $out/bin
+    # nixGL/Home Manager issue; https://github.com/guibou/nixGL/issues/44
+    # nixGL/Home Manager issue; https://github.com/guibou/nixGL/issues/114
+    # nixGL causes all software ran under it to gain nixGL status; https://github.com/guibou/nixGL/issues/116
+    # we wrap packages with nixGL; it customizes LD_LIBRARY_PATH and related
+    # envs so that nixpkgs find a compatible OpenGL driver
+    nixgl_bin="${lib.getExe nixgl.auto.nixGLDefault}"
+    # Similar to OpenGL, the executables installed by nix cannot find the GTK modules
+    # required by the environment. The workaround is to unset the GTK_MODULES and
+    # GTK3_MODULES so that it does not reach for system GTK modules.
+    # We also need to modify the GTK_PATH to point to libcanberra-gtk3 installed via Nix
+    gtk_path="${lib.getLib pkgs.libcanberra-gtk3}/lib/gtk-3.0"
     for bin in ${pkg}/bin/*; do
       wrapped_bin=$out/bin/$(basename $bin)
-      echo "exec ${lib.getExe nixgl.auto.nixGLDefault} $bin \"\$@\"" > $wrapped_bin
+      echo "exec env GTK_MODULES= GTK3_MODULES= GTK_PATH=\"$gtk_path\" $nixgl_bin  $bin \"\$@\"" > $wrapped_bin
       chmod +x $wrapped_bin
     done
   '';
@@ -50,19 +56,19 @@ in
     nixgl.auto.nixGLDefault
 
     # terminal
-    (nixGLWrap pkgs.kitty)
+    (nixGuiWrap pkgs.kitty)
 
     # browser
-    pkgs.firefox
-    pkgs.vivaldi
+    (nixGuiWrap pkgs.firefox)
+    (nixGuiWrap pkgs.vivaldi)
 
     # text editor
     pkgs.emacs
 
     # doc
-    (nixGLWrap pkgs.libreoffice)
-    pkgs.okular
-    pkgs.zathura
+    (nixGuiWrap pkgs.libreoffice)
+    (nixGuiWrap pkgs.okular)
+    (nixGuiWrap pkgs.zathura)
 
     # doc utils
     pkgs.ghostscript
@@ -70,16 +76,16 @@ in
     pkgs.pandoc
 
     # reference
-    (nixGLWrap pkgs.calibre)
-    pkgs.font-manager
-    pkgs.zotero
+    (nixGuiWrap pkgs.calibre)
+    (nixGuiWrap pkgs.font-manager)
+    (nixGuiWrap pkgs.zotero)
 
     # image
-    pkgs.gimp
-    pkgs.gpick
-    (nixGLWrap pkgs.gthumb)
-    (nixGLWrap pkgs.inkscape)
-    pkgs.peek
+    (nixGuiWrap pkgs.gimp)
+    (nixGuiWrap pkgs.gpick)
+    (nixGuiWrap pkgs.gthumb)
+    (nixGuiWrap pkgs.inkscape)
+    (nixGuiWrap pkgs.peek)
 
     # image utils
     pkgs.exiftool
@@ -92,8 +98,8 @@ in
     pkgs.zopfli
 
     # media
-    pkgs.spotify
-    pkgs.vlc
+    (nixGuiWrap pkgs.spotify)
+    (nixGuiWrap pkgs.vlc)
 
     # messaging
     pkgs.weechat
@@ -142,7 +148,7 @@ in
     pkgs.gsettings-desktop-schemas
     pkgs.openfortivpn
     pkgs.python310Packages.jupyterlab
-    pkgs.qgis
+    (nixGuiWrap pkgs.qgis)
 
     # TODO doesn't work
     # layers and layers of wrapping; Zoom does not seem to play nicely with nixGL
