@@ -471,7 +471,7 @@ require'packer'.startup {function (use)
     },
     config = function ()
 
-      vim.g.vsnip_snippet_dir = vim.env.HOME..".config/nvim/vsnip"
+      vim.g.vsnip_snippet_dir = vim.env.HOME.."/.config/nvim/vsnip"
 
       local cmp = require('cmp')
 

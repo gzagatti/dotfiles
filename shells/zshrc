@@ -164,7 +164,7 @@ if [[ $- == *i* ]]; then
           return
       fi
 
-      nnn -G -e
+      nnn -e
 
       if [ -f "$NNN_TMPFILE" ]; then
               . "$NNN_TMPFILE"
