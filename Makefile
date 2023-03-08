@@ -49,6 +49,7 @@ nnn/%        \
 nvim/%       \
 rofi/%       \
 zathura/%    \
+direnv/%     \
 :
 	mkdir -p $(workspace)/.config/$(@D)
 	ln -fs $(dotfiles)/$@ $(workspace)/.config/$@
@@ -83,4 +84,5 @@ rofi      \
 latexmk   \
 vim       \
 zathura   \
+direnv    \
 : %: $$(shell find % -type f)
