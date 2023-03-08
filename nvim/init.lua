@@ -956,7 +956,7 @@ require'packer'.startup {function (use)
       -----lua {{{
       -- server deployed internally
       -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L153
-      lspconfig.sumneko_lua.setup(
+      lspconfig.lua_ls.setup(
         my_config({
         settings = {
             Lua = {
