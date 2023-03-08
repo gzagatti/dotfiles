@@ -518,10 +518,10 @@ require'packer'.startup {function (use)
         }),
       }
 
-      vim.api.nvim_set_keymap('i', '<right>', 'vsnip#jumpable(1) ? "<Plug>(vsnip-jump-next)" : "<nop>"', { expr = true, noremap = true })
-      vim.api.nvim_set_keymap('s', '<right>', 'vsnip#jumpable(1) ? "<Plug>(vsnip-jump-next)" : "<nop>"', { expr = true, noremap = true })
-      vim.api.nvim_set_keymap('i', '<left>', 'vsnip#jumpable(-1) ? "<Plug>(vsnip-jump-prev)" : "<nop>"', { expr = true, noremap = true })
-      vim.api.nvim_set_keymap('s', '<left>', 'vsnip#jumpable(-1) ? "<Plug>(vsnip-jump-prev)" : "<nop>"', { expr = true, noremap = true })
+      vim.api.nvim_set_keymap('i', '<right>', 'vsnip#jumpable(1) ? "<Plug>(vsnip-jump-next)" : ""', { expr = true, noremap = true })
+      vim.api.nvim_set_keymap('s', '<right>', 'vsnip#jumpable(1) ? "<Plug>(vsnip-jump-next)" : ""', { expr = true, noremap = true })
+      vim.api.nvim_set_keymap('i', '<left>', 'vsnip#jumpable(-1) ? "<Plug>(vsnip-jump-prev)" : ""', { expr = true, noremap = true })
+      vim.api.nvim_set_keymap('s', '<left>', 'vsnip#jumpable(-1) ? "<Plug>(vsnip-jump-prev)" : ""', { expr = true, noremap = true })
 
       function cmp_sources_list(arglead, _, _)
         -- the API does not allow for the retrieval of sources from cmdline
