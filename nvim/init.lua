@@ -692,7 +692,8 @@ require'packer'.startup {function (use)
             },
           },
           indent = {
-            enable = true
+            enable = true,
+            disable = { "julia" }
           },
         }
       vim.opt.foldmethod = 'expr'
@@ -1535,7 +1536,7 @@ vim.cmd [[
 
     "latex
     autocmd BufNewFile,BufRead *.tex set filetype=tex
-    autocmd BufDelete *.tex silent! execute ":!cd " . expand("<afile>:h") . "; latexmk -c " . expand("<afile>:t")
+    " autocmd BufDelete *.tex silent! execute ":!cd " . expand("<afile>:h") . "; latexmk -c " . expand("<afile>:t")
 
     "asciidoctor
     autocmd Filetype asciidoctor nnoremap <leader>ll :call ToggleAsciidoctorAutocompile()<cr>
