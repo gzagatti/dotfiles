@@ -68,7 +68,8 @@ in
     # doc
     (nixGuiWrap pkgs.libreoffice)
     (nixGuiWrap pkgs.okular)
-    (nixGuiWrap pkgs.zathura)
+    # does not work properly; crashes randomly and does not navigate properly
+    # (nixGuiWrap pkgs.zathura)
 
     # doc utils
     pkgs.ghostscript
