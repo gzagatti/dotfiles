@@ -1,9 +1,13 @@
 layout_pyenv() {
     if [ -n "$(which pyenv)" ]; then
         local virtualenv=$(realpath "$(pyenv root)/versions/$1")
-        source "$(dirname $(dirname "$virtualenv"))/bin/activate"
-        export PYENV_VERSION="$1"
-        export PYENV_VIRTUAL_ENV="$virtualenv"
-        export VIRTUAL_ENV="$virtualenv"
+        if [ -d "$virtualenv" ]; then
+          source "$(dirname $(dirname "$virtualenv"))/bin/activate"
+          export PYENV_VERSION="$1"
+          export PYENV_VIRTUAL_ENV="$virtualenv"
+          export VIRTUAL_ENV="$virtualenv"
+        else
+          echo -e "\e[38:5:1mPyenv virtual environment not available: $1\e[0m"
+        fi
     fi
 }
