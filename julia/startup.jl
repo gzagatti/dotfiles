@@ -14,7 +14,7 @@ else
             end
         end
         if level == 1
-            Pkg.activate()
+            Pkg.activate(temp=true)
         end
     end
 end
