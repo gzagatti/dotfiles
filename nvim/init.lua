@@ -695,6 +695,11 @@ require'packer'.startup {function (use)
             enable = true,
             disable = { "julia" }
           },
+          query_linter = {
+            enable = true,
+            use_virtual_text = true,
+            lint_events = {"BufWrite", "CursorHold"},
+          },
         }
       vim.opt.foldmethod = 'expr'
       vim.opt.foldexpr = 'luaeval(printf(\'require"nvim-treesitter.fold".get_fold_indic(%d)\', v:lnum))'
