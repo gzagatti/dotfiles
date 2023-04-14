@@ -253,6 +253,39 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
+  ---pretty-fold {{{
+  use {
+    'anuvyklack/pretty-fold.nvim',
+    config = function()
+        require('pretty-fold').setup({
+          fill_char = '-',
+          remove_fold_markers = false,
+          process_comment_signs = false,
+        })
+        require('pretty-fold').ft_setup('julia', {
+          fill_char = '-',
+          remove_fold_markers = false,
+          process_comment_signs = false,
+          comment_signs = {'"""'},
+        })
+        require('pretty-fold').ft_setup('lua', {
+          fill_char = '-',
+          remove_fold_markers = false,
+          process_comment_signs = false,
+          matchup_patterns = {
+              { '^%s*do$', 'end' }, -- do ... end blocks
+              { '^%s*if', 'end' },  -- if ... end
+              { '^%s*for', 'end' }, -- for
+              { 'function%s*%(', 'end' }, -- 'function'
+              {  '{', '}' },
+              { '%(', ')' }, -- % to escape lua pattern char
+              { '%[', ']' }, -- % to escape lua pattern char
+          },
+        })
+    end
+  }
+  ---}}}
+
   ---indentLine {{{
   -- displays thin vertical lines at each indentation level for code indented with spaces
   use {
@@ -1210,7 +1243,7 @@ vim.opt.softtabstop = indent
 vim.opt.expandtab = true
 vim.opt.backspace = 'indent,eol,start'
 vim.opt.list = true
-vim.opt.listchars = { tab = ':>\\', trail = '.', extends = '>', precedes = '>', nbsp = '%'}
+vim.opt.listchars = { tab = ':>-', trail = '.', extends = '>', precedes = '>', nbsp = '%'}
 --}}}
 
 ---folding {{{
