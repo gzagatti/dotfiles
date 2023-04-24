@@ -1,30 +1,46 @@
-import Pkg
-# activate project at current path or at repo root
-if isfile("Project.toml") && isfile("Manifest.toml")
-    Pkg.activate(".")
-else
-    here = splitpath(abspath("."))
-    for level = length(here):-1:1
-        parent = here[1:level]
-        if isdir(joinpath([parent; ".git"]))
-            if isfile(joinpath([parent; "Project.toml"])) &&
-               isfile(joinpath([parent; "Manifest.toml"]))
-                Pkg.activate(joinpath(parent))
-                break
+atreplinit() do repl
+
+    @eval import Pkg
+
+    # activate project at current path or at repo root
+    if isfile("Project.toml") && isfile("Manifest.toml")
+        Pkg.activate(".")
+        println()
+    else
+        here = splitpath(abspath("."))
+        for level = length(here):-1:1
+            parent = here[1:level]
+            if isdir(joinpath([parent; ".git"]))
+                if isfile(joinpath([parent; "Project.toml"])) &&
+                  isfile(joinpath([parent; "Manifest.toml"]))
+                    Pkg.activate(joinpath(parent))
+                    break
+                end
+            end
+            if level == 1
+                Pkg.activate(temp=true)
+                println()
             end
         end
-        if level == 1
-            Pkg.activate(temp=true)
-        end
     end
+
+    if !isnothing(Base.find_package("Revise"))
+        @eval using Revise
+        @info "Revise loaded."
+    end
+    if !isnothing(Base.find_package("KittyTerminalImages")) && get(ENV, "TERM", "") == "xterm-kitty"
+        @eval using KittyTerminalImages
+        @info "KittyTerminalImages loaded."
+    end
+
+    # prefer magenta in the shell prompt
+    repl.shell_color = Base.text_colors[5]
+
+    # margin between welcome message and first prompt
+    println()
 end
 
 let theme = get(ENV, "THEME", "")
-    function leuven_colors(repl)
-        # prefer magenta in the shell prompt
-        repl.shell_color = Base.text_colors[5]
-    end
-    atreplinit(leuven_colors)
     if theme == "leuven"
         # colors in the REPL are sourced from Base.text_colors
         # see: https://github.com/JuliaLang/julia/blob/master/base/client.jl
