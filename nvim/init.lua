@@ -1191,10 +1191,10 @@ require'packer'.startup {function (use)
 end
 --}}}
 
--- config {{{
+--config {{{
 _G.load_config = function()
 
--- basic settings {{{
+--basic settings {{{
 
 ---basic {{{
 vim.opt.encoding = 'utf-8'
@@ -1243,7 +1243,7 @@ vim.opt.softtabstop = indent
 vim.opt.expandtab = true
 vim.opt.backspace = 'indent,eol,start'
 vim.opt.list = true
-vim.opt.listchars = { tab = ':>-', trail = '.', extends = '>', precedes = '>', nbsp = '%'}
+vim.opt.listchars = { tab = '»·', trail = '·', extends = '›', precedes = '‹', nbsp = '␣'}
 --}}}
 
 ---folding {{{
@@ -1510,7 +1510,7 @@ vim.api.nvim_set_keymap('n', '?', '?\\v', { noremap = true })
 
 --}}}
 
--- cmd {{{
+--cmd {{{
 -- reloads a lua module
 function loaded(arglead, _, _)
   local out = {}
@@ -1539,7 +1539,7 @@ end
 vim.cmd [[ command! -nargs=1 -complete=customlist,v:lua.loaded Luareload lua reload(<f-args>) ]]
 -- }}}
 
--- autocmd {{{
+--autocmd {{{
 vim.cmd [[
   augroup vimrctweaks
     autocmd!
