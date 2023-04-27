@@ -31,6 +31,8 @@ atreplinit() do repl
     if !isnothing(Base.find_package("KittyTerminalImages")) && get(ENV, "TERM", "") == "xterm-kitty"
         @eval using KittyTerminalImages
         @info "KittyTerminalImages loaded."
+        # avoids display issues https://github.com/JuliaPlots/Plots.jl/issues/1905#issuecomment-458778817
+        ENV["GKSwstype"]="nul";
     end
 
     # prefer magenta in the shell prompt
@@ -44,8 +46,8 @@ let theme = get(ENV, "THEME", "")
     if theme == "leuven"
         # colors in the REPL are sourced from Base.text_colors
         # see: https://github.com/JuliaLang/julia/blob/master/base/client.jl
-        ENV["JULIA_ERROR_COLOR"] = 1
-        ENV["JULIA_WARN_COLOR"] = 3
+        # ENV["JULIA_ERROR_COLOR"] = 1
+        # ENV["JULIA_WARN_COLOR"] = 3
 
         # no point in printing light colors if you cannot see
         # the leuven way is to add a light background when printing light colors
