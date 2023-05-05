@@ -1,9 +1,26 @@
-:root.sidebar #background {
+:root {
+  --tab-highlighted-glow: #E920A3
+}
+
+:root #background {
   background: #272727;
 }
 
-:root.sidebar tab-item {
+tab-item {
   font-size: 12px !important;
+  background: #272727
+}
+
+tab-item tab-favicon {
+	margin-right: 3px;
+}
+
+tab-item:not(.loading):not(.active):not(.pinned) tab-favicon {
+  filter: drop-shadow(0px 0px 2.5px white);
+}
+
+tab-item:not(.some-descendants-highlighted) ::part(extra-contents-by-tst-active-tab-in-collapsed-tree_piro_sakura_ne_jp favicon) {
+  filter: drop-shadow(0px 0px 5px white);
 }
 
 /* Show title of unread tabs with red and italic font */
