@@ -19,6 +19,7 @@ atreplinit() do repl
             end
             if level == 1
                 Pkg.activate(temp=true)
+                Pkg.offline(true)
                 println()
             end
         end
