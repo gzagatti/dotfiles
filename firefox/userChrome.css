@@ -8,6 +8,13 @@
 
 :root {
   --tab-min-height: 0 !important;
+  --toolbar-non-lwt-bgcolor: #2D2D2D !important;
+  --button-bgcolor: #4C4C4C !important;
+  --toolbar-field-focus-background-color: #4C4C4C !important;
+}
+
+input.findbar-textbox {
+  background-color: #4C4C4C !important;
 }
 
 #tabs-newtab-button {
@@ -46,7 +53,6 @@
   opacity: 1;
   height: initial;
   min-height: 40px !important;
-  background-color: #2D2D2D !important;
   margin-bottom: 5px;
 }
 
@@ -59,6 +65,7 @@
 
 #sidebar-box {
   font-size: 12px !important;
+  background-color: #4C4C4C !important;
 }
 
 #sidebar-box #sidebar-header {
