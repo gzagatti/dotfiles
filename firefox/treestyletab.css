@@ -1,39 +1,28 @@
 :root {
-  --tab-highlighted-glow: #E920A3
+  --tab-highlighted-glow: #E920A3;
+  --tab-surface-active: #5F5F5F;
 }
 
 :root #background {
-  background: #272727;
+  background: #4C4C4C;
 }
 
 tab-item {
   font-size: 12px !important;
-  background: #272727
 }
 
 tab-item tab-favicon {
-	margin-right: 3px;
+	margin-right: 2px;
 }
 
-tab-item:not(.loading):not(.active):not(.pinned) tab-favicon {
+::part(extra-contents-by-tst-active-tab-in-collapsed-tree_piro_sakura_ne_jp) {
+   background-color: #4C4C4C;
+}
+
+/*tab-item:not(.loading):not(.active):not(.pinned) tab-favicon {
   filter: drop-shadow(0px 0px 2.5px white);
 }
 
 tab-item:not(.some-descendants-highlighted) ::part(extra-contents-by-tst-active-tab-in-collapsed-tree_piro_sakura_ne_jp favicon) {
   filter: drop-shadow(0px 0px 5px white);
-}
-
-/* Show title of unread tabs with red and italic font */
-/*
-:root.sidebar tab-item.unread .label-content {
-  color: red !important;
-  font-style: italic !important;
-}
-*/
-
-/* Add private browsing indicator per tab */
-/*
-:root.sidebar tab-item.private-browsing tab-label:before {
-  content: "🕶";
-}
-*/
+}*/
