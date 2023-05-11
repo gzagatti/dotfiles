@@ -209,10 +209,18 @@ if [[ $- == *i* ]]; then
     local color=""
     local reset_color=' '
     if [[ $THEME == "leuven" ]]; then
-      color='$(if [[ $? == 0 ]]; then echo "\[\e[48:5:11m\]";else echo "\[\e[38:5:1m\]\[\e[48:5:9m\]"; fi)'
+      if [[ -n $SSH_CLIENT ]]; then
+        color='$(if [[ $? == 0 ]]; then echo "\[\e[47:5:10m\]";else echo "\[\e[38:5:1m\]\[\e[48:5:9m\]"; fi)'
+      else
+        color='$(if [[ $? == 0 ]]; then echo "\[\e[48:5:11m\]";else echo "\[\e[38:5:1m\]\[\e[48:5:9m\]"; fi)'
+      fi
       reset_color='\[\e[0m\] '
     elif [[ $THEME == "dracula" ]]; then
-      color='$(if [[ $? == 0 ]]; then echo "\[\e[00;30m\]";else echo "\[\e[00;31m\]"; fi)'
+      if [[ -n $SSH_CLIENT ]]; then
+        color='$(if [[ $? == 0 ]]; then echo "\[\e[00;35m\]";else echo "\[\e[00;31m\]"; fi)'
+      else
+        color='$(if [[ $? == 0 ]]; then echo "\[\e[00;30m\]";else echo "\[\e[00;31m\]"; fi)'
+      fi
       reset_color='\[\e[0m\] \[\e[33m\]'
     fi
     printf %s "$color$(_precmd_ps1)$info$reset_color"
