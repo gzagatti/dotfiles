@@ -2,11 +2,30 @@ import re
 
 from kittens.tui.handler import result_handler
 from kitty.key_encoding import KeyEvent, parse_shortcut
+from kittens.ssh.utils import is_kitten_cmdline
+
+# for logging during debug, use something like
+# boss.call_remote_control(window, ("send-text", "--match", "id:{target}", f"{message}\n"))
 
 
 def is_window_vim(window, vim_id):
     fp = window.child.foreground_processes
-    return any(re.search(vim_id, p['cmdline'][0] if len(p['cmdline']) else '', re.I) for p in fp)
+    wtitle = window.child_title
+    for p in fp:
+        q = list(p["cmdline"] or ())
+        if is_kitten_cmdline(q):
+            wtitle = wtitle.split(": ")[1]
+            vim_id = f"^{vim_id}(\s+\S+|$)"
+            if re.search(vim_id, wtitle, re.I):
+                return True
+            else:
+                return False
+        else:
+            if len(q) == 0:
+                continue
+            if re.search(vim_id, p["cmdline"][0], re.I):
+                return True
+    return False
 
 
 def encode_key_mapping(window, key_mapping):
@@ -38,10 +57,11 @@ def handle_result(args, result, target_window_id, boss):
 
     if window is None:
         return
+
     if is_window_vim(window, vim_id):
         encoded = encode_key_mapping(window, key_mapping)
         window.write_to_child(encoded)
     else:
-        # do nothing if are fully focused on one window
+        # do nothing if fully focused on one window
         if boss.active_tab._current_layout_name != "stack":
             boss.active_tab.neighboring_window(direction)

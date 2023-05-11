@@ -6,11 +6,15 @@ from kittens.tui.handler import result_handler
 from kitty.constants import config_dir
 from kitty.utils import reload_conf_in_all_kitties
 
+
 def main(args: List[str]) -> None:
     pass
 
+
 @result_handler(no_ui=True)
-def handle_result(args: List[str], result: None, target_window_id: int, boss: Boss) -> None:
+def handle_result(
+    args: List[str], result: None, target_window_id: int, boss: Boss
+) -> None:
     current_theme = Path(config_dir) / "current-theme.conf"
     dracula = Path(config_dir) / "themes/dracula.conf"
     leuven = Path(config_dir) / "themes/leuven.conf"
@@ -23,6 +27,3 @@ def handle_result(args: List[str], result: None, target_window_id: int, boss: Bo
     elif dracula.exists():
         current_theme.write_text(dracula.read_text())
     reload_conf_in_all_kitties()
-
-
-
