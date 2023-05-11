@@ -226,7 +226,7 @@ if [[ $- == *i* ]]; then
       return
     fi
     unset AT_PROMPT
-    echo -en '\033[0m'
+    printf '\033[0m'
   }
   # reset colours prior to printing output
   trap "PreCommand" DEBUG
