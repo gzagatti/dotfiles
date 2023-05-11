@@ -238,10 +238,18 @@ if [[ $- == *i* ]]; then
     # https://zsh.sourceforge.io/Doc/Release/Prompt-Expansion.html#Visual-effects
     color=""
     if [[ $THEME == "leuven" ]]; then
-      color='%(?.%K{11}.%K{9}%F{1})'
+      if [[ -n $SSH_CLIENT ]]; then
+        color='%(?.%K{10}.%K{9}%F{1})'
+      else
+        color='%(?.%K{11}.%K{9}%F{1})'
+      fi
       LS_COLORS="no=00:fi=00:di=34::ln=32;102:so=37;107:pi=1;33:ex=31:bd=37;107:cd=37;107:su=37;107:sg=37;107:tw=35:ow=35"
     elif [[ $THEME == "dracula" ]]; then
-      color='%(?.%F{black}.%F{red})'
+      if [[ -n $SSH_CLIENT ]]; then
+        color='%(?.%F{green}.%F{red})'
+      else
+        color='%(?.%F{black}.%F{red})'
+      fi
       LS_COLORS="no=00:fi=00:di=34::ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
     fi
     local host_info_msg="[%m %n]:%1~ %#"
@@ -279,7 +287,7 @@ if [[ $- == *i* ]]; then
     if [[ $THEME = "leuven" ]]; then
       PS1="$color${dev_info_msg}${host_info_msg}%k%f "
     elif [[ $THEME = "dracula" ]]; then
-      PS1="$color${dev_info_msg}${host_info_msg}%F{yellow} "
+      PS1="$color${dev_info_msg}${host_info_msg}%k%f "
     else
       PS1="$color${dev_info_msg}${host_info_msg} "
     fi
