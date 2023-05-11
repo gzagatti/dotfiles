@@ -60,7 +60,6 @@ in
 
     # browser
     (nixGuiWrap pkgs.firefox)
-    (nixGuiWrap pkgs.vivaldi)
 
     # text editor
     pkgs.emacs
