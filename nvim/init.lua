@@ -30,10 +30,10 @@ require'packer'.startup {function (use)
   ---}}}
 
   ---lualine/tmuxline {{{
-  -- lean & mean status/tabline for vim that's light as air
+  -- lean & mean status for vim that's light as air
   use {
     'nvim-lualine/lualine.nvim',
-    requires = { 'kyazdani42/nvim-web-devicons', opt = true },
+    requires = { 'nvim-tree/nvim-web-devicons', opt = true },
     config = function ()
       require'lualine'.setup()
     end
@@ -50,22 +50,6 @@ require'packer'.startup {function (use)
           autocmd TextYankPost * if v:event.operator is 'y' && v:event.regname is '+' | execute 'OSCYankRegister +' | endif
         augroup end
       ]]
-    end
-  }
-  ---}}}
-
-  ---tabline {{{
-  use {
-    'kdheepak/tabline.nvim',
-    requires = {
-      { 'hoob3rt/lualine.nvim' },
-      {'kyazdani42/nvim-web-devicons', opt = true},
-    },
-    config = function ()
-      require'tabline'.setup()
-      vim.opt.sessionoptions:append('tabpages')
-      vim.api.nvim_set_keymap('n', '<leader>2', ':TablineBufferNext<cr>', {})
-      vim.api.nvim_set_keymap('n', '<leader>1', ':TablineBufferPrevious<cr>', {})
     end
   }
   ---}}}
