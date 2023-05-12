@@ -50,6 +50,7 @@ nvim/%       \
 rofi/%       \
 zathura/%    \
 direnv/%     \
+sc-im/%      \
 :
 	mkdir -p $(workspace)/.config/$(@D)
 	ln -fs $(dotfiles)/$@ $(workspace)/.config/$@
@@ -85,4 +86,5 @@ latexmk   \
 vim       \
 zathura   \
 direnv    \
+sc-im     \
 : %: $$(shell find % -type f)
