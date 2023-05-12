@@ -33,9 +33,9 @@ if [[ $- == *i* ]]; then
   export LSCOLORS="excxhxDxbxhxhxhxhxfxfx"
   export LS_COLORS=""
   if [[ $THEME == "leuven" ]]; then
-    LS_COLORS="no=00:fi=00:di=34::ln=32;102:so=37;107:pi=1;33:ex=31:bd=37;107:cd=37;107:su=37;107:sg=37;107:tw=35:ow=35"
+    LS_COLORS="no=00:fi=00:di=34:ln=32;102:so=30;107:pi=33;103:ex=31:cd=33;107:bd=33;107:su=31;101:sg=34;106:tw=35;101:ow=34;101"
   elif [[ $THEME == "dracula" ]]; then
-    LS_COLORS="no=00:fi=00:di=34::ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
+    LS_COLORS="no=00:fi=00:di=34:ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
   fi
   # }}}
 
@@ -250,14 +250,14 @@ if [[ $- == *i* ]]; then
       else
         color='%(?.%K{11}.%K{9}%F{1})'
       fi
-      LS_COLORS="no=00:fi=00:di=34::ln=32;102:so=37;107:pi=1;33:ex=31:bd=37;107:cd=37;107:su=37;107:sg=37;107:tw=35:ow=35"
+      LS_COLORS="no=00:fi=00:di=34:ln=32;102:so=30;107:pi=33;103:ex=31:cd=33;107:bd=33;107:su=31;101:sg=34;106:tw=35;101:ow=34;101"
     elif [[ $THEME == "dracula" ]]; then
       if [[ -n $SSH_CLIENT ]]; then
         color='%(?.%F{magenta}.%F{red})'
       else
         color='%(?.%F{black}.%F{red})'
       fi
-      LS_COLORS="no=00:fi=00:di=34::ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
+      LS_COLORS="no=00:fi=00:di=34:ln=32:so=37:pi=1;33:ex=31:bd=37:cd=37:su=37:sg=37:tw=35:ow=35"
     fi
     local host_info_msg="[%m %n]:%1~ %#"
     local dev_info_msg
