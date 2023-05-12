@@ -1,8 +1,11 @@
+# Based on MIT licensed code at https://github.com/mrjones2014/smart-splits.nvim/blob/master/kitty/pass_keys.py
 import re
 
 from kittens.tui.handler import result_handler
 from kitty.key_encoding import KeyEvent, parse_shortcut
 from kittens.ssh.utils import is_kitten_cmdline
+
+from relative_resize import relative_resize_window
 
 # for logging during debug, use something like
 # boss.call_remote_control(window, ("send-text", "--match", "id:{target}", f"{message}\n"))
@@ -51,17 +54,23 @@ def main():
 @result_handler(no_ui=True)
 def handle_result(args, result, target_window_id, boss):
     window = boss.window_id_map.get(target_window_id)
+    action = args[1]
     direction = args[2]
-    key_mapping = args[3]
-    vim_id = args[4] if len(args) > 4 else "(n?vim|emacs)"
+    key_mapping = args[3] if action == 'neighboring_window' else args[4]
+    amount = int(args[3]) if action == 'relative_resize' else None
+    vim_id_idx = 4 if action == 'neighboring_window' else 5
+    vim_id = args[vim_id_idx] if len(args) > vim_id_idx else "(n?vim|emacs)"
 
     if window is None:
         return
 
-    if is_window_vim(window, vim_id):
-        encoded = encode_key_mapping(window, key_mapping)
-        window.write_to_child(encoded)
-    else:
+    if is_window_vim(window, vim_id) and action == 'neighboring_window':
+        for keymap in key_mapping.split(">"):
+            encoded = encode_key_mapping(window, key_mapping)
+            window.write_to_child(encoded)
+    elif action == 'neighboring_window':
         # do nothing if fully focused on one window
         if boss.active_tab._current_layout_name != "stack":
             boss.active_tab.neighboring_window(direction)
+    elif action == 'relative_resize':
+        relative_resize_window(direction, amount, target_window_id, boss)
