@@ -425,6 +425,7 @@ require'packer'.startup {function (use)
   -- orgmode clone written in Lua
     use {
       'gzagatti/orgmode',
+      branch= 'nested-link',
       requires = { 'nvim-treesitter/nvim-treesitter' },
       config = function ()
         require'orgmode'.setup_ts_grammar()
@@ -1231,7 +1232,7 @@ vim.opt.listchars = { tab = '»·', trail = '·', extends = '›', precedes = '�
 --}}}
 
 ---folding {{{
-vim.opt.foldlevelstart = 0
+vim.opt.foldlevelstart = 99
 --}}}
 
 ---searching {{{
@@ -1539,6 +1540,9 @@ vim.cmd [[
       endif
     endfunction
     autocmd BufWritePre * call s:auto_mkdir(expand('<afile>:p:h'), v:cmdbang)
+
+    "force update folds on read
+    autocmd BufReadPost,FileReadPost * normal zX
 
     "configuration files
     autocmd BufNewFile,BufRead *.*rc,*rc,init.lua setlocal foldmethod=marker
