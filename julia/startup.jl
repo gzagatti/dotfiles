@@ -41,14 +41,22 @@ atreplinit() do repl
 
     # margin between welcome message and first prompt
     println()
+
+    # https://docs.julialang.org/en/v1/stdlib/REPL/#Numbered-prompt
+    @eval using REPL
+    if !isdefined(repl, :interface)
+      repl.interface = REPL.setup_interface(repl)
+    end
+    REPL.numbered_prompt!(repl)
+
 end
 
 let theme = get(ENV, "THEME", "")
     if theme == "leuven"
         # colors in the REPL are sourced from Base.text_colors
         # see: https://github.com/JuliaLang/julia/blob/master/base/client.jl
-        # ENV["JULIA_ERROR_COLOR"] = 1
-        # ENV["JULIA_WARN_COLOR"] = 3
+        ENV["JULIA_ERROR_COLOR"] = 1
+        ENV["JULIA_WARN_COLOR"] = 3
 
         # no point in printing light colors if you cannot see
         # the leuven way is to add a light background when printing light colors
