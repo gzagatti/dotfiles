@@ -84,8 +84,9 @@ in
     (nixGuiWrap pkgs.gimp)
     (nixGuiWrap pkgs.gpick)
     (nixGuiWrap pkgs.gthumb)
-    (nixGuiWrap pkgs.inkscape)
-    (nixGuiWrap pkgs.peek)
+    # does not work properly; need extensions properly working
+    # (nixGuiWrap pkgs.inkscape)
+    # (nixGuiWrap pkgs.peek)
 
     # image utils
     pkgs.exiftool
