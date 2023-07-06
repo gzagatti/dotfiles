@@ -530,7 +530,7 @@ require'packer'.startup {function (use)
           { name = 'nvim_lua' },
           -- override trigger characters, so they don't interfere with snippets
           { name = 'orgmode', trigger_characters = {} },
-          { name = 'latex_symbols' },
+          { name = 'latex_symbols'},
           { name = 'buffer', keyword_length = 3 },
         }),
       }
@@ -731,7 +731,7 @@ require'packer'.startup {function (use)
 
   ---neogit {{{
   use {
-    'TimUntersberger/neogit',
+    'NeogitOrg/neogit',
     requires = { 'nvim-lua/plenary.nvim' },
     config = function ()
       require'neogit'.setup {
