@@ -1138,6 +1138,11 @@ require'packer'.startup {function (use)
   --   end,
   -- }
   --}}}
+  
+  ---beancount {{{
+  -- support for beancount files
+  use { 'nathangrigg/vim-beancount' }
+  --}}}
 
   ---theme: dracula {{{
   use {
