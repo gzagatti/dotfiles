@@ -84,7 +84,7 @@ in
     (nixGuiWrap pkgs.gimp)
     (nixGuiWrap pkgs.gpick)
     (nixGuiWrap pkgs.gthumb)
-    # does not work properly; need extensions properly working
+    # TODO does not work properly; need extensions properly working
     # (nixGuiWrap pkgs.inkscape)
     # (nixGuiWrap pkgs.peek)
 
@@ -121,7 +121,8 @@ in
     pkgs.nmap
     pkgs.python310Packages.pygments
     pkgs.ripgrep
-    pkgs.rofi
+    # does not load apps correctly, mixes nix and system paths
+    # pkgs.rofi
 
     # compilers
     pkgs.cmake
@@ -149,7 +150,8 @@ in
     pkgs.gsettings-desktop-schemas
     pkgs.openfortivpn
     pkgs.python310Packages.jupyterlab
-    (nixGuiWrap pkgs.qgis)
+    # TODO plugins do not work with installed version
+    # (nixGuiWrap pkgs.qgis)
 
     # TODO doesn't work
     # layers and layers of wrapping; Zoom does not seem to play nicely with nixGL
