@@ -842,11 +842,11 @@ require'packer'.startup {function (use)
           end
 
           if (client.name == "ltex") then
-            tmpdir = vim.api.nvim_eval[[tempname()]] .. "-ltex"
+            -- tmpdir = vim.api.nvim_eval[[tempname()]] .. "-ltex"
             require'ltex_extra'.setup {
               load_langs = { 'en-US' },
-              init_check = false,
-              path = tmpdir,
+              init_check = true,
+              path = '.ltex', -- tmpdir
               log_level = "info"
             }
           end
@@ -908,12 +908,9 @@ require'packer'.startup {function (use)
           settings = {
             ltex = {
               disabledRules = {
-                ["en"]    = { "MORFOLOGIK_RULE_EN",    "PROFANITY"    },
-                ["en-GB"] = { "MORFOLOGIK_RULE_EN_GB", "PROFANITY" },
-                ["en-US"] = { "MORFOLOGIK_RULE_EN_US", "PROFANITY" },
-                ["es"]    = { "MORFOLOGIK_RULE_ES"    },
-                ["it"]    = { "MORFOLOGIK_RULE_IT_IT" },
-                ["de"]    = { "MORFOLOGIK_RULE_DE_DE" },
+                -- ["en"]    = { "PROFANITY" }, -- "MORFOLOGIK_RULE_EN"
+                -- ["en-GB"] = { "PROFANITY" }, -- "MORFOLOGIK_RULE_EN_GB"
+                ["en-US"] = { "PROFANITY" }, -- "MORFOLOGIK_RULE_EN_US",
               },
             },
           },
