@@ -1138,10 +1138,20 @@ require'packer'.startup {function (use)
   --   end,
   -- }
   --}}}
-  
+
   ---beancount {{{
   -- support for beancount files
   use { 'nathangrigg/vim-beancount' }
+  --}}}
+
+  ---drawit {{{
+  -- ASCII drawing plugin
+  use { 'vim-scripts/DrawIt' }
+  --}}}
+
+  ---venn {{{
+  -- draw ASCII diagrams
+  use { 'jbyuki/venn.nvim' }
   --}}}
 
   ---theme: dracula {{{
