@@ -225,7 +225,7 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
-  --- ufo {{{ 
+  --- ufo {{{
   -- ultra fold
   use {
     'kevinhwang91/nvim-ufo',
@@ -239,6 +239,8 @@ require'packer'.startup {function (use)
       })
       vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
       vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
+      vim.keymap.set('n', 'zr', require('ufo').openFoldsExceptKinds)
+      vim.keymap.set('n', 'zm', require('ufo').closeFoldsWith) -- closeAllFolds == closeFoldsWith(0)
     end
   }
   ---}}}
@@ -1216,7 +1218,7 @@ vim.opt.listchars = { tab = '»·', trail = '·', extends = '›', precedes = '�
 ---folding {{{
 vim.o.foldcolumn = "0"
 vim.opt.foldlevel = 99
-vim.o.foldlevelstart = 0
+vim.o.foldlevelstart = 99
 vim.o.foldenable = true
 --}}}
 
