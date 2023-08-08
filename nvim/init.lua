@@ -241,6 +241,28 @@ require'packer'.startup {function (use)
       vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
       vim.keymap.set('n', 'zr', require('ufo').openFoldsExceptKinds)
       vim.keymap.set('n', 'zm', require('ufo').closeFoldsWith) -- closeAllFolds == closeFoldsWith(0)
+      vim.api.nvim_create_autocmd('BufReadPost', {
+        callback = function()
+          if vim.bo.filetype == 'org' then return end
+          require('async')(function()
+            local winid = vim.api.nvim_get_current_win()
+            local method = vim.wo[winid].foldmethod
+            if method == 'diff' or method == 'marker' then
+              require('ufo').closeAllFolds()
+            else
+              local bufnr = vim.api.nvim_get_current_buf()
+              -- make sure buffer is attached
+              require('ufo').attach(bufnr)
+              -- getFolds return Promise if providerName == 'lsp'
+              local ranges = await(require('ufo').getFolds(bufnr, 'treesitter') or {})
+              local ok = require('ufo').applyFolds(bufnr, ranges)
+              if ok then
+                require('ufo').closeAllFolds()
+              end
+            end
+          end)
+        end
+      })
     end
   }
   ---}}}
