@@ -164,18 +164,6 @@ require'packer'.startup {function (use)
     }
   ---}}}
 
-  ---leap {{{
-  use {
-    'ggandor/leap.nvim',
-    require = { 'tpope/vim-repeat' },
-    config = function()
-        require'leap'.add_default_mappings()
-        vim.keymap.del({'x', 'o'}, 'x')
-        vim.keymap.del({'x', 'o'}, 'X')
-    end
-  }
-  ---}}}
-
   ---slime {{{
   -- multiplexer integration
   use {
@@ -237,35 +225,20 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
-  ---pretty-fold {{{
+  --- ufo {{{ 
+  -- ultra fold
   use {
-    'anuvyklack/pretty-fold.nvim',
+    'kevinhwang91/nvim-ufo',
+    requires = { 'kevinhwang91/promise-async', 'nvim-treesitter/nvim-treesitter' },
     config = function()
-        require('pretty-fold').setup({
-          fill_char = '-',
-          remove_fold_markers = false,
-          process_comment_signs = false,
-        })
-        require('pretty-fold').ft_setup('julia', {
-          fill_char = '-',
-          remove_fold_markers = false,
-          process_comment_signs = false,
-          comment_signs = {'"""'},
-        })
-        require('pretty-fold').ft_setup('lua', {
-          fill_char = '-',
-          remove_fold_markers = false,
-          process_comment_signs = false,
-          matchup_patterns = {
-              { '^%s*do$', 'end' }, -- do ... end blocks
-              { '^%s*if', 'end' },  -- if ... end
-              { '^%s*for', 'end' }, -- for
-              { 'function%s*%(', 'end' }, -- 'function'
-              {  '{', '}' },
-              { '%(', ')' }, -- % to escape lua pattern char
-              { '%[', ']' }, -- % to escape lua pattern char
-          },
-        })
+      require('ufo').setup({
+          open_fold_hl_timeout = 150,
+          provider_selector = function(bufnr, filetype, buftype)
+              return {'treesitter', 'indent'}
+          end
+      })
+      vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
+      vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
     end
   }
   ---}}}
@@ -530,7 +503,7 @@ require'packer'.startup {function (use)
           { name = 'nvim_lua' },
           -- override trigger characters, so they don't interfere with snippets
           { name = 'orgmode', trigger_characters = {} },
-          { name = 'latex_symbols'},
+          { name = 'latex_symbols' },
           { name = 'buffer', keyword_length = 3 },
         }),
       }
@@ -718,8 +691,6 @@ require'packer'.startup {function (use)
             lint_events = {"BufWrite", "CursorHold"},
           },
         }
-      vim.opt.foldmethod = 'expr'
-      vim.opt.foldexpr = 'luaeval(printf(\'require"nvim-treesitter.fold".get_fold_indic(%d)\', v:lnum))'
     end
   }
   -- debugging and learning about treesitter
@@ -1243,7 +1214,10 @@ vim.opt.listchars = { tab = '»·', trail = '·', extends = '›', precedes = '�
 --}}}
 
 ---folding {{{
-vim.opt.foldlevelstart = 0
+vim.o.foldcolumn = "0"
+vim.opt.foldlevel = 99
+vim.o.foldlevelstart = 0
+vim.o.foldenable = true
 --}}}
 
 ---searching {{{
@@ -1551,6 +1525,9 @@ vim.cmd [[
       endif
     endfunction
     autocmd BufWritePre * call s:auto_mkdir(expand('<afile>:p:h'), v:cmdbang)
+
+    "force update folds on read
+    autocmd BufReadPost,FileReadPost * normal zX
 
     "configuration files
     autocmd BufNewFile,BufRead *.*rc,*rc,init.lua setlocal foldmethod=marker
