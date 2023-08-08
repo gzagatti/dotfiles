@@ -164,18 +164,6 @@ require'packer'.startup {function (use)
     }
   ---}}}
 
-  ---leap {{{
-  use {
-    'ggandor/leap.nvim',
-    require = { 'tpope/vim-repeat' },
-    config = function()
-        require'leap'.add_default_mappings()
-        vim.keymap.del({'x', 'o'}, 'x')
-        vim.keymap.del({'x', 'o'}, 'X')
-    end
-  }
-  ---}}}
-
   ---slime {{{
   -- multiplexer integration
   use {
@@ -237,35 +225,20 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
-  ---pretty-fold {{{
+  --- ufo {{{ 
+  -- ultra fold
   use {
-    'anuvyklack/pretty-fold.nvim',
+    'kevinhwang91/nvim-ufo',
+    requires = { 'kevinhwang91/promise-async', 'nvim-treesitter/nvim-treesitter' },
     config = function()
-        require('pretty-fold').setup({
-          fill_char = '-',
-          remove_fold_markers = false,
-          process_comment_signs = false,
-        })
-        require('pretty-fold').ft_setup('julia', {
-          fill_char = '-',
-          remove_fold_markers = false,
-          process_comment_signs = false,
-          comment_signs = {'"""'},
-        })
-        require('pretty-fold').ft_setup('lua', {
-          fill_char = '-',
-          remove_fold_markers = false,
-          process_comment_signs = false,
-          matchup_patterns = {
-              { '^%s*do$', 'end' }, -- do ... end blocks
-              { '^%s*if', 'end' },  -- if ... end
-              { '^%s*for', 'end' }, -- for
-              { 'function%s*%(', 'end' }, -- 'function'
-              {  '{', '}' },
-              { '%(', ')' }, -- % to escape lua pattern char
-              { '%[', ']' }, -- % to escape lua pattern char
-          },
-        })
+      require('ufo').setup({
+          open_fold_hl_timeout = 150,
+          provider_selector = function(bufnr, filetype, buftype)
+              return {'treesitter', 'indent'}
+          end
+      })
+      vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
+      vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
     end
   }
   ---}}}
@@ -719,8 +692,6 @@ require'packer'.startup {function (use)
             lint_events = {"BufWrite", "CursorHold"},
           },
         }
-      vim.opt.foldmethod = 'expr'
-      vim.opt.foldexpr = 'luaeval(printf(\'require"nvim-treesitter.fold".get_fold_indic(%d)\', v:lnum))'
     end
   }
   -- debugging and learning about treesitter
@@ -732,7 +703,7 @@ require'packer'.startup {function (use)
 
   ---neogit {{{
   use {
-    'TimUntersberger/neogit',
+    'NeogitOrg/neogit',
     requires = { 'nvim-lua/plenary.nvim' },
     config = function ()
       require'neogit'.setup {
@@ -1232,7 +1203,10 @@ vim.opt.listchars = { tab = '»·', trail = '·', extends = '›', precedes = '�
 --}}}
 
 ---folding {{{
-vim.opt.foldlevelstart = 99
+vim.o.foldcolumn = "0"
+vim.opt.foldlevel = 99
+vim.o.foldlevelstart = 0
+vim.o.foldenable = true
 --}}}
 
 ---searching {{{
