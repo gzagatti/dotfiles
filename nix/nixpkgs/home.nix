@@ -18,7 +18,7 @@ let
     # nixGL causes all software ran under it to gain nixGL status; https://github.com/guibou/nixGL/issues/116
     # we wrap packages with nixGL; it customizes LD_LIBRARY_PATH and related
     # envs so that nixpkgs find a compatible OpenGL driver
-    nixgl_bin="${lib.getExe nixgl.auto.nixGLDefault}"
+    nixgl_bin="${lib.getBin nixgl.auto.nixGLDefault}/bin/nixGL"
     # Similar to OpenGL, the executables installed by nix cannot find the GTK modules
     # required by the environment. The workaround is to unset the GTK_MODULES and
     # GTK3_MODULES so that it does not reach for system GTK modules.
