@@ -35,7 +35,19 @@ require'packer'.startup {function (use)
     'nvim-lualine/lualine.nvim',
     requires = { 'nvim-tree/nvim-web-devicons', opt = true },
     config = function ()
-      require'lualine'.setup()
+      require'lualine'.setup({
+        sections = {
+          lualine_b = {
+              'branch',
+              'diff',
+              {
+                'diagnostics',
+                symbols = { error = 'E', warn = 'W', info = 'I', hint = 'H'},
+              }
+          },
+          lualine_x = { 'aerial', 'filetype' },
+        }
+      })
     end
   }
   ---}}}
@@ -1033,13 +1045,17 @@ require'packer'.startup {function (use)
     }
   ---}}}
 
-  ---vista {{{
-  -- easy tags navigation
+  ---aerial {{{
+  -- code outline window
   use {
-    'liuchengxu/vista.vim',
+    'stevearc/aerial.nvim',
     config = function()
-      -- need to make it toggle
-      vim.api.nvim_set_keymap('n', '<f9>', ':Vista nvim_lsp<cr>', { noremap = true })
+      require'aerial'.setup({
+        layout = {
+            default_direction = "right",
+        },
+      })
+      vim.api.nvim_set_keymap('n', '<f9>', '<cmd>AerialToggle! right<CR>', { noremap = true })
     end
   }
   ---}}}
