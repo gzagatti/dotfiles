@@ -1,6 +1,6 @@
 {
   "block_math": {
-    "prefix": ["\\["],
+    "prefix": ["["],
     "body": [
       "\\[",
       "$0",
@@ -9,16 +9,16 @@
     "description": "block math template."
   },
   "inline_math": {
-    "prefix": ["\\("],
+    "prefix": ["("],
     "body": [
       "\\( $1 \\)$0"
     ],
     "description": "inline math template."
   },
   "begin": {
-    "prefix": ["\\begin"],
+    "prefix": ["begin"],
     "body": [
-      "\\begin{$1}",
+      "\\begin{$1}$2",
       "$0",
       "\\end{$1}"
     ],

@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+#
+# Description: Follows the symlink to its original directory.
+#
+# Author: Guilherme Zagatti
+# https://stackoverflow.com/questions/29789204/bash-how-to-get-real-path-of-a-symlink
+
+. "$(dirname "$0")"/.nnn-plugin-helper

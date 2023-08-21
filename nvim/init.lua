@@ -33,9 +33,21 @@ require'packer'.startup {function (use)
   -- lean & mean status for vim that's light as air
   use {
     'nvim-lualine/lualine.nvim',
-    requires = { 'nvim-tree/nvim-web-devicons', opt = true },
+    requires = { 'stevearc/aerial.nvim' },
     config = function ()
-      require'lualine'.setup()
+      require'lualine'.setup({
+        sections = {
+          lualine_b = {
+              'branch',
+              'diff',
+              {
+                'diagnostics',
+                symbols = { error = 'E', warn = 'W', info = 'I', hint = 'H'},
+              }
+          },
+          lualine_x = { 'aerial', 'filetype' },
+        }
+      })
     end
   }
   ---}}}
@@ -59,8 +71,8 @@ require'packer'.startup {function (use)
     'gzagatti/nnn.nvim',
     branch = 'tweaks',
     config = function()
-      local builtin = require("nnn").builtin
-      require("nnn").setup {
+      local builtin = require'nnn'.builtin
+      require'nnn'.setup {
         explorer = {
           cmd = "NNN_TMPFILE='' nnn",
         },
@@ -225,20 +237,45 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
-  --- ufo {{{ 
+  --- ufo {{{
   -- ultra fold
   use {
     'kevinhwang91/nvim-ufo',
     requires = { 'kevinhwang91/promise-async', 'nvim-treesitter/nvim-treesitter' },
     config = function()
-      require('ufo').setup({
+      require'ufo'.setup({
           open_fold_hl_timeout = 150,
           provider_selector = function(bufnr, filetype, buftype)
               return {'treesitter', 'indent'}
           end
       })
-      vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
-      vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
+      vim.keymap.set('n', 'zR', require'ufo'.openAllFolds)
+      vim.keymap.set('n', 'zM', require'ufo'.closeAllFolds)
+      vim.keymap.set('n', 'zr', require'ufo'.openFoldsExceptKinds)
+      vim.keymap.set('n', 'zm', require'ufo'.closeFoldsWith) -- closeAllFolds == closeFoldsWith(0)
+      vim.api.nvim_create_autocmd('BufRead', {
+        callback = function()
+          vim.cmd[[ silent! foldclose! ]]
+          local bufnr = vim.api.nvim_get_current_buf()
+          -- make sure buffer is attached
+          vim.wait(100, function() require'ufo'.attach(bufnr) end)
+          if require'ufo'.hasAttached(bufnr) then
+            local winid = vim.api.nvim_get_current_win()
+            local method = vim.wo[winid].foldmethod
+            if method == 'diff' or method == 'marker' then
+              require'ufo'.closeAllFolds()
+              return
+            end
+            -- getFolds returns a Promise if providerName == 'lsp', use vim.wait in this case
+            local ok, ranges = pcall(require'ufo'.getFolds, bufnr, 'treesitter')
+            if ok and ranges then
+              if require'ufo'.applyFolds(bufnr, ranges) then
+                require'ufo'.closeAllFolds()
+              end
+            end
+          end
+        end
+      })
     end
   }
   ---}}}
@@ -330,7 +367,7 @@ require'packer'.startup {function (use)
             silent !tmux set -w status off
             silent !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
           endif
-          lua require('lualine').hide()
+          lua require'lualine'.hide()
           autocmd VimResized * exe "normal \<c-w>="
           set noshowmode
           set noshowcmd
@@ -342,7 +379,7 @@ require'packer'.startup {function (use)
             silent !tmux set -w status on
             silent !tmux list-panes -F '\#F' | grep -q Z && tmux resize-pane -Z
           endif
-          lua require('lualine').hide({unhide=true})
+          lua require'lualine'.hide({unhide=true})
           set showmode
           set showcmd
         endfunction
@@ -454,7 +491,7 @@ require'packer'.startup {function (use)
 
       vim.g.vsnip_snippet_dir = vim.env.HOME.."/.config/nvim/vsnip"
 
-      local cmp = require('cmp')
+      local cmp = require'cmp'
 
       -- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings
       local has_words_before = function ()
@@ -739,7 +776,7 @@ require'packer'.startup {function (use)
         local lspconfig = require'lspconfig'
 
         local capabilities = vim.lsp.protocol.make_client_capabilities()
-        capabilities = require("cmp_nvim_lsp").default_capabilities()
+        capabilities = require'cmp_nvim_lsp'.default_capabilities()
 
         local opts = { noremap=true, silent=true }
 
@@ -814,11 +851,11 @@ require'packer'.startup {function (use)
           end
 
           if (client.name == "ltex") then
-            tmpdir = vim.api.nvim_eval[[tempname()]] .. "-ltex"
+            -- tmpdir = vim.api.nvim_eval[[tempname()]] .. "-ltex"
             require'ltex_extra'.setup {
               load_langs = { 'en-US' },
-              init_check = false,
-              path = tmpdir,
+              init_check = true,
+              path = '.ltex', -- tmpdir
               log_level = "info"
             }
           end
@@ -880,12 +917,9 @@ require'packer'.startup {function (use)
           settings = {
             ltex = {
               disabledRules = {
-                ["en"]    = { "MORFOLOGIK_RULE_EN",    "PROFANITY"    },
-                ["en-GB"] = { "MORFOLOGIK_RULE_EN_GB", "PROFANITY" },
-                ["en-US"] = { "MORFOLOGIK_RULE_EN_US", "PROFANITY" },
-                ["es"]    = { "MORFOLOGIK_RULE_ES"    },
-                ["it"]    = { "MORFOLOGIK_RULE_IT_IT" },
-                ["de"]    = { "MORFOLOGIK_RULE_DE_DE" },
+                -- ["en"]    = { "PROFANITY" }, -- "MORFOLOGIK_RULE_EN"
+                -- ["en-GB"] = { "PROFANITY" }, -- "MORFOLOGIK_RULE_EN_GB"
+                ["en-US"] = { "PROFANITY" }, -- "MORFOLOGIK_RULE_EN_US",
               },
             },
           },
@@ -1012,13 +1046,17 @@ require'packer'.startup {function (use)
     }
   ---}}}
 
-  ---vista {{{
-  -- easy tags navigation
+  ---aerial {{{
+  -- code outline window
   use {
-    'liuchengxu/vista.vim',
+    'stevearc/aerial.nvim',
     config = function()
-      -- need to make it toggle
-      vim.api.nvim_set_keymap('n', '<f9>', ':Vista nvim_lsp<cr>', { noremap = true })
+      require'aerial'.setup({
+        layout = {
+            default_direction = "right",
+        },
+      })
+      vim.api.nvim_set_keymap('n', '<f9>', '<cmd>AerialToggle! right<CR>', { noremap = true })
     end
   }
   ---}}}
@@ -1109,6 +1147,21 @@ require'packer'.startup {function (use)
   --     vim.api.nvim_set_keymap('n', '<leader>gE', "<cmd>lua require'nabla'.popup()<cr>", { noremap=true })
   --   end,
   -- }
+  --}}}
+
+  ---beancount {{{
+  -- support for beancount files
+  use { 'nathangrigg/vim-beancount' }
+  --}}}
+
+  ---drawit {{{
+  -- ASCII drawing plugin
+  use { 'vim-scripts/DrawIt' }
+  --}}}
+
+  ---venn {{{
+  -- draw ASCII diagrams
+  use { 'jbyuki/venn.nvim' }
   --}}}
 
   ---theme: dracula {{{
@@ -1204,8 +1257,8 @@ vim.opt.listchars = { tab = '»·', trail = '·', extends = '›', precedes = '�
 
 ---folding {{{
 vim.o.foldcolumn = "0"
-vim.opt.foldlevel = 99
-vim.o.foldlevelstart = 0
+vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
 vim.o.foldenable = true
 --}}}
 
@@ -1520,6 +1573,9 @@ vim.cmd [[
 
     "configuration files
     autocmd BufNewFile,BufRead *.*rc,*rc,init.lua setlocal foldmethod=marker
+
+    "leave the command-line window with q
+    autocmd CmdwinEnter * map <buffer> q <c-c>q
 
     "rmd
     " adds vim-markdown as a filetype plugin in order to allow

@@ -44,10 +44,12 @@ atreplinit() do repl
 
     # https://docs.julialang.org/en/v1/stdlib/REPL/#Numbered-prompt
     @eval using REPL
-    if !isdefined(repl, :interface)
-      repl.interface = REPL.setup_interface(repl)
+    if isdefined(REPL, :numbered_prompt!)
+      if !isdefined(repl, :interface)
+        repl.interface = REPL.setup_interface(repl)
+      end
+      REPL.numbered_prompt!(repl)
     end
-    REPL.numbered_prompt!(repl)
 
 end
 

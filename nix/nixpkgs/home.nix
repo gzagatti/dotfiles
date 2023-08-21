@@ -18,7 +18,7 @@ let
     # nixGL causes all software ran under it to gain nixGL status; https://github.com/guibou/nixGL/issues/116
     # we wrap packages with nixGL; it customizes LD_LIBRARY_PATH and related
     # envs so that nixpkgs find a compatible OpenGL driver
-    nixgl_bin="${lib.getExe nixgl.auto.nixGLDefault}"
+    nixgl_bin="${lib.getBin nixgl.auto.nixGLDefault}/bin/nixGL"
     # Similar to OpenGL, the executables installed by nix cannot find the GTK modules
     # required by the environment. The workaround is to unset the GTK_MODULES and
     # GTK3_MODULES so that it does not reach for system GTK modules.
@@ -60,6 +60,7 @@ in
 
     # browser
     (nixGuiWrap pkgs.firefox)
+    pkgs.lagrange
 
     # text editor
     pkgs.emacs
@@ -84,8 +85,9 @@ in
     (nixGuiWrap pkgs.gimp)
     (nixGuiWrap pkgs.gpick)
     (nixGuiWrap pkgs.gthumb)
-    (nixGuiWrap pkgs.inkscape)
-    (nixGuiWrap pkgs.peek)
+    # TODO does not work properly; need extensions properly working
+    # (nixGuiWrap pkgs.inkscape)
+    # (nixGuiWrap pkgs.peek)
 
     # image utils
     pkgs.exiftool
@@ -120,7 +122,8 @@ in
     pkgs.nmap
     pkgs.python310Packages.pygments
     pkgs.ripgrep
-    pkgs.rofi
+    # does not load apps correctly, mixes nix and system paths
+    # pkgs.rofi
 
     # compilers
     pkgs.cmake
@@ -148,7 +151,8 @@ in
     pkgs.gsettings-desktop-schemas
     pkgs.openfortivpn
     pkgs.python310Packages.jupyterlab
-    (nixGuiWrap pkgs.qgis)
+    # TODO plugins do not work with installed version
+    # (nixGuiWrap pkgs.qgis)
 
     # TODO doesn't work
     # layers and layers of wrapping; Zoom does not seem to play nicely with nixGL
