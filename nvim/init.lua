@@ -38,14 +38,28 @@ require'packer'.startup {function (use)
       require'lualine'.setup({
         sections = {
           lualine_b = {
-              'branch',
-              'diff',
-              {
-                'diagnostics',
-                symbols = { error = 'E', warn = 'W', info = 'I', hint = 'H'},
-              }
+            'branch',
+            'filename',
           },
-          lualine_x = { 'aerial', 'filetype' },
+          lualine_c = {
+            {
+              'aerial',
+              sep = '  ',
+              colored = false,
+            },
+          },
+          lualine_x = {
+            {
+              'diagnostics',
+              symbols = { error = 'E', warn = 'W', info = 'I', hint = 'H'},
+            },
+            'diff',
+          },
+          lualine_y = { 'progress' },
+          lualine_z = {
+            'location',
+            'filetype',
+          },
         }
       })
     end
