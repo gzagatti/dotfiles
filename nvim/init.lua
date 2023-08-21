@@ -71,8 +71,8 @@ require'packer'.startup {function (use)
     'gzagatti/nnn.nvim',
     branch = 'tweaks',
     config = function()
-      local builtin = require("nnn").builtin
-      require("nnn").setup {
+      local builtin = require'nnn'.builtin
+      require'nnn'.setup {
         explorer = {
           cmd = "NNN_TMPFILE='' nnn -G",
         },
@@ -243,34 +243,34 @@ require'packer'.startup {function (use)
     'kevinhwang91/nvim-ufo',
     requires = { 'kevinhwang91/promise-async', 'nvim-treesitter/nvim-treesitter' },
     config = function()
-      require('ufo').setup({
+      require'ufo'.setup({
           open_fold_hl_timeout = 150,
           provider_selector = function(bufnr, filetype, buftype)
               return {'treesitter', 'indent'}
           end
       })
-      vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
-      vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
-      vim.keymap.set('n', 'zr', require('ufo').openFoldsExceptKinds)
-      vim.keymap.set('n', 'zm', require('ufo').closeFoldsWith) -- closeAllFolds == closeFoldsWith(0)
+      vim.keymap.set('n', 'zR', require'ufo'.openAllFolds)
+      vim.keymap.set('n', 'zM', require'ufo'.closeAllFolds)
+      vim.keymap.set('n', 'zr', require'ufo'.openFoldsExceptKinds)
+      vim.keymap.set('n', 'zm', require'ufo'.closeFoldsWith) -- closeAllFolds == closeFoldsWith(0)
       vim.api.nvim_create_autocmd('BufRead', {
         callback = function()
           vim.cmd[[ silent! foldclose! ]]
           local bufnr = vim.api.nvim_get_current_buf()
           -- make sure buffer is attached
-          vim.wait(100, function() require('ufo').attach(bufnr) end)
-          if require('ufo').hasAttached(bufnr) then
+          vim.wait(100, function() require'ufo'.attach(bufnr) end)
+          if require'ufo'.hasAttached(bufnr) then
             local winid = vim.api.nvim_get_current_win()
             local method = vim.wo[winid].foldmethod
             if method == 'diff' or method == 'marker' then
-              require('ufo').closeAllFolds()
+              require'ufo'.closeAllFolds()
               return
             end
             -- getFolds returns a Promise if providerName == 'lsp', use vim.wait in this case
-            local ok, ranges = pcall(require('ufo').getFolds, bufnr, 'treesitter')
+            local ok, ranges = pcall(require'ufo'.getFolds, bufnr, 'treesitter')
             if ok and ranges then
-              if require('ufo').applyFolds(bufnr, ranges) then
-                require('ufo').closeAllFolds()
+              if require'ufo'.applyFolds(bufnr, ranges) then
+                require'ufo'.closeAllFolds()
               end
             end
           end
@@ -367,7 +367,7 @@ require'packer'.startup {function (use)
             silent !tmux set -w status off
             silent !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
           endif
-          lua require('lualine').hide()
+          lua require'lualine'.hide()
           autocmd VimResized * exe "normal \<c-w>="
           set noshowmode
           set noshowcmd
@@ -379,7 +379,7 @@ require'packer'.startup {function (use)
             silent !tmux set -w status on
             silent !tmux list-panes -F '\#F' | grep -q Z && tmux resize-pane -Z
           endif
-          lua require('lualine').hide({unhide=true})
+          lua require'lualine'.hide({unhide=true})
           set showmode
           set showcmd
         endfunction
@@ -490,7 +490,7 @@ require'packer'.startup {function (use)
 
       vim.g.vsnip_snippet_dir = vim.env.HOME.."/.config/nvim/vsnip"
 
-      local cmp = require('cmp')
+      local cmp = require'cmp'
 
       -- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings
       local has_words_before = function ()
@@ -775,7 +775,7 @@ require'packer'.startup {function (use)
         local lspconfig = require'lspconfig'
 
         local capabilities = vim.lsp.protocol.make_client_capabilities()
-        capabilities = require("cmp_nvim_lsp").default_capabilities()
+        capabilities = require'cmp_nvim_lsp'.default_capabilities()
 
         local opts = { noremap=true, silent=true }
 
