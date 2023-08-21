@@ -1574,7 +1574,7 @@ vim.cmd [[
     autocmd BufNewFile,BufRead *.*rc,*rc,init.lua setlocal foldmethod=marker
 
     "leave the command-line window with q
-    autocmd CmdwinEnter * map <buffer> q <c-c>
+    autocmd CmdwinEnter * map <buffer> q <c-c>q
 
     "rmd
     " adds vim-markdown as a filetype plugin in order to allow
