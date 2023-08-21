@@ -241,26 +241,27 @@ require'packer'.startup {function (use)
       vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
       vim.keymap.set('n', 'zr', require('ufo').openFoldsExceptKinds)
       vim.keymap.set('n', 'zm', require('ufo').closeFoldsWith) -- closeAllFolds == closeFoldsWith(0)
-      vim.api.nvim_create_autocmd('BufReadPost', {
+      vim.api.nvim_create_autocmd('BufRead', {
         callback = function()
-          if vim.bo.filetype == 'org' then return end
-          local winid = vim.api.nvim_get_current_win()
-          local method = vim.wo[winid].foldmethod
-          if method == 'diff' or method == 'marker' then
-            require('ufo').closeAllFolds()
-            return
-          end
-          require('async')(function()
-            local bufnr = vim.api.nvim_get_current_buf()
-            -- make sure buffer is attached
-            require('ufo').attach(bufnr)
-            -- getFolds return Promise if providerName == 'lsp'
-            local ranges = await(require('ufo').getFolds(bufnr, 'treesitter') or {})
-            local ok = require('ufo').applyFolds(bufnr, ranges)
-            if ok then
+          vim.cmd[[ silent! foldclose! ]]
+          local bufnr = vim.api.nvim_get_current_buf()
+          -- make sure buffer is attached
+          vim.wait(100, function() require('ufo').attach(bufnr) end)
+          if require('ufo').hasAttached(bufnr) then
+            local winid = vim.api.nvim_get_current_win()
+            local method = vim.wo[winid].foldmethod
+            if method == 'diff' or method == 'marker' then
               require('ufo').closeAllFolds()
+              return
             end
-          end)
+            -- getFolds returns a Promise if providerName == 'lsp', use vim.wait in this case
+            local ok, ranges = pcall(require('ufo').getFolds, bufnr, 'treesitter')
+            if ok and ranges then
+              if require('ufo').applyFolds(bufnr, ranges) then
+                require('ufo').closeAllFolds()
+              end
+            end
+          end
         end
       })
     end
@@ -1239,7 +1240,7 @@ vim.opt.listchars = { tab = '»·', trail = '·', extends = '›', precedes = '�
 
 ---folding {{{
 vim.o.foldcolumn = "0"
-vim.opt.foldlevel = 99
+vim.o.foldlevel = 99
 vim.o.foldlevelstart = 99
 vim.o.foldenable = true
 --}}}
@@ -1555,6 +1556,9 @@ vim.cmd [[
 
     "configuration files
     autocmd BufNewFile,BufRead *.*rc,*rc,init.lua setlocal foldmethod=marker
+
+    "leave the command-line window with q
+    autocmd CmdwinEnter * map <buffer> q <c-c>
 
     "rmd
     " adds vim-markdown as a filetype plugin in order to allow
