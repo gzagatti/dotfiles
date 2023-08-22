@@ -266,7 +266,7 @@ if [[ $- == *i* ]]; then
   if [[ $OSTYPE == Linux* ]]; then
 
     ## More convenient xdg-open {{{
-    alias open='xdg-open'
+    function open { setsid xdg-open "$1" &>/dev/null; } 
     ## }}}
 
   fi
