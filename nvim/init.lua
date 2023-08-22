@@ -1380,6 +1380,7 @@ vim.cmd [[
   au TermOpen * setlocal nonumber
 ]]
 ---}}}
+
 --}}}
 
 --key mappings {{{
@@ -1533,6 +1534,16 @@ vim.api.nvim_set_keymap('n', '/', '/\\v', { noremap = true })
 vim.api.nvim_set_keymap('n', '?', '?\\v', { noremap = true })
 ---}}}
 
+--- command-line window {{{
+-- maps for the command-line window get on the way of quitting Vim
+vim.api.nvim_set_keymap('n', 'q:', '', { nowait = true, noremap = true })
+vim.api.nvim_set_keymap('n', 'q/', '', { nowait = true, noremap = true })
+vim.api.nvim_set_keymap('n', 'q?', '', { nowait = true, noremap = true })
+vim.api.nvim_set_keymap('n', 'c:', 'q:', { noremap = true })
+vim.api.nvim_set_keymap('n', 'c/', 'q/', { noremap = true })
+vim.api.nvim_set_keymap('n', 'c?', 'q?', { noremap = true })
+---}}}
+
 --}}}
 
 --cmd {{{
@@ -1587,8 +1598,8 @@ vim.cmd [[
     "configuration files
     autocmd BufNewFile,BufRead *.*rc,*rc,init.lua setlocal foldmethod=marker
 
-    "leave the command-line window with q
-    autocmd CmdwinEnter * map <buffer> q <c-c>q
+    "leave the command-line window
+    autocmd CmdwinEnter * nmap <buffer> <nowait> q :quit<cr>
 
     "rmd
     " adds vim-markdown as a filetype plugin in order to allow
