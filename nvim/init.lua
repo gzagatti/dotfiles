@@ -284,7 +284,7 @@ require'packer'.startup {function (use)
             local ok, ranges = pcall(require'ufo'.getFolds, bufnr, 'treesitter')
             if ok and ranges then
               if require'ufo'.applyFolds(bufnr, ranges) then
-                require'ufo'.closeAllFolds()
+                pcall(require'ufo'.closeAllFolds)
               end
             end
           end

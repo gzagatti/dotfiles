@@ -145,23 +145,19 @@ if [[ $- == *i* ]]; then
   ## nnn {{{
   # https://github.com/jarun/nnn
   if hash nnn 2>/dev/null; then
-    # The behaviour is set to cd on quit (nnn checks if NNN_TMPFILE is set)
-    # To cd on quit only on ^G, either remove the "export" as in:
-    #    NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
-    #    (or, to a custom path: NNN_TMPFILE=/tmp/.lastd)
-    # or, export NNN_TMPFILE after nnn invocation
-    export NNN_TMPFILE="$HOME/.config/nnn/.lastd"
     export NNN_PLUG="/:fcd;p:preview-tui;m:mimelist;f:followln"
-    export NNN_FIFO="/tmp/nnn.fifo"
     export NNN_OPENER="nuke"
     n(){
+      # To cd on quit only on ^G
+      NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
+
       # Block nesting of nnn in subshells
-      if [ -n $NNNLVL ] && [ "${NNNLVL:-0}" -ge 1 ]; then
+      [ "${NNNLVL:-0}" -eq 0 ] || {
           echo "nnn is already running"
           return
-      fi
+      }
 
-      nnn -e
+      nnn -ea
 
       if [ -f "$NNN_TMPFILE" ]; then
               . "$NNN_TMPFILE"
