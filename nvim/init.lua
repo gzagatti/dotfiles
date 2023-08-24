@@ -806,6 +806,8 @@ require'packer'.startup {function (use)
           -- diagnostic
           vim.api.nvim_buf_set_keymap(bufnr, 'n', '[telescope]l',
             '<cmd>Telescope diagnostics theme=get_ivy<cr>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gq',
+            '<cmd>lua vim.diagnostic.setqflist()<cr>', opts)
 
           local diagnostic_hidden = {}
 
@@ -1382,6 +1384,10 @@ vim.cmd [[
 ]]
 ---}}}
 
+---quickfix {{{
+vim.cmd[[packadd cfilter]]
+---}}}
+
 --}}}
 
 --key mappings {{{
@@ -1601,6 +1607,22 @@ vim.cmd [[
 
     "leave the command-line window
     autocmd CmdwinEnter * nmap <buffer> <nowait> q :quit<cr>
+
+    "remove item from quickfix/loclist window
+    function! Remove_from_qf()
+      let l:qfvar = getwininfo(win_getid())[0]['quickfix']
+      let l:llvar = getwininfo(win_getid())[0]['loclist']
+      let l:iniline = line('.')
+      if l:qfvar == 1
+        if l:llvar == 1
+          call setloclist(0, filter(getloclist(0), {idx -> idx != line('.') - 1}), 'r')
+        else
+          call setqflist(filter(getqflist(), {idx -> idx != line('.') - 1}), 'r')
+        endif
+        exe "exe " .. l:iniline
+      endif
+    endfunction
+    autocmd FileType qf nnoremap <buffer> <silent> dd :call Remove_from_qf()<CR>
 
     "rmd
     " adds vim-markdown as a filetype plugin in order to allow
