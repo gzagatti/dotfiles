@@ -416,31 +416,100 @@ require'packer'.startup {function (use)
     'nvim-telescope/telescope.nvim',
     requires = { 'nvim-telescope/telescope-file-browser.nvim' },
     config = function ()
+
+      local actions = require'telescope.actions'
+      local finders = require "telescope.finders"
+      local action_state = require "telescope.actions.state"
+      local builtin = require "telescope.builtin"
+      local themes = require "telescope.themes"
+
+      local function narrow_picker(prompt_bufnr)
+        local picker = action_state.get_current_picker(prompt_bufnr)
+        local manager = picker.manager
+        local results = {}
+
+        if #picker:get_multi_selection() > 0 then
+          for _, entry in ipairs(picker:get_multi_selection()) do
+              table.insert(results, entry)
+              print(vim.inspect(entry))
+          end
+        else
+          for entry in manager:iter() do
+              table.insert(results, entry)
+          end
+        end
+
+        local finder = finders.new_table {
+            results = results,
+            entry_maker = function(entry) return entry end,
+        }
+
+        picker:refresh(finder, { reset_prompt = true })
+      end
+
+      local function buffers_instead(prompt_bufnr)
+        local picker = action_state.get_current_picker(prompt_bufnr)
+        local prompt_text = picker:_get_prompt()
+        builtin.buffers(themes.get_ivy({ default_text = prompt_text }))
+      end
+
+      local function find_files_instead(prompt_bufnr)
+        local picker = action_state.get_current_picker(prompt_bufnr)
+        local prompt_text = picker:_get_prompt()
+        builtin.find_files(themes.get_ivy({ default_text = prompt_text }))
+      end
+
       require'telescope'.setup {
         defaults = {
+          cache_pickers = {
+              num_pickers = 20,
+              limit_entries = 1000,
+          },
           mappings = {
             i = {
               ["<c-g>"] = "close",
+              ["<c-q>"] = actions.smart_add_to_qflist + actions.open_qflist,
+              ["<c-r>"] = narrow_picker,
             },
             n = {
               ["<c-g>"] = "close",
+              ["<c-q>"] = actions.smart_add_to_qflist + actions.open_qflist,
+              ["<c-r>"] = narrow_picker,
             },
           },
         },
+        pickers = {
+            buffers = {
+              mappings = {
+                i = {
+                  ["<right>"] = find_files_instead,
+                },
+                n = {
+                  ["<right>"] = find_files_instead,
+                },
+              },
+            },
+            find_files = {
+              no_ignore = true,
+              mappings = {
+                i = {
+                  ["<left>"] = buffers_instead,
+                },
+                n = {
+                  ["<left>"] = buffers_instead,
+                },
+              },
+            },
+        },
       }
+
       vim.api.nvim_set_keymap('n', '[telescope]', '', { noremap = true })
       vim.api.nvim_set_keymap('n', '<space>', '[telescope]', {})
-      vim.api.nvim_set_keymap(
-          'n',
-          '[telescope]/',
-          "<cmd>lua require'telescope.builtin'.find_files(require'telescope.themes'.get_ivy({no_ignore=false}))<cr>",
-          { noremap = true }
-      )
-      vim.api.nvim_set_keymap('n', '[telescope]f', '<cmd>Telescope live_grep theme=get_ivy<cr>', { noremap = true })
-      vim.api.nvim_set_keymap('n', '[telescope]y', '<cmd>Telescope registers theme=get_ivy<cr>', { noremap = true })
-      vim.api.nvim_set_keymap('n', '[telescope]b', '<cmd>Telescope buffers theme=get_ivy<cr>', { noremap = true })
-      vim.api.nvim_set_keymap('n', '[telescope]l', '<cmd>Telescope loclist theme=get_ivy<cr>', { noremap = false })
-      vim.api.nvim_set_keymap('n', '[telescope]q', '<cmd>Telescope quickfix theme=get_ivy<cr>', { noremap = true })
+      vim.keymap.set('n', '[telescope]/', function () builtin.buffers(themes.get_ivy()) end, { noremap = true })
+      vim.keymap.set('n', '[telescope]f', function () builtin.live_grep(themes.get_ivy()) end, { noremap = true })
+      vim.keymap.set('n', '[telescope]y', function () builtin.registers(themes.get_ivy()) end, { noremap = true })
+      vim.keymap.set('n', '[telescope]q', function () builtin.quickfix(themes.get_ivy()) end, { noremap = true })
+      vim.keymap.set('n', '[telescope].', function () builtin.resume(themes.get_ivy()) end, { noremap = true })
     end
   }
   ---}}}
@@ -803,10 +872,47 @@ require'packer'.startup {function (use)
           print("Attaching ", client.name, " LSP in buffer ", bufnr, "...")
 
           -- diagnostic
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '[telescope]l',
-            '<cmd>Telescope diagnostics theme=get_ivy<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gq',
-            '<cmd>lua vim.diagnostic.setqflist()<cr>', opts)
+          local builtin = require "telescope.builtin"
+          local themes = require "telescope.themes"
+          local action_state = require "telescope.actions.state"
+          local diagnostic_picker = nil
+
+          local function toggle_diagnostic(prompt_bufnr)
+            local picker = action_state.get_current_picker(prompt_bufnr)
+            local prompt_text = picker:_get_prompt()
+            local severity = picker.severity
+            if picker.prompt_title == "Document Diagnostics - Buffer" then
+              new_prompt_title = "Document Diagnostics - All"
+              new_key = "<left>"
+              new_picker_bufnr = nil
+            else
+              new_prompt_title = "Document Diagnostics - Buffer"
+              new_key = "<right>"
+              new_picker_bufnr = prompt_bufnr
+            end
+            diagnostic_picker(new_prompt_title, new_key, new_bufnr, prompt_text, severity)
+          end
+
+          diagnostic_picker = function(prompt_title, key, picker_bufnr, default_text, severity)
+            if picker_bufnr == 0 then
+              picker_bufnr = bufnr
+            end
+            builtin.diagnostics(themes.get_ivy({
+              prompt_title = prompt_title,
+              default_text = default_text,
+              bufnr = pikcer_bufnr,
+              severity = severity,
+              attach_mappings = function(_, map) 
+                map({"i", "n"}, key, toggle_diagnostic) 
+                return true 
+              end,
+            }))
+          end
+
+          vim.keymap.set('n', '[telescope]l', 
+            function() diagnostic_picker("Document Diagnostics - Buffer", "<right>", 0, "", "ERROR") end)
+          vim.keymap.set('n', '[telescope]L', 
+            function() diagnostic_picker("Document Diagnostics - Buffer", "<right>", 0, "", nil) end)
 
           local diagnostic_hidden = {}
 
@@ -822,7 +928,7 @@ require'packer'.startup {function (use)
             end
           end
 
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ll',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gl',
             '<cmd>lua diagnostic_toggle(0)<cr>', opts)
           vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gL',
             '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
@@ -836,22 +942,16 @@ require'packer'.startup {function (use)
             '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
           vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd',
             '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>k',
-            '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
           vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',
-            '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi',
-            '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
+            '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
 
           -- code action
           vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gA',
             '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
 
           -- variable management
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'rn',
-            '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
           vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr',
-            '<cmd>lua vim.lsp.buf.references()<cr>', opts)
+            '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
 
           -- formatting
           vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gQ',
