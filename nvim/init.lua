@@ -871,47 +871,48 @@ require'packer'.startup {function (use)
           print("Attaching ", client.name, " LSP in buffer ", bufnr, "...")
 
           -- diagnostic
-          local builtin = require "telescope.builtin"
-          local themes = require "telescope.themes"
-          local action_state = require "telescope.actions.state"
-          local diagnostic_picker = nil
+          diagnostic_picker = function()
 
-          local function toggle_diagnostic(prompt_bufnr)
-            local picker = action_state.get_current_picker(prompt_bufnr)
-            local prompt_text = picker:_get_prompt()
-            local severity = picker.severity
-            if picker.prompt_title == "Document Diagnostics - Buffer" then
-              new_prompt_title = "Document Diagnostics - All"
-              new_key = "<left>"
-              new_picker_bufnr = nil
-            else
-              new_prompt_title = "Document Diagnostics - Buffer"
-              new_key = "<right>"
-              new_picker_bufnr = prompt_bufnr
+            local builtin = require "telescope.builtin"
+            local themes = require "telescope.themes"
+            local actions = require "telescope.actions"
+            local action_state = require "telescope.actions.state"
+
+            local _diagnostic_picker = nil
+
+            local function toggle_diagnostic(prompt_bufnr)
+              local picker = action_state.get_current_picker(prompt_bufnr)
+              local prompt_text = picker:_get_prompt()
+              if picker.prompt_title == "Diagnostics - Buffer" then
+                new_prompt_title = "Diagnostics - Workspace"
+                new_key = "<left>"
+                new_picker_bufnr = nil
+              else
+                new_prompt_title = "Diagnostics - Buffer"
+                new_key = "<right>"
+                new_picker_bufnr = 0
+              end
+              pcall(actions.close, prompt_bufnr)
+              _diagnostic_picker(new_prompt_title, prompt_text, new_picker_bufnr, new_key)
             end
-            diagnostic_picker(new_prompt_title, new_key, new_bufnr, prompt_text, severity)
+
+            _diagnostic_picker = function(prompt_title, default_text, bufnr, key)
+              builtin.diagnostics(themes.get_ivy({
+                prompt_title = prompt_title,
+                default_text = default_text,
+                bufnr = bufnr,
+                attach_mappings = function(_, map) 
+                  map({"i", "n"}, key, toggle_diagnostic) 
+                  return true 
+                end,
+              }))
+            end
+
+            _diagnostic_picker("Diagnostics - Buffer", ":error:", 0, "<right>")
+
           end
 
-          diagnostic_picker = function(prompt_title, key, picker_bufnr, default_text, severity)
-            if picker_bufnr == 0 then
-              picker_bufnr = bufnr
-            end
-            builtin.diagnostics(themes.get_ivy({
-              prompt_title = prompt_title,
-              default_text = default_text,
-              bufnr = pikcer_bufnr,
-              severity = severity,
-              attach_mappings = function(_, map) 
-                map({"i", "n"}, key, toggle_diagnostic) 
-                return true 
-              end,
-            }))
-          end
-
-          vim.keymap.set('n', '[telescope]l', 
-            function() diagnostic_picker("Document Diagnostics - Buffer", "<right>", 0, "", "ERROR") end)
-          vim.keymap.set('n', '[telescope]L', 
-            function() diagnostic_picker("Document Diagnostics - Buffer", "<right>", 0, "", nil) end)
+          vim.keymap.set('n', '[telescope]l', function() diagnostic_picker(nil) end)
 
           local diagnostic_hidden = {}
 
