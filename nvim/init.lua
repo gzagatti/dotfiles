@@ -133,8 +133,8 @@ require'packer'.startup {function (use)
               vim.api.nvim_set_current_win(nnnwin)
             end
           },
-          quitcd = "cd",
         },
+        quitcd = "cd",
       }
       vim.api.nvim_set_keymap(
         "",
