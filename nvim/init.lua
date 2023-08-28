@@ -88,10 +88,10 @@ require'packer'.startup {function (use)
       local builtin = require'nnn'.builtin
       require'nnn'.setup {
         explorer = {
-          cmd = "NNN_TMPFILE='' nnn -G",
+          cmd = "NNN_TMPFILE=\"${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd\" nnn -a",
         },
         picker = {
-          cmd = "tmux new-session nnn -Pp -G",
+          cmd = "tmux new-session nnn -Pp",
         },
         auto_open = {
           empty = true,
@@ -133,8 +133,7 @@ require'packer'.startup {function (use)
               vim.api.nvim_set_current_win(nnnwin)
             end
           },
-          -- cd to file directory
-          {"<C-w>", builtin.cd_to_path },
+          quitcd = "cd",
         },
       }
       vim.api.nvim_set_keymap(
