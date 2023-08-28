@@ -1722,6 +1722,7 @@ vim.cmd [[
       endif
     endfunction
     autocmd FileType qf nnoremap <buffer> <silent> dd :call Remove_from_qf()<CR>
+    autocmd FileType qf nnoremap <buffer> <silent> <nowait> q :cclose<CR>
 
     "rmd
     " adds vim-markdown as a filetype plugin in order to allow
