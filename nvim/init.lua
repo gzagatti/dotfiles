@@ -88,7 +88,7 @@ require'packer'.startup {function (use)
       local builtin = require'nnn'.builtin
       require'nnn'.setup {
         explorer = {
-          cmd = "NNN_TMPFILE=\"${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd\" nnn -a",
+          cmd = "nnn",
         },
         picker = {
           cmd = "tmux new-session nnn -Pp",
