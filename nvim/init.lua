@@ -458,6 +458,8 @@ require'packer'.startup {function (use)
         builtin.find_files(themes.get_ivy({ default_text = prompt_text }))
       end
 
+      -- UFO will not apply folds if we start from insert mode,
+      -- so stop insert and performs the same action in normal mode
       local stop_insert_first = function(key)
         return function(prompt_bufnr)
           vim.cmd[[stopinsert]]
