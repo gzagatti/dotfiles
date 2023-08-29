@@ -458,6 +458,13 @@ require'packer'.startup {function (use)
         builtin.find_files(themes.get_ivy({ default_text = prompt_text }))
       end
 
+      local stop_insert_first = function(key)
+        return function(prompt_bufnr)
+          vim.cmd[[stopinsert]]
+          vim.cmd(string.format("exe \"normal %s\"", key))
+        end
+      end
+
       require'telescope'.setup {
         defaults = {
           cache_pickers = {
@@ -467,13 +474,18 @@ require'packer'.startup {function (use)
           mappings = {
             i = {
               ["<c-g>"] = "close",
-              ["<c-q>"] = actions.smart_add_to_qflist + actions.open_qflist,
+              ["<c-q>"] = actions.smart_add_to_qflist,
               ["<c-r>"] = narrow_picker,
+              ["<cr>"] = stop_insert_first("\\<cr>"),
+              ["<c-x>"] = stop_insert_first("\\<c-x>"),
+              ["<c-v>"] = stop_insert_first("\\<c-v>"),
+              ["<c-t>"] = false,
             },
             n = {
               ["<c-g>"] = "close",
-              ["<c-q>"] = actions.smart_add_to_qflist + actions.open_qflist,
+              ["<c-q>"] = actions.smart_add_to_qflist,
               ["<c-r>"] = narrow_picker,
+              ["<c-t>"] = false,
             },
           },
         },
@@ -902,9 +914,9 @@ require'packer'.startup {function (use)
                 prompt_title = prompt_title,
                 default_text = default_text,
                 bufnr = bufnr,
-                attach_mappings = function(_, map) 
-                  map({"i", "n"}, key, toggle_diagnostic) 
-                  return true 
+                attach_mappings = function(_, map)
+                  map({"i", "n"}, key, toggle_diagnostic)
+                  return true
                 end,
               }))
             end
@@ -1698,9 +1710,6 @@ vim.cmd [[
       endif
     endfunction
     autocmd BufWritePre * call s:auto_mkdir(expand('<afile>:p:h'), v:cmdbang)
-
-    "force update folds on read
-    autocmd BufReadPost,FileReadPost * normal zX
 
     "configuration files
     autocmd BufNewFile,BufRead *.*rc,*rc,init.lua setlocal foldmethod=marker
