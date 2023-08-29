@@ -459,7 +459,7 @@ require'packer'.startup {function (use)
       end
 
       -- UFO will not apply folds if we start from insert mode,
-      -- so stop insert and performs the same action in normal mode
+      -- so stop insert and perform the same action in normal mode
       local stop_insert_first = function(key)
         return function(prompt_bufnr)
           vim.cmd[[stopinsert]]
