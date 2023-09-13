@@ -2,10 +2,41 @@ atreplinit() do repl
 
     @eval import Pkg
 
+    # pre-load some useful packages
+    packages_loaded = false
+    if !isnothing(Base.find_package("Revise"))
+        @eval using Revise
+        @info "Revise loaded."
+        packages_loaded = true
+    end
+    if !isnothing(Base.find_package("KittyTerminalImages")) && get(ENV, "TERM", "") == "xterm-kitty"
+        @eval using KittyTerminalImages
+        @info "KittyTerminalImages loaded."
+        # avoids display issues https://github.com/JuliaPlots/Plots.jl/issues/1905#issuecomment-458778817
+        ENV["GKSwstype"]="nul";
+        packages_loaded = true
+    end
+
+    if packages_loaded
+      println()
+    end
+
+    # prefer magenta in the shell prompt
+    repl.shell_color = Base.text_colors[5]
+
+    # numbered prompt
+    # https://docs.julialang.org/en/v1/stdlib/REPL/#Numbered-prompt
+    @eval using REPL
+    if isdefined(REPL, :numbered_prompt!)
+      if !isdefined(repl, :interface)
+        repl.interface = REPL.setup_interface(repl)
+      end
+      REPL.numbered_prompt!(repl)
+    end
+
     # activate project at current path or at repo root
     if isfile("Project.toml") && isfile("Manifest.toml")
         Pkg.activate(".")
-        println()
     else
         here = splitpath(abspath("."))
         for level = length(here):-1:1
@@ -20,36 +51,12 @@ atreplinit() do repl
             if level == 1
                 Pkg.activate(temp=true)
                 Pkg.offline(true)
-                println()
             end
         end
     end
 
-    if !isnothing(Base.find_package("Revise"))
-        @eval using Revise
-        @info "Revise loaded."
-    end
-    if !isnothing(Base.find_package("KittyTerminalImages")) && get(ENV, "TERM", "") == "xterm-kitty"
-        @eval using KittyTerminalImages
-        @info "KittyTerminalImages loaded."
-        # avoids display issues https://github.com/JuliaPlots/Plots.jl/issues/1905#issuecomment-458778817
-        ENV["GKSwstype"]="nul";
-    end
-
-    # prefer magenta in the shell prompt
-    repl.shell_color = Base.text_colors[5]
-
     # margin between welcome message and first prompt
     println()
-
-    # https://docs.julialang.org/en/v1/stdlib/REPL/#Numbered-prompt
-    @eval using REPL
-    if isdefined(REPL, :numbered_prompt!)
-      if !isdefined(repl, :interface)
-        repl.interface = REPL.setup_interface(repl)
-      end
-      REPL.numbered_prompt!(repl)
-    end
 
 end
 
