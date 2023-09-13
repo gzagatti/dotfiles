@@ -151,6 +151,8 @@ in
     pkgs.gsettings-desktop-schemas
     pkgs.openfortivpn
     pkgs.python310Packages.jupyterlab
+    pkgs.android-tools
+    pkgs.qdl
     # TODO plugins do not work with installed version
     # (nixGuiWrap pkgs.qgis)
 
