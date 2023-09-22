@@ -3,22 +3,21 @@ atreplinit() do repl
     @eval import Pkg
 
     # pre-load some useful packages
-    packages_loaded = false
+    margin = false
     if !isnothing(Base.find_package("Revise"))
         @eval using Revise
         @info "Revise loaded."
-        packages_loaded = true
+        margin = true
     end
     if !isnothing(Base.find_package("KittyTerminalImages")) && get(ENV, "TERM", "") == "xterm-kitty"
-        @eval using KittyTerminalImages
-        @info "KittyTerminalImages loaded."
-        # avoids display issues https://github.com/JuliaPlots/Plots.jl/issues/1905#issuecomment-458778817
+    #     @eval using KittyTerminalImages
+        @info "KittyTerminalImages is available."
+    #     # avoids display issues https://github.com/JuliaPlots/Plots.jl/issues/1905#issuecomment-458778817
         ENV["GKSwstype"]="nul";
-        packages_loaded = true
+        margin = true
     end
-
-    if packages_loaded
-      println()
+    if margin 
+      println() 
     end
 
     # prefer magenta in the shell prompt
