@@ -159,13 +159,6 @@ if [[ $- == *i* ]]; then
   fi
   ##}}}
 
-  ## julia {{{
-  if hash julia 2>/dev/null; then
-    # the latest version of Plots require libtiff 4.5, which is only available in Homebrew
-    alias julia="LD_LIBRARY_PATH=/home/linuxbrew/.linuxbrew/Cellar/libtiff/4.5.1/lib:${LIBRARY_PATH} julia"
-  fi
-  ##}}}
-
   # }}}
 
   # PS1 {{{
