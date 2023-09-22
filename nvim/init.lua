@@ -851,7 +851,13 @@ require'packer'.startup {function (use)
 
   ---fugitive {{{
   use {
-      'tpope/vim-fugitive'
+    'tpope/vim-fugitive'
+  }
+  ---}}}
+
+  ----spotdiff {{{
+  use {
+    'rickhowe/spotdiff.vim'
   }
   ---}}}
 
