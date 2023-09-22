@@ -1,3 +1,11 @@
+# tweak LD_LIBRARY_PATH to avoid raising error when plotting
+# if isfile("/home/linuxbrew/.linuxbrew/lib/libtiff.so.6")
+#   libtiff = dirname(realpath("/home/linuxbrew/.linuxbrew/lib/libtiff.so.6"))
+#   ld_library_path = get(ENV, "LD_LIBRARY_PATH", "")
+#   ld_library_path = length(ld_library_path) > 0 ? ":$ld_library_path" : ""
+#   ENV["LD_LIBRARY_PATH"] = "$libtiff$ld_library_path"
+# end
+
 atreplinit() do repl
 
     @eval import Pkg
