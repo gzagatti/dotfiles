@@ -10,7 +10,6 @@ from relative_resize import relative_resize_window
 # for logging during debug, use something like
 # boss.call_remote_control(window, ("send-text", "--match", "id:{target}", f"{message}\n"))
 
-
 def is_window_vim(window, vim_id):
     fp = window.child.foreground_processes
     wtitle = window.child_title

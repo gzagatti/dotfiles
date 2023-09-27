@@ -29,7 +29,7 @@ jupyter/%:
 	ln -fs $(dotfiles)/$@ $(workspace)/.jupyter/$(@F)
 
 nix/%:
-	mkdir -p $(workspace)/$(@D:nix/%=%)
+	mkdir -p $(workspace)/.config/$(@D:nix/%=%)
 	ln -fs $(dotfiles)/$@ $(workspace)/.config/$(@:nix/%=%)
 
 # symlinks to ~/
