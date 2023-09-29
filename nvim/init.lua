@@ -1410,10 +1410,22 @@ vim.opt.numberwidth = 4
 ---white space {{{
 vim.opt.wrap = true
 vim.opt.shiftround = true
-local indent = 2
-vim.opt.shiftwidth = indent
-vim.opt.softtabstop = indent
+-- smartab modifies the behaviour of <Tab> in front of a line which can mess up
+-- with settings for vartabstop and varsofttabstop since those are not
+-- applied when tabbing on an empty line
+vim.opt.smarttab = false
+-- replaces <Tab> with space according to the setting for tabstop
 vim.opt.expandtab = true
+-- if shiftwidth is 0 then the tabstop value is used instead which makes configuration easier
+vim.opt.shiftwidth = 0
+-- if vartabstop is set then tabstop is ignored and vartabstop is used instead
+-- the number of spaces that a <Tab> in the file counts for
+vim.opt.vartabstop = '2'
+-- if varsofttabstop is set then softtabstop is ignored and varsofttabstop is used instead
+-- softtabstop will mix space and tabs in a file that uses tab. For those using
+-- expandtab = true softtabstop will ensure that <BS> works by deleting the
+-- equivalet number of tabs
+vim.opt.varsofttabstop = '2'
 vim.opt.backspace = 'indent,eol,start'
 vim.opt.list = true
 vim.opt.listchars = { tab = '»·', trail = '·', extends = '›', precedes = '‹', nbsp = '␣'}
