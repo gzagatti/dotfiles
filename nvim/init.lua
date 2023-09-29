@@ -1742,7 +1742,7 @@ end
 vim.cmd [[ command! -nargs=1 -complete=customlist,v:lua.loaded Luareload lua reload(<f-args>) ]]
 -- }}}
 
---autocmd {{{
+---autocmd {{{
 vim.cmd [[
   augroup vimrctweaks
     autocmd!
@@ -1811,6 +1811,94 @@ vim.cmd [[
 
   augroup END
 ]]
+
+---- org {{{
+function org_section_level()
+  node = vim.treesitter.get_node()
+
+  local block
+
+  while node ~= nil do
+    node = node:parent()
+    if node == nil then
+      return nil, block
+    elseif node:type() == "section" then
+      stars = node:child(0):child(0)
+      if stars ~= nil then
+        _, start_col, _, end_col = stars:range()
+        level = end_col - start_col
+        print("Level", level)
+        return level, block
+      else
+        return nil, block
+      end
+    elseif node:type() == "block" then
+      block_node = node:child(1)
+      start_row, start_col, end_row, end_col = block_node:range()
+      block_name = vim.api.nvim_buf_get_text(0, start_row, start_col, end_row, end_col, {})[1]
+      print(block_name)
+      if block_name == "src" then
+        block_type = node:child(2)
+        if block_type then
+          start_row, start_col, end_row, end_col = block_type:range()
+          block = vim.api.nvim_buf_get_text(0, start_row, start_col, end_row, end_col, {})[1]
+          print(block)
+        end
+      end
+    end
+  end
+
+end
+
+function set_org_indent()
+  level, block = org_section_level()
+  indent = level and level + 1 or level
+  if block == "python" then
+    vim.opt_local.vartabstop = indent and indent .. ',4' or '4'
+    vim.opt_local.varsofttabstop = indent and indent .. ',4' or '4'
+  else
+    vim.opt_local.vartabstop = indent and indent .. ',2' or '2'
+    vim.opt_local.varsofttabstop = indent and indent .. ',2' or '2'
+  end
+end
+
+function unset_org_indent()
+  vim.opt_local.vartabstop = '2' 
+  vim.opt_local.varsofttabstop = '2' 
+end
+
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = {"org"},
+    callback = function()
+      vim.keymap.set('n', '>>', function()
+        set_org_indent()
+        vim.cmd[[>]]
+        unset_org_indent()
+      end, { noremap = true, buffer = 0 })
+      vim.keymap.set('n', '<<', function()
+        set_org_indent()
+        vim.cmd[[<]]
+        unset_org_indent()
+      end, { noremap = true, buffer = 0 })
+      vim.keymap.set('v', '>', function()
+        set_org_indent()
+        vim.cmd[[:'<,'>>]]
+        unset_org_indent()
+      end, { noremap = true, buffer = 0 })
+    end,
+})
+
+vim.api.nvim_create_autocmd('InsertEnter', {
+  pattern = {"*.org"},
+  callback = set_org_indent
+})
+
+vim.api.nvim_create_autocmd('InsertLeave', {
+  pattern = {"*.org"},
+  callback = unset_org_indent
+})
+----}}}
+
 ---}}}
 
 end
@@ -1818,3 +1906,4 @@ end
 
 load_plugins()
 load_config()
+
