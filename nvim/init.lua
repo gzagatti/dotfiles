@@ -196,52 +196,81 @@ require'packer'.startup {function (use)
     config = function()
       if vim.env.TERM == 'xterm-kitty' then
         vim.g.slime_target = "kitty"
+        vim.g.slime_bracketed_paste = 1
       else
         vim.g.slime_target = "tmux"
+        vim.g.slime_bracketed_paste = 1
       end
+
+      vim.cmd[[
+        function! SlimeConfirm() abort
+          if exists("b:slime_bracketed_paste")
+            if b:slime_bracketed_paste
+              let restore_b_slime_bracketed_paste = 1
+              let b:slime_bracketed_paste = 0
+            else
+              return
+            endif
+          elseif exists("g:slime_bracketed_paste")
+            if g:slime_bracketed_paste
+              let b:slime_bracketed_paste = 0
+              let restore_b_slime_bracketed_paste = 0
+            else
+              return
+            end
+          endif
+          call slime#send("\r")
+          if restore_b_slime_bracketed_paste
+            let b:slime_bracketed_paste = 1
+          else
+            unlet b:slime_bracketed_paste
+          endif
+        endfunction
+      ]]
 
       vim.g.slime_no_mappings = 1
 
       vim.api.nvim_set_keymap('', '[slime]', '', { noremap = true })
       vim.api.nvim_set_keymap('', '<leader>s', '[slime]', {})
-      vim.api.nvim_set_keymap('' , '[slime]l', ':<c-u>call slime#send_lines(v:count1)<cr>', {})
-      vim.api.nvim_set_keymap('v', '[slime]l', ':<c-u>call slime#send_op(visualmode(), 1)<cr>', {})
-      vim.api.nvim_set_keymap('', '[slime]v', ':<c-u>call slime#config()<cr>', {})
-      vim.api.nvim_set_keymap('' , '[slime]b', ':<c-u>call slime#send_range(line(1), line("$"))<cr>', {})
+      vim.api.nvim_set_keymap('' , '[slime]l', ':call slime#send_lines(v:count1) | call SlimeConfirm()<cr>', {})
+      vim.api.nvim_set_keymap('v', '[slime]l', ':<c-u>call slime#send_op(visualmode(), 1) | call SlimeConfirm()<cr>', {})
+      vim.api.nvim_set_keymap('', '[slime]v',  ':call slime#config()<cr>', {})
+      vim.api.nvim_set_keymap('' , '[slime]b', ':call slime#send_range(line(1), line("$")) | call SlimeConfirm()<cr>', {})
       vim.cmd [[
         augroup slime_augroup:
           autocmd!
 
           "" file execute commands
           autocmd FileType python noremap <buffer> <silent> [slime]f
-            \ :execute ":call slime#send(\"%run -i " . @% . "\r\")" <cr>
+            \ :execute ":call slime#send(\"%run -i " . @% . "\") \| call SlimeConfirm()" <cr>
           autocmd FileType matlab noremap <buffer> <silent> [slime]f
-            \ :execute ":call slime#send(\"run '" . @% . "'\r\")" <cr>
+            \ :execute ":call slime#send(\"run '" . @% . "\") \| call SlimeConfirm()" <cr>
           autocmd FileType sql noremap <buffer> <silent> [slime]f
-            \ :execute ":call slime#send('\\i " . @% . "\r')" <cr>
+            \ :execute ":call slime#send('\\i " . @% . "') \| call SlimeConfirm()" <cr>
           autocmd FileType r noremap <buffer> <silent> [slime]f
-            \ :execute ":call slime#send(\"source('" . @% . "', echo=TRUE)\r\")" <cr>
+            \ :execute ":call slime#send(\"source('" . @% . "', echo=TRUE)\") \| call SlimeConfirm()" <cr>
           autocmd FileType ruby noremap <buffer> <silent> [slime]f
-            \ :execute ":call slime#send(\"load '" . @% . "'\r\")" <cr>
+            \ :execute ":call slime#send(\"load '" . @% . "'\") \| call SlimeConfirm()" <cr>
           autocmd FileType julia noremap <buffer> <silent> [slime]f
-            \ :execute ":call slime#send('include(\"" . @% . "\");\r')" <cr>
+            \ :execute ":call slime#send('include(\"" . @% . "\")') \| call SlimeConfirm()" <cr>
           autocmd FileType lua noremap <buffer> <silent> [slime]f
-            \ :execute ":call slime#send('dofile(\"" . @% . "\");\r')" <cr>
+            \ :execute ":call slime#send('dofile(\"" . @% . "\")')" <cr>
           autocmd FileType scheme noremap <buffer> <silent> [slime]f
-            \ :execute ":call slime#send(',require-reloadable \"" . @% . "\"\r')" <cr>
+            \ :execute ":call slime#send(',require-reloadable \"" . @% . "\"')" <cr>
 
           "" weave commands
           autocmd FileType rmd,r noremap <buffer> <silent> [slime]w
-            \ :execute ":call slime#send(\"rmarkdown::render('" . @% . "', output_format='all', quiet=TRUE)\r\")" <cr>
+            \ :execute ":call slime#send(\"rmarkdown::render('" . @% . "', output_format='all', quiet=TRUE)\") \| call SlimeConfirm()" <cr>
           autocmd FileType julia noremap <buffer> <silent> [slime]w
-            \ :execute ":call slime#send('weave(\"" . @% . "\"; doctype=\"md2html\", out_path=:pwd, mod=Main)\r')" <cr>
+            \ :execute ":call slime#send('weave(\"" . @% . "\"; doctype=\"md2html\", out_path=:pwd, mod=Main)') \| call SlimeConfirm()" <cr>
 
+          "" code cells
           autocmd FileType markdown noremap <buffer> <silent> [slime]c
-            \ :execute ":call slime#send_cell()" <cr>
+            \ :execute ":call slime#send_cell() \| call SlimeConfirm()" <cr>
           autocmd FileType markdown let b:slime_cell_delimiter = "```"
 
           autocmd FileType org noremap <buffer> <silent> [slime]c
-            \ :execute ":call slime#send_cell()" <cr>
+            \ :execute ":call slime#send_cell() \| call SlimeConfirm()" <cr>
           autocmd FileType org let b:slime_cell_delimiter = "#+"
 
         augroup END
