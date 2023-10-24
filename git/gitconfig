@@ -3,6 +3,7 @@
         email = gzagatti@users.noreply.github.com
 [core]
         autocrlf = input
+        attributesfile = \"$HOME/.gitattributes\"
 [ui]
         color = true
 [push]
@@ -16,6 +17,7 @@
 [alias]
         s = status -s
         lg = log --oneline --decorate --all --graph
+        wdiff = diff --word-diff
 [github]
         user = gzagatti
 [hub]
@@ -33,6 +35,8 @@
 [diff "jupyternotebook"]
         command = git-nbdiffdriver diff
         prompt = false
+[diff "tex"]
+        wordRegex = "\\\\[a-zA-Z]+|[{}]|\\\\.|[^\\{}[:space:]]+"
 [merge "jupyternotebook"]
         driver = git-nbmergedriver merge %O %A %B %L %P
         name = jupyter notebook merge driver
