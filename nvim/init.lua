@@ -565,6 +565,18 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
+  ---neoscroll {{{
+  -- smooth scrolling
+  use {
+    'karb94/neoscroll.nvim',
+    config = function()
+        require'neoscroll'.setup({
+          mappings = {},
+        })
+    end,
+  }
+  ---}}}
+
   ---cutlass {{{
   -- adds a 'cut' operation separate from delete
   use {
