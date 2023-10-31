@@ -467,6 +467,10 @@ require'packer'.startup {function (use)
       -----r {{{
       lspconfig.r_language_server.setup(my_config())
       -----}}}
+ 
+      -----beancount {{{
+      lspconfig.beancount.setup(my_config())
+      -----}}}
 
       ----}}}
       end,
@@ -580,19 +584,6 @@ require'packer'.startup {function (use)
           mappings = {},
         })
     end,
-  }
-  ---}}}
-
-  ---cutlass {{{
-  -- adds a 'cut' operation separate from delete
-  use {
-    'gbprod/cutlass.nvim',
-    config = function()
-        require'cutlass'.setup({
-          cut_key = "m",
-        })
-
-    end
   }
   ---}}}
 
@@ -1435,6 +1426,7 @@ require'packer'.startup {function (use)
   -- solve leetcode problems from neovim
   use {
     'Dhanus3133/LeetBuddy.nvim',
+    cmd = { "LBCheckCookies", "LBQuestions", "LBQuestion" },
     requires = {
       'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope.nvim',

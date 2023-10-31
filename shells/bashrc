@@ -96,13 +96,9 @@ if [[ $- == *i* ]]; then
   fi
   ## }}}
 
-  ## pyenv {{{
-  if hash pyenv 2>/dev/null; then
-    export PYENV_ROOT="$(pyenv root)"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
-    alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew'
+  ## rust {{{
+  if hash cargo 2>/dev/null; then
+    export PATH=$HOME/.cargo/bin${PATH+:$PATH}
   fi
   ## }}}
 
@@ -124,6 +120,16 @@ if [[ $- == *i* ]]; then
   ## go {{{
   if hash go 2>/dev/null; then
     export GOPATH=$HOME/.go
+  fi
+  ## }}}
+
+  ## pyenv {{{
+  if hash pyenv 2>/dev/null; then
+    export PYENV_ROOT="$(pyenv root)"
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
+    alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew'
   fi
   ## }}}
 
@@ -293,7 +299,7 @@ if [[ $- == *i* ]]; then
   PATH=`printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}'`
   # }}}
 
-   # Program specific {{{
+  # Program specific {{{
 
   # direnv {{{
   # the hook has to appear at the end
