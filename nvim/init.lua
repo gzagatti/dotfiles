@@ -163,9 +163,10 @@ require'packer'.startup {function (use)
         local lspconfig = require'lspconfig'
 
         local capabilities = vim.lsp.protocol.make_client_capabilities()
-        capabilities = require'cmp_nvim_lsp'.default_capabilities()
+        capabilities = require'cmp_nvim_lsp'.default_capabilities(capabilities)
+        capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-        local opts = { noremap=true, silent=true }
+        local opts = { noremap = true, silent = true }
 
         vim.api.nvim_set_keymap('n', 'gS', '<cmd>lua vim.lsp.stop_client(vim.lsp.get_active_clients())<cr>',
           { noremap = true})
@@ -402,6 +403,11 @@ require'packer'.startup {function (use)
       )
       -----}}}
 
+      -----bash {{{
+      -- server deployed with Homebrew
+      lspconfig.bashls.setup(my_config())
+      -----}}}
+
       -----lua {{{
       -- server deployed internally
       -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L153
@@ -583,8 +589,9 @@ require'packer'.startup {function (use)
     'gbprod/cutlass.nvim',
     config = function()
         require'cutlass'.setup({
-          cut_key = "x",
+          cut_key = "m",
         })
+
     end
   }
   ---}}}
@@ -1001,6 +1008,42 @@ require'packer'.startup {function (use)
     }
   ---}}}
 
+  ---otter {{{
+  -- auto-completion for injected languages
+  use {
+    'jmbuhr/otter.nvim',
+    requires = { 'neovim/nvim-lspconfig' },
+    config = function()
+        function otter_extensions(arglead, _, _)
+          local extensions = require'otter.tools.extensions'
+          local out = {}
+          for k, v in pairs(extensions) do
+            if arglead == nil then
+              table.insert(out, "*.otter." .. v)
+            elseif k:find("^" .. arglead) ~= nil then
+              table.insert(out, k)
+            end
+          end
+          return out
+        end
+        vim.api.nvim_create_autocmd({'BufNewFile', 'BufRead'}, {
+          group = vim.api.nvim_create_augroup("lspconfig", { clear = false }),
+          pattern = otter_extensions(),
+          callback = function(ev)
+            local buf = ev.buf
+            local ft = vim.api.nvim_get_option_value("filetype", { buf = ev.buf })
+            local matching_configs = require('lspconfig.util').get_config_by_ft(ft)
+              for _, config in ipairs(matching_configs) do
+                print("Activating ", config.name, " LspOtter in buffer ", buf, "...")
+                config.launch(buf)
+              end
+          end
+        })
+        vim.cmd [[ command! -nargs=* -complete=customlist,v:lua.otter_extensions LspOtter lua require'otter'.activate({<f-args>}) ]]
+    end
+  }
+  ---}}}
+
   ---cmp {{{
   -- auto-completion for nvim written in Lua
   use {
@@ -1014,6 +1057,8 @@ require'packer'.startup {function (use)
       'hrsh7th/cmp-vsnip',
       'gzagatti/cmp-latex-symbols',
       'hrsh7th/cmp-nvim-lua',
+      'jmbuhr/otter.nvim',
+      here 'cmp-copilot',
     },
     config = function ()
 
@@ -1022,10 +1067,10 @@ require'packer'.startup {function (use)
       local cmp = require'cmp'
 
       -- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings
-      local has_words_before = function ()
-        -- table.unpack is not defined, so we cannot fix the warning.
+      local has_words_before = function()
+        if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then return false end
         local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-        return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+        return col ~= 0 and vim.api.nvim_buf_get_text(0, line-1, 0, line-1, col, {})[1]:match("^%s*$") == nil
       end
 
       local feedkey = function (key, mode)
@@ -1040,10 +1085,8 @@ require'packer'.startup {function (use)
         },
         mapping = {
           ["<Tab>"] = cmp.mapping(function(fallback)
-              if cmp.visible() then
-                cmp.select_next_item()
-              elseif has_words_before() then
-                cmp.complete()
+              if cmp.visible() and has_words_before() then
+                cmp.select_next_item({ behavior = cmp.SelectBehavior })
               else
                 fallback()
               end
@@ -1052,32 +1095,29 @@ require'packer'.startup {function (use)
           ),
           ["<S-Tab>"] = cmp.mapping(function()
               if cmp.visible() then
-                cmp.select_prev_item()
-              else
-                fallback()
+                cmp.select_prev_item({ behavior = cmp.SelectBehavior })
               end
             end,
             { "i", "s" }
           ),
           ["<CR>"] = cmp.mapping.confirm { select = true },
           ["<C-Space>"] = cmp.mapping.complete(),
+          ["<Right>"] = cmp.mapping(function() cmp.confirm { select = true } end, { "i", "s" }),
+          ["<Left>"] = cmp.mapping(function() cmp.abort()  end, { "i", "s" })
         },
         sources = cmp.config.sources({
           { name = 'vsnip' },
           { name = 'nvim_lsp' },
+          { name = 'otter' },
           { name = 'path' },
           { name = 'nvim_lua' },
           -- override trigger characters, so they don't interfere with snippets
           { name = 'orgmode', trigger_characters = {} },
           { name = 'latex_symbols' },
           { name = 'buffer', keyword_length = 3 },
+          { name = 'copilot' },
         }),
       }
-
-      vim.api.nvim_set_keymap('i', '<right>', 'vsnip#jumpable(1) ? "<Plug>(vsnip-jump-next)" : ""', { expr = true, noremap = true })
-      vim.api.nvim_set_keymap('s', '<right>', 'vsnip#jumpable(1) ? "<Plug>(vsnip-jump-next)" : ""', { expr = true, noremap = true })
-      vim.api.nvim_set_keymap('i', '<left>', 'vsnip#jumpable(-1) ? "<Plug>(vsnip-jump-prev)" : ""', { expr = true, noremap = true })
-      vim.api.nvim_set_keymap('s', '<left>', 'vsnip#jumpable(-1) ? "<Plug>(vsnip-jump-prev)" : ""', { expr = true, noremap = true })
 
       function cmp_sources_list(arglead, _, _)
         -- the API does not allow for the retrieval of sources from cmdline
@@ -1353,6 +1393,57 @@ require'packer'.startup {function (use)
   -- draw ASCII diagrams
   use { 'jbyuki/venn.nvim' }
   --}}}
+
+  ---chatgpt {{{
+  -- ChatGPT
+  use {
+    'jackMort/ChatGPT.nvim',
+    requires = {
+      'MunifTanjim/nui.nvim',
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope.nvim'
+    },
+    config = function ()
+        require'chatgpt'.setup({
+          api_key_cmd = "secret-tool lookup application chatgpt"
+        })
+    end
+  }
+  ---}}}
+
+  ---copilot {{{
+  -- Github copilot
+  use {
+    'github/copilot.vim',
+    requires = { here 'cmp-copilot' },
+    cmd = "Copilot",
+    config = function()
+      vim.g.copilot_no_tab_map = true
+      vim.g.copilot_filetypes = { ['*'] = false }
+      vim.api.nvim_set_keymap('n', '<leader>co', ':Copilot panel<cr>', { noremap = true })
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = { "copilot.*" },
+        callback = function()
+            vim.api.nvim_buf_set_keymap(0, 'n', 'q', ':q<cr>', { noremap = true, nowait = true })
+        end,
+      })
+    end
+  }
+  ---}}}
+
+  ---leetbuddy {{{
+  -- solve leetcode problems from neovim
+  use {
+    'Dhanus3133/LeetBuddy.nvim',
+    requires = {
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope.nvim',
+    },
+    config = function()
+        require'leetbuddy'.setup({})
+    end
+  }
+  ---}}}
 
   ---theme: dracula {{{
   use {
@@ -1983,3 +2074,4 @@ end
 
 load_plugins()
 load_config()
+
