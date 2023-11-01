@@ -178,7 +178,7 @@ require'packer'.startup {function (use)
       config = function ()
 
         ----config {{{
-        vim.lsp.set_log_level("INFO")
+        vim.lsp.set_log_level("ERROR")
 
         local lspconfig = require'lspconfig'
 
@@ -483,6 +483,18 @@ require'packer'.startup {function (use)
       'nvim-treesitter/nvim-treesitter',
       -- run = ':TSUpdate',
       config = function ()
+        -- https://github.com/nvim-treesitter/nvim-treesitter#adding-parsers
+        local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+        parser_config.typst = {
+          install_info = {
+            url = "https://github.com/uben0/tree-sitter-typst", -- local path or git repo
+            files = {"src/parser.c", "src/scanner.c"}, -- note that some parsers also require src/scanner.c or src/scanner.cc
+            -- optional entries:
+            branch = "master", -- default branch in case of git repo if different from master
+            generate_requires_npm = false, -- if stand-alone parser without npm dependencies
+            requires_generate_from_grammar = false, -- if folder contains pre-generated src/parser.c
+          },
+        }
         require'nvim-treesitter.install'.update()
         require'nvim-treesitter.configs'.setup {
           ensure_installed = 'all', -- one of 'all', 'maintained', or a list of languages
@@ -793,10 +805,39 @@ require'packer'.startup {function (use)
     requires = { 'kevinhwang91/promise-async', 'nvim-treesitter/nvim-treesitter' },
     config = function()
       require'ufo'.setup({
-          open_fold_hl_timeout = 150,
-          provider_selector = function(bufnr, filetype, buftype)
-              return {'treesitter', 'indent'}
+        open_fold_hl_timeout = 150,
+        provider_selector = function(bufnr, filetype, buftype)
+            return {'treesitter', 'indent'}
+        end,
+        enable_get_fold_virt_text = true,
+        fold_virt_text_handler = function(virtText, lnum, endLnum, width, truncate, ctx)
+          -- include the bottom line in folded text for additional context
+          local filling = ' ⋯ '
+          local sufWidth = vim.fn.strdisplaywidth(suffix)
+          local targetWidth = width - sufWidth
+          local curWidth = 0
+          table.insert(virtText, {filling, 'Folded'})
+          local endVirtText = ctx.get_fold_virt_text(endLnum)
+          for _, chunk in ipairs(endVirtText) do
+            local chunkText = chunk[1]
+            local chunkWidth = vim.fn.strdisplaywidth(chunkText)
+            if targetWidth > curWidth + chunkWidth then
+              table.insert(virtText, chunk)
+            else
+              chunkText = truncate(chunkText, targetWidth - curWidth)
+              local hlGroup = chunk[2]
+              table.insert(virtText, {chunkText, hlGroup})
+              chunkWidth = vim.fn.strdisplaywidth(chunkText)
+              -- str width returned from truncate() may less than 2nd argument, need padding
+              if curWidth + chunkWidth < targetWidth then
+                suffix = suffix .. (' '):rep(targetWidth - curWidth - chunkWidth)
+              end
+              break
+            end
+            curWidth = curWidth + chunkWidth
           end
+          return virtText
+        end,
       })
       vim.keymap.set('n', 'zR', require'ufo'.openAllFolds)
       vim.keymap.set('n', 'zM', require'ufo'.closeAllFolds)
@@ -825,37 +866,6 @@ require'packer'.startup {function (use)
           end
         end
       })
-    end
-  }
-  ---}}}
-
-  ---mini.indentscope {{{
-  -- visualize scope with animated vertical line
-  use {
-    'echasnovski/mini.indentscope',
-    config = function()
-        require'mini.indentscope'.setup({
-          draw = {
-            animation = require'mini.indentscope'.gen_animation.none(),
-          },
-          options = {
-            border = 'top'
-          }
-        })
-        vim.api.nvim_create_autocmd('ColorScheme', {
-          pattern = {"leuven"},
-          command = [[highlight MiniIndentscopeSymbol guifg='#dadad7' ctermfg=253]]
-        })
-        vim.api.nvim_create_autocmd('ColorScheme', {
-          pattern = {"dracula"},
-          command = [[highlight MiniIndentscopeSymbol guifg='#2f3751' ctermfg=253]]
-        })
-        vim.api.nvim_create_autocmd('FileType', {
-          pattern = {"help", "aerial"},
-          callback = function()
-            vim.b.miniindentscope_disable = true
-          end,
-        })
     end
   }
   ---}}}
@@ -1437,9 +1447,41 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
+  ---mini.indentscope {{{
+  -- visualize scope with animated vertical line
+  use {
+    'echasnovski/mini.indentscope',
+    config = function()
+        require'mini.indentscope'.setup({
+          draw = {
+            animation = require'mini.indentscope'.gen_animation.none(),
+          },
+          options = {
+            border = 'top'
+          }
+        })
+        vim.api.nvim_create_autocmd('ColorScheme', {
+          pattern = {"leuven"},
+          command = [[highlight MiniIndentscopeSymbol guifg='#dadad7' ctermfg=253]]
+        })
+        vim.api.nvim_create_autocmd('ColorScheme', {
+          pattern = {"dracula"},
+          command = [[highlight MiniIndentscopeSymbol guifg='#2f3751' ctermfg=253]]
+        })
+        vim.api.nvim_create_autocmd('FileType', {
+          pattern = {"help", "aerial"},
+          callback = function()
+            vim.b.miniindentscope_disable = true
+          end,
+        })
+    end
+  }
+  ---}}}
+
   ---theme: dracula {{{
   use {
     'dracula/vim',
+    after = { 'mini.indentscope' },
     config = function ()
       if (vim.env.THEME == 'dracula') or (vim.env.THEME == nil) then
         vim.cmd [[
@@ -1453,6 +1495,7 @@ require'packer'.startup {function (use)
   ---theme: leuven {{{
   use {
     here 'vim-leuven-theme',
+    after = { 'mini.indentscope' },
     config = function ()
       if (vim.env.THEME == 'leuven') then
         vim.cmd [[
