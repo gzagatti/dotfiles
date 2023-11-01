@@ -24,6 +24,23 @@ require'packer'.startup {function (use)
   use { 'wbthomason/packer.nvim' }
   ---}}}
 
+  ---mason {{{
+  -- package manager for external dependencies
+  use {
+    'williamboman/mason.nvim',
+    requires = { 'williamboman/mason-lspconfig.nvim' },
+    config = function()
+      require'mason'.setup()
+      require'mason-lspconfig'.setup({
+          ensure_installed = { 'vimls', 'html', 'julials', 'pyright', 'jsonls',
+            'ltex', 'texlab', 'clangd', 'bashls', 'lua_ls', 'solargraph',
+            'stylelint_lsp', 'beancount', 'typst_lsp' }
+      })
+
+    end
+  }
+  ---}}}
+
   ---plenary {{{
   -- lua utilities
   use { 'nvim-lua/plenary.nvim' }
@@ -151,6 +168,9 @@ require'packer'.startup {function (use)
   -- neovim built-in language server
     use {
       'neovim/nvim-lspconfig',
+      after = {
+        'mason.nvim',
+      },
       requires = {
         'hrsh7th/nvim-cmp',
         'barreiroleo/ltex-extra.nvim'
@@ -300,22 +320,18 @@ require'packer'.startup {function (use)
       -- to check start options: :help lsp.start
 
       -----vim {{{
-      -- server deployed with npm
       lspconfig.vimls.setup(my_config())
       -----}}}
 
       -----html {{{
-      -- server deployed with npm
       lspconfig.html.setup(my_config())
       -----}}}
 
       -----julia {{{
-      -- server deployed with Julia
       lspconfig.julials.setup(my_config())
       -----}}}
 
       -----python {{{
-      -- server deployed with Homebrew
       lspconfig.pyright.setup(
         my_config({
             settings = {
@@ -328,12 +344,10 @@ require'packer'.startup {function (use)
       -----}}}
 
       -----json {{{
-      -- server deployed with npm
       lspconfig.jsonls.setup(my_config())
       -----}}}
 
       -----text {{{
-      -- server deployed with Homebrew
       lspconfig.ltex.setup(
         my_config({
           settings = {
@@ -374,7 +388,6 @@ require'packer'.startup {function (use)
       -----}}}
 
       -----latex {{{
-      -- server deployed with Homebrew
       -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L168
       lspconfig.texlab.setup(
         my_config({
@@ -391,26 +404,14 @@ require'packer'.startup {function (use)
       -----}}}
 
       -----clang {{{
-      -- server deployed with Homebrew
-      lspconfig.ccls.setup(
-        my_config({
-          init_options = {
-            cache = {
-              directory = ".ccls-cache",
-            }
-          }
-        })
-      )
+      lspconfig.clangd.setup(my_config())
       -----}}}
 
       -----bash {{{
-      -- server deployed with Homebrew
       lspconfig.bashls.setup(my_config())
       -----}}}
 
       -----lua {{{
-      -- server deployed internally
-      -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L153
       lspconfig.lua_ls.setup(
         my_config({
         settings = {
@@ -433,7 +434,6 @@ require'packer'.startup {function (use)
       -----}}}
 
       -----ruby {{{
-      -- server deployed with Homebrew
       lspconfig.solargraph.setup(
         my_config({
           settings = {
@@ -447,7 +447,6 @@ require'packer'.startup {function (use)
       -----}}}
 
       -----css {{{
-      -- server deployed with Homebrew
       lspconfig.stylelint_lsp.setup(
         my_config({
           settings = {
@@ -464,15 +463,16 @@ require'packer'.startup {function (use)
       lspconfig.racket_langserver.setup(my_config())
       -----}}}
 
-      -----r {{{
-      lspconfig.r_language_server.setup(my_config())
-      -----}}}
- 
       -----beancount {{{
       lspconfig.beancount.setup(my_config())
       -----}}}
 
+      -----typst {{{
+      lspconfig.typst_lsp.setup(my_config())
+      -----}}}
+
       ----}}}
+
       end,
     }
   ---}}}

@@ -140,13 +140,6 @@ in
     pkgs.ruby_3_1
     pkgs.rustup
 
-    # language servers
-    pkgs.ccls
-    pkgs.rubyPackages_3_1.solargraph
-    pkgs.sumneko-lua-language-server
-    pkgs.texlab
-    pkgs.nodePackages.pyright
-
     # misc
     pkgs.gsettings-desktop-schemas
     pkgs.openfortivpn
