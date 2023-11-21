@@ -12,12 +12,12 @@ atreplinit() do repl
     if !isnothing(Base.find_package("KittyTerminalImages")) && get(ENV, "TERM", "") == "xterm-kitty"
     #     @eval using KittyTerminalImages
         @info "KittyTerminalImages is available."
-    #     # avoids display issues https://github.com/JuliaPlots/Plots.jl/issues/1905#issuecomment-458778817
+        # avoids display issues https://github.com/JuliaPlots/Plots.jl/issues/1905#issuecomment-458778817
         ENV["GKSwstype"]="nul";
         margin = true
     end
-    if margin 
-      println() 
+    if margin
+      println()
     end
 
     # prefer magenta in the shell prompt
@@ -34,23 +34,34 @@ atreplinit() do repl
     end
 
     # activate project at current path or at repo root
-    if isfile("Project.toml") && isfile("Manifest.toml")
-        Pkg.activate(".")
-    else
-        here = splitpath(abspath("."))
-        for level = length(here):-1:1
-            parent = here[1:level]
-            if isdir(joinpath([parent; ".git"]))
-                if isfile(joinpath([parent; "Project.toml"])) &&
-                  isfile(joinpath([parent; "Manifest.toml"]))
-                    Pkg.activate(joinpath(parent))
-                    break
+    default_proj = "v1.9"
+    project_file = dirname(abspath(Base.active_project()))
+    # avoid over-writting --proj flag
+    # loops through all possible default projects and activate project only if
+    # we start with the default environment
+    for depot in Base.DEPOT_PATH
+        default_file = joinpath(depot, "environments/$(default_proj)")
+        if project_file == default_file
+            if isfile("Project.toml") && isfile("Manifest.toml")
+                Pkg.activate(".")
+            else
+                here = splitpath(abspath("."))
+                for level = length(here):-1:1
+                    parent = here[1:level]
+                    if isdir(joinpath([parent; ".git"]))
+                        if isfile(joinpath([parent; "Project.toml"])) &&
+                        isfile(joinpath([parent; "Manifest.toml"]))
+                            Pkg.activate(joinpath(parent))
+                            break
+                        end
+                    end
+                    if level == 1
+                        Pkg.activate(temp=true)
+                        Pkg.offline(true)
+                    end
                 end
             end
-            if level == 1
-                Pkg.activate(temp=true)
-                Pkg.offline(true)
-            end
+            break
         end
     end
 
