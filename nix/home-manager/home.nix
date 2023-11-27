@@ -8,7 +8,7 @@ let
 
   # the motivation for nixGL; https://discourse.nixos.org/t/design-discussion-about-nixgl-opengl-cuda-opencl-wrapper-for-nix/2453
   nixgl = import <nixgl> {} ;
-  nixGuiWrap = pkg: pkgs.runCommand "${pkg.name}-nixgui-wrapper" {} ''
+  nixGuiWrap = { pkg, light ? false }: pkgs.runCommand "${pkg.name}-nixgui-wrapper" {GTK_THEME= if light then ":light" else "";} ''
     mkdir $out
     ln -s ${pkg}/* $out
     rm $out/bin
@@ -23,10 +23,11 @@ let
     # required by the environment. The workaround is to unset the GTK_MODULES and
     # GTK3_MODULES so that it does not reach for system GTK modules.
     # We also need to modify the GTK_PATH to point to libcanberra-gtk3 installed via Nix
-    gtk_path="${lib.getLib pkgs.libcanberra-gtk3}/lib/gtk-3.0"
+    GTK_PATH="${lib.getLib pkgs.libcanberra-gtk3}/lib/gtk-3.0"
+    # light or dark
     for bin in ${pkg}/bin/*; do
       wrapped_bin=$out/bin/$(basename $bin)
-      echo "exec env GTK_MODULES= GTK3_MODULES= GTK_PATH=\"$gtk_path\" $nixgl_bin  $bin \"\$@\"" > $wrapped_bin
+      echo "exec env GTK_MODULES= GTK3_MODULES= GTK_PATH=\"$GTK_PATH\" GTK_THEME=\"$GTK_THEME\" $nixgl_bin  $bin \"\$@\"" > $wrapped_bin
       chmod +x $wrapped_bin
     done
   '';
@@ -56,20 +57,20 @@ in
     nixgl.auto.nixGLDefault
 
     # terminal
-    (nixGuiWrap pkgs.kitty)
+    (nixGuiWrap { pkg = pkgs.kitty; })
 
     # browser
-    (nixGuiWrap pkgs.firefox)
+    (nixGuiWrap { pkg = pkgs.firefox; })
     pkgs.lagrange
 
     # text editor
     pkgs.emacs
 
     # doc
-    (nixGuiWrap pkgs.libreoffice)
-    (nixGuiWrap pkgs.okular)
+    (nixGuiWrap { pkg = pkgs.libreoffice; })
+    (nixGuiWrap { pkg = pkgs.okular; })
     # does not work properly; crashes randomly and does not navigate properly
-    # (nixGuiWrap pkgs.zathura)
+    # (nixGuiWrap { pkg = pkgs.zathura; })
 
     # doc utils
     pkgs.ghostscript
@@ -77,17 +78,17 @@ in
     pkgs.pandoc
 
     # reference
-    (nixGuiWrap pkgs.calibre)
-    (nixGuiWrap pkgs.font-manager)
-    (nixGuiWrap pkgs.zotero)
+    (nixGuiWrap { pkg = pkgs.calibre; light = true; })
+    (nixGuiWrap { pkg = pkgs.font-manager; })
+    (nixGuiWrap { pkg = pkgs.zotero; light = true; })
 
     # image
-    (nixGuiWrap pkgs.gimp)
-    (nixGuiWrap pkgs.gpick)
-    (nixGuiWrap pkgs.gthumb)
+    (nixGuiWrap { pkg = pkgs.gimp; })
+    (nixGuiWrap { pkg = pkgs.gpick; })
+    (nixGuiWrap { pkg = pkgs.gthumb; })
     # TODO does not work properly; need extensions properly working
-    # (nixGuiWrap pkgs.inkscape)
-    # (nixGuiWrap pkgs.peek)
+    # (nixGuiWrap { pkg = pkgs.inkscape; })
+    # (nixGuiWrap { pkg = pkgs.peek; })
 
     # image utils
     pkgs.exiftool
@@ -100,8 +101,8 @@ in
     pkgs.zopfli
 
     # media
-    (nixGuiWrap pkgs.spotify)
-    (nixGuiWrap pkgs.vlc)
+    (nixGuiWrap { pkg = pkgs.spotify; })
+    (nixGuiWrap { pkg = pkgs.vlc; })
 
     # messaging
     pkgs.weechat
