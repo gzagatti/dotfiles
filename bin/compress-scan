@@ -1,0 +1,53 @@
+#!/bin/bash
+
+display_help() {
+    echo "Usage: $0 <input_pdf> <output_pdf> [<convert_options>...]"
+    echo
+    echo "This script extracts images from a PDF, processes them with ImageMagick's convert command, and combines them back into a PDF."
+    echo
+    echo "By default, it resizes images to 50% and sets their quality to 80. You can override these defaults by providing your own convert options."
+    echo
+    echo "Examples:"
+    echo "  $0 input.pdf output.pdf"
+    echo "  $0 input.pdf output.pdf -resize 25% -quality 60"
+}
+
+# check if no arguments or -h/--help is provided
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    display_help
+    exit 0
+fi
+
+if [[ -z "$1" ]] || [[ -z "$2" ]]; then
+    echo "Error: You must provide an input and output file."
+    echo "Usage: $0 <input_pdf> <output_pdf> [<convert_options>...]"
+    exit 1
+fi
+input_pdf="$1"
+output_pdf="$2"
+
+# remove the first two arguments
+shift 2
+
+# set default convert options if none are provided
+if [ $# -eq 0 ]; then
+    set -- -resize 50% -quality 80
+fi
+
+# create a temporary directory
+temp_dir=$(mktemp -d)
+
+# extract images from the PDF
+pdfimages -j "$input_pdf" "$temp_dir/extracted_image"
+
+# process images with the remaining arguments
+for img in "$temp_dir"/extracted_image*.jpg; do
+    convert "$@" "$img" "${img%.jpg}_small.jpg"
+done
+
+# convert images back to PDF
+convert $(ls "$temp_dir"/*small.jpg | sort -V) "$output_pdf"
+
+# clean up
+rm -r "$temp_dir"
+
