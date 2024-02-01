@@ -62,6 +62,8 @@ in
     # browser
     (nixGuiWrap { pkg = pkgs.firefox; })
     pkgs.lagrange
+    pkgs.bombadillo
+    pkgs.amfora
 
     # text editor
     pkgs.emacs
@@ -76,16 +78,22 @@ in
     pkgs.ghostscript
     pkgs.hugo
     pkgs.pandoc
+    pkgs.pdf2svg
+    pkgs.biber
+    pkgs.languagetool
+    pkgs.typst
 
     # reference
     (nixGuiWrap { pkg = pkgs.calibre; light = true; })
     (nixGuiWrap { pkg = pkgs.font-manager; })
     (nixGuiWrap { pkg = pkgs.zotero; light = true; })
 
-    # image
+    # graphics
     (nixGuiWrap { pkg = pkgs.gimp; })
     (nixGuiWrap { pkg = pkgs.gpick; })
+    (nixGuiWrap { pkg = pkgs.loupe; })
     (nixGuiWrap { pkg = pkgs.gthumb; })
+    pkgs.fontforge
     # TODO does not work properly; need extensions properly working
     # (nixGuiWrap { pkg = pkgs.inkscape; })
     # (nixGuiWrap { pkg = pkgs.peek; })
@@ -99,6 +107,8 @@ in
     pkgs.pngquant
     pkgs.timg
     pkgs.zopfli
+    pkgs.trimage
+    pkgs.pngcrush
 
     # media
     (nixGuiWrap { pkg = pkgs.spotify; })
@@ -121,8 +131,12 @@ in
     pkgs.gnused
     pkgs.jq
     pkgs.nmap
-    pkgs.python310Packages.pygments
+    pkgs.python311Packages.pygments
     pkgs.ripgrep
+    pkgs.wget
+    pkgs.socat
+    pkgs.jless
+    pkgs.valgrind
     # does not load apps correctly, mixes nix and system paths
     # pkgs.rofi
 
@@ -140,13 +154,20 @@ in
     pkgs.rbenv
     pkgs.ruby_3_1
     pkgs.rustup
+    pkgs.dotnet-sdk_8
+    pkgs.go
+    pkgs.sassc
+    pkgs.jdk21
 
     # misc
     pkgs.gsettings-desktop-schemas
     pkgs.openfortivpn
-    pkgs.python310Packages.jupyterlab
+    pkgs.python311Packages.jupyterlab
     pkgs.android-tools
     pkgs.qdl
+    pkgs.fava
+    pkgs.beancount
+    pkgs.gnuplot
     # TODO plugins do not work with installed version
     # (nixGuiWrap pkgs.qgis)
 
