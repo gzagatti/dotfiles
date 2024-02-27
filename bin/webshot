@@ -1,0 +1,55 @@
+#!/bin/bash
+
+show_help() {
+  echo "Usage: $(basename "$0") [-h] <url>"
+  echo "  -h, --help    Show this help message and exit"
+  exit 1
+}
+
+check_dependency() {
+  command -v "$1" >/dev/null 2>&1 || {
+    echo >&2 "Error: $1 is required but not installed. Aborting."
+    exit 1
+  }
+}
+
+cleanup() {
+  rm -rf "$temp_dir"
+}
+
+# Check dependencies
+check_dependency "pageres"
+check_dependency "convert"
+check_dependency "xclip"
+
+# Check if no arguments provided or if -h/--help flag is used
+if [ "$#" -eq 0 ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+  show_help
+fi
+
+# Check if more than one argument is provided
+if [ "$#" -gt 1 ]; then
+  echo "Error: Only a single URL is allowed as an argument."
+  show_help
+fi
+
+# Get current directory
+wd=$(pwd)
+
+# Create a temporary directory
+temp_dir=$(mktemp -d)
+trap cleanup EXIT
+
+cd "$temp_dir" || exit
+
+# Take a screenshot of the page
+pageres "$1" 1200x1200 --crop --overwrite 2> /dev/null
+
+# Get the file
+filename=$(ls -t | head -n1)
+
+# Convert it to webp
+convert "$filename" "${filename%.*}.webp"
+
+# Copy to clipboard
+xclip -selection clipboard -t image/webp -i "${filename%.*}.webp"
