@@ -3,7 +3,7 @@ workspace := $(HOME)
 
 .PHONY: all
 
-shells: bash zsh tmux
+shells: bash zsh tmux profile
 
 # SYMLINK CREATION
 bin/%:
@@ -57,6 +57,8 @@ sc-im/%      \
 
 # CONFIGS
 inputrc: shells/inputrc
+
+profile: shells/profile
 
 bash: inputrc $(wildcard shells/bash*)
 
