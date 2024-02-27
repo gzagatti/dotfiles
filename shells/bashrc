@@ -56,12 +56,14 @@ if [[ $- == *i* ]]; then
   ## }}}
 
   ## brew {{{
-  if [ -f $HOME/.linuxbrew/bin/brew ]; then
-    export HOMEBREW_PREFIX=$HOME/.linuxbrew
-  elif [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
-    export HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
-  elif hash brew &>/dev/null && [[ -z "$HOMEBREW_PREFIX" ]]; then
-    export HOMEBREW_PREFIX=$(brew --prefix)
+  if [[ -z "$HOMEBREW_PREFIX" ]]; then
+    if [ -f $HOME/.linuxbrew/bin/brew ]; then
+      export HOMEBREW_PREFIX=$HOME/.linuxbrew
+    elif [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
+      export HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
+    elif hash brew &>/dev/null && [[ -z "$HOMEBREW_PREFIX" ]]; then
+      export HOMEBREW_PREFIX=$(brew --prefix)
+    fi
   fi
 
   if [[ -n "$HOMEBREW_PREFIX" ]]; then
@@ -98,7 +100,7 @@ if [[ $- == *i* ]]; then
 
   ## rust {{{
   if hash cargo 2>/dev/null; then
-    export PATH=$HOME/.cargo/bin${PATH+:$PATH}
+    export PATH=$HOME/.cargo/bin${PATH:+:$PATH}
   fi
   ## }}}
 
@@ -114,6 +116,13 @@ if [[ $- == *i* ]]; then
     export R_PROFILE=$HOME/.RProfile
     alias R='R --no-save --no-restore'
     alias r='R --no-save --no-restore'
+  fi
+  ## }}}
+
+  ## julia {{{
+  if hash julia 2>/dev/null; then
+    # LD_LIBRARY_PATH set by nix conflicts with julia
+    alias julia='LD_LIBRARY_PATH= julia'
   fi
   ## }}}
 
@@ -295,7 +304,7 @@ if [[ $- == *i* ]]; then
   # PATH {{{
   # add ~/.local/bin to PATH to the front of the path
   export PATH=$HOME/.local/bin:$PATH
-  # removes duplicates from the PATH, given that the above can introduce duplicates
+  # removes duplicates from the PATH
   PATH=`printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}'`
   # }}}
 

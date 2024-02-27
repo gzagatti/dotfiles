@@ -8,9 +8,12 @@ if [[ $- == *i* ]]; then
   # Shell options {{{
   setopt NO_CASE_GLOB
   setopt AUTO_CD
+  autoload edit-command-line
+  zle -N edit-command-line
   bindkey -v
   bindkey "^?" backward-delete-char
   bindkey "^R" history-incremental-search-backward
+  bindkey -M vicmd v edit-command-line
   # }}}
 
   # History {{{
@@ -48,20 +51,19 @@ if [[ $- == *i* ]]; then
   ## }}}
 
   ## brew {{{
-  if [ -f $HOME/.linuxbrew/bin/brew ]; then
-    export HOMEBREW_PREFIX=$HOME/.linuxbrew
-  elif [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
-    export HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
-  elif hash brew &>/dev/null && [[ -z "$HOMEBREW_PREFIX" ]]; then
-    export HOMEBREW_PREFIX=$(brew --prefix)
+  if [[ -z "$HOMEBREW_PREFIX" ]]; then
+    if [ -f $HOME/.linuxbrew/bin/brew ]; then
+      export HOMEBREW_PREFIX=$HOME/.linuxbrew
+    elif [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
+      export HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
+    elif hash brew &>/dev/null && [[ -z "$HOMEBREW_PREFIX" ]]; then
+      export HOMEBREW_PREFIX=$(brew --prefix)
+    fi
   fi
 
   if [[ -n "$HOMEBREW_PREFIX" ]]; then
     export HOMEBREW_CELLAR=$HOMEBREW_PREFIX/Cellar
     export HOMEBREW_REPOSITORY=$HOMEBREW_PREFIX/Homebrew
-    # ${parameter+alt_value} if parameter set use alt_value else use null string
-    export MANPATH="$HOMEBREW_PREFIX/share/man${MANPATH+:$MANPATH}:"
-    export INFOPATH="$HOMEBREW_PREFIX/share/info${INFOPATH+:$INFOPATH}"
     export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin${PATH+:$PATH}"
     export FPATH="$HOMEBREW_PREFIX/share/zsh/site-functions${FPATH+:$FPATH}"
     hash -f
@@ -97,7 +99,7 @@ if [[ $- == *i* ]]; then
 
   ## rust {{{
   if hash cargo 2>/dev/null; then
-    export PATH=$HOME/.cargo/bin${PATH+:$PATH}
+    export PATH=$HOME/.cargo/bin${PATH:+:$PATH}
   fi
   ## }}}
 
@@ -116,6 +118,13 @@ if [[ $- == *i* ]]; then
   fi
   ## }}}
 
+  ## julia {{{
+  if hash julia 2>/dev/null; then
+    # LD_LIBRARY_PATH set by nix conflicts with julia
+    alias julia='LD_LIBRARY_PATH= julia'
+  fi
+  ## }}}
+
   ## go {{{
   if hash go 2>/dev/null; then
     export GOPATH=$HOME/.go
@@ -131,7 +140,6 @@ if [[ $- == *i* ]]; then
     alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew'
   fi
   ## }}}
-
 
   ## kitty {{{
   if test -n "$KITTY_INSTALLATION_DIR"; then
@@ -361,7 +369,7 @@ if [[ $- == *i* ]]; then
   # PATH {{{
   # add ~/.local/bin to PATH to the front of the path
   export PATH=$HOME/.local/bin:$PATH
-  # removes duplicates from the PATH, given that the above can introduce duplicates
+  # removes duplicates from the PATH
   PATH=`printf %s "$PATH" | awk -v RS=: '{ if (!arr[$0]++) {printf("%s%s",!ln++?"":":",$0)}}'`
   # }}}
 
