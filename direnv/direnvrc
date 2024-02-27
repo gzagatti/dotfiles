@@ -2,7 +2,7 @@ layout_pyenv() {
     if [ -n "$(which pyenv)" ]; then
         local virtualenv=$(realpath "$(pyenv root)/versions/$1")
         if [ -d "$virtualenv" ]; then
-          source "$(dirname $(dirname "$virtualenv"))/bin/activate"
+          source activate $1
           export PYENV_VERSION="$1"
           export PYENV_VIRTUAL_ENV="$virtualenv"
           export VIRTUAL_ENV="$virtualenv"
