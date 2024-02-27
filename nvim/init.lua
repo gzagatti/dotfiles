@@ -34,7 +34,7 @@ require'packer'.startup {function (use)
       require'mason-lspconfig'.setup({
           ensure_installed = { 'vimls', 'html', 'julials', 'pyright', 'jsonls',
             'ltex', 'texlab', 'clangd', 'bashls', 'lua_ls', 'solargraph',
-            'stylelint_lsp', 'beancount', 'typst_lsp' }
+            'stylelint_lsp', 'beancount', 'typst_lsp', 'hoon_ls' }
       })
 
     end
@@ -115,9 +115,9 @@ require'packer'.startup {function (use)
               ["<c-g>"] = "close",
               ["<c-q>"] = actions.smart_add_to_qflist,
               ["<c-r>"] = narrow_picker,
-              -- ["<cr>"] = stop_insert_first("\\<cr>"),
-              -- ["<c-x>"] = stop_insert_first("\\<c-x>"),
-              -- ["<c-v>"] = stop_insert_first("\\<c-v>"),
+              ["<cr>"] = stop_insert_first("\\<cr>"),
+              ["<c-x>"] = stop_insert_first("\\<c-x>"),
+              ["<c-v>"] = stop_insert_first("\\<c-v>"),
               ["<c-t>"] = false,
             },
             n = {
@@ -198,7 +198,11 @@ require'packer'.startup {function (use)
           print("Attaching ", client.name, " LSP in buffer ", bufnr, "...")
 
           -- diagnostic
-          diagnostic_picker = function()
+
+          -- diagnostic without clutter
+          vim.diagnostic.config({ virtual_text = false, signs = false })
+
+          telescope_diagnostic_picker = function()
 
             local builtin = require "telescope.builtin"
             local themes = require "telescope.themes"
@@ -239,7 +243,7 @@ require'packer'.startup {function (use)
 
           end
 
-          vim.keymap.set('n', '[telescope]l', function() diagnostic_picker(nil) end)
+          vim.keymap.set('n', '[telescope]l', function() telescope_diagnostic_picker(nil) end)
 
           local diagnostic_hidden = {}
 
@@ -259,9 +263,9 @@ require'packer'.startup {function (use)
             '<cmd>lua diagnostic_toggle(0)<cr>', opts)
           vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gL',
             '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gn',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', ']d',
             '<cmd>lua vim.diagnostic.goto_next()<cr>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gp',
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', '[d',
             '<cmd>lua vim.diagnostic.goto_prev()<cr>', opts)
 
           -- documentation help
@@ -298,7 +302,6 @@ require'packer'.startup {function (use)
               load_langs = { 'en-US' },
               init_check = true,
               path = '.ltex', -- tmpdir
-              log_level = "info"
             }
           end
         end
@@ -359,6 +362,7 @@ require'packer'.startup {function (use)
               },
             },
           },
+          filetypes = { 'bib', 'gitcommit', 'markdown', 'org', 'plaintex', 'rst', 'rnoweb', 'tex', 'pandoc', 'quarto', 'rmd', 'typst' },
           get_language_id = function(bufnr, filetype)
               buf_name = vim.api.nvim_buf_get_name(bufnr)
               if buf_name:match(".sty$") then
@@ -374,6 +378,7 @@ require'packer'.startup {function (use)
                     rst = 'restructuredtext',
                     tex = 'latex',
                     xhtml = 'xhtml',
+                    typst = 'text',
                 }
               local language_id = language_id_mapping[filetype]
                 if language_id then
@@ -468,7 +473,21 @@ require'packer'.startup {function (use)
       -----}}}
 
       -----typst {{{
-      lspconfig.typst_lsp.setup(my_config())
+      lspconfig.typst_lsp.setup(
+        my_config({
+          settings = {
+            exportPdf = "never",
+          },
+        })
+      )
+      -----}}}
+
+      -----hoon {{{
+      lspconfig.hoon_ls.setup(
+        my_config({
+          cmd = {"hoon-language-server", "-p", "8080"},
+        })
+      )
       -----}}}
 
       ----}}}
@@ -817,15 +836,25 @@ require'packer'.startup {function (use)
           local targetWidth = width - sufWidth
           local curWidth = 0
           table.insert(virtText, {filling, 'Folded'})
+          -- do not add virtual text to title sections
+          local captures = vim.treesitter.get_captures_at_pos(ctx.bufnr, lnum-1, 0)
+          for _, c in pairs(captures) do
+              if c.capture:match("^text.title") then
+                return virtText
+              end
+          end
           local endVirtText = ctx.get_fold_virt_text(endLnum)
-          for _, chunk in ipairs(endVirtText) do
+          for i, chunk in ipairs(endVirtText) do
             local chunkText = chunk[1]
+            local hlGroup = chunk[2]
+            if i == 1 then
+                chunkText = chunkText:gsub("^%s+", "")
+            end
             local chunkWidth = vim.fn.strdisplaywidth(chunkText)
             if targetWidth > curWidth + chunkWidth then
-              table.insert(virtText, chunk)
+              table.insert(virtText, {chunkText, hlGroup})
             else
               chunkText = truncate(chunkText, targetWidth - curWidth)
-              local hlGroup = chunk[2]
               table.insert(virtText, {chunkText, hlGroup})
               chunkWidth = vim.fn.strdisplaywidth(chunkText)
               -- str width returned from truncate() may less than 2nd argument, need padding
@@ -917,7 +946,7 @@ require'packer'.startup {function (use)
       vim.cmd [[
         augroup pencil
           autocmd!
-          autocmd FileType tex,org call pencil#init({'wrap': 'soft'})
+          autocmd FileType tex,org,typst call pencil#init({'wrap': 'soft'})
         augroup END
       ]]
     end
@@ -995,10 +1024,26 @@ require'packer'.startup {function (use)
     }
   ---}}}
 
-  ---org-goodies{{{
+  ---org-goodies {{{
   use {
     here 'org-goodies.nvim',
     requires = { 'nvim-orgmode/orgmode' },
+  }
+  ---}}}
+
+  ---norg {{{
+  use {
+    'nvim-neorg/neorg',
+    config = function()
+      require'neorg'.setup({
+        ["core.defaults"] = {},
+        ["core.dirman"] = {
+            config = {
+              home = "~/norg"
+            }
+        }
+      })
+    end
   }
   ---}}}
 
@@ -1085,7 +1130,8 @@ require'packer'.startup {function (use)
           end,
         },
         mapping = {
-          ["<Tab>"] = cmp.mapping(function(fallback)
+          ["<Tab>"] = cmp.mapping(
+            function(fallback)
               if cmp.visible() and has_words_before() then
                 cmp.select_next_item({ behavior = cmp.SelectBehavior })
               else
@@ -1094,7 +1140,8 @@ require'packer'.startup {function (use)
             end,
             { "i", "s" }
           ),
-          ["<S-Tab>"] = cmp.mapping(function()
+          ["<S-Tab>"] = cmp.mapping(
+            function()
               if cmp.visible() then
                 cmp.select_prev_item({ behavior = cmp.SelectBehavior })
               end
@@ -1103,8 +1150,26 @@ require'packer'.startup {function (use)
           ),
           ["<CR>"] = cmp.mapping.confirm { select = true },
           ["<C-Space>"] = cmp.mapping.complete(),
-          ["<Right>"] = cmp.mapping(function() cmp.confirm { select = true } end, { "i", "s" }),
-          ["<Left>"] = cmp.mapping(function() cmp.abort()  end, { "i", "s" })
+          ["<Right>"] = cmp.mapping(
+            function(fallback)
+              if cmp.visible() and has_words_before() then
+                cmp.abort()
+              else
+                fallback()
+              end
+            end,
+            { "i", "s" }
+          ),
+          ["<Left>"] = cmp.mapping(
+            function(fallback)
+              if cmp.visible() and has_words_before() then
+                cmp.abort()
+              else
+                fallback()
+              end
+            end,
+            { "i", "s" }
+          ),
         },
         sources = cmp.config.sources({
           { name = 'vsnip' },
@@ -1119,6 +1184,12 @@ require'packer'.startup {function (use)
           { name = 'copilot' },
         }),
       }
+
+      -- use arrows to navigate through snippet fields
+      vim.api.nvim_set_keymap('i', '<Right>', 'vsnip#jumpable(1) ? "<Plug>(vsnip-jump-next)" : ""', { expr = true, noremap = true })
+      vim.api.nvim_set_keymap('s', '<Right>', 'vsnip#jumpable(1) ? "<Plug>(vsnip-jump-next)" : ""', { expr = true, noremap = true })
+      vim.api.nvim_set_keymap('i', '<Left>', 'vsnip#jumpable(-1) ? "<Plug>(vsnip-jump-prev)" : ""', { expr = true, noremap = true })
+      vim.api.nvim_set_keymap('s', '<Left>', 'vsnip#jumpable(-1) ? "<Plug>(vsnip-jump-prev)" : ""', { expr = true, noremap = true })
 
       function cmp_sources_list(arglead, _, _)
         -- the API does not allow for the retrieval of sources from cmdline
@@ -1272,6 +1343,12 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
+  ---diffchar {{{
+  use {
+    'rickhowe/diffchar.vim'
+  }
+  ---}}}
+
   ---aerial {{{
   -- code outline window
   use {
@@ -1361,6 +1438,11 @@ require'packer'.startup {function (use)
       vim.api.nvim_create_user_command(
         'PasteJPG',
         function(opts) require'clipboard-image.paste'.paste_img({img_format='jpg'}) end,
+        { nargs = 0 }
+      )
+      vim.api.nvim_create_user_command(
+        'PasteWEBP',
+        function(opts) require'clipboard-image.paste'.paste_img({img_format='webp'}) end,
         { nargs = 0 }
       )
 
@@ -1539,7 +1621,7 @@ _G.load_config = function()
   ---mouse {{{
   if vim.fn.has('mouse') then
     vim.opt.mouse= 'nv'
-    -- do not scroll in insert
+    -- do not move cursor with arrows in insert
     vim.api.nvim_set_keymap('i', '<Up>', '<nop>', { noremap = true })
     vim.api.nvim_set_keymap('i', '<Down>', '<nop>', { noremap = true })
     vim.api.nvim_set_keymap('i', '<Right>', '<nop>', { noremap = true })
@@ -2011,6 +2093,17 @@ _G.load_config = function()
   })
   ---}}}
 
+  ---hoon {{{
+  vim.api.nvim_create_autocmd({'FileType'}, {
+      pattern = {"hoon"},
+      callback = function()
+        vim.opt_local.commentstring = ":: %s"
+        vim.api.nvim_set_keymap('i', '<tab>', '  ', { noremap = true })
+      end
+      -- command = [[setlocal commentstring=\:\:\ %s]]
+  })
+  ---}}}
+
   --- org {{{
   function org_section_level()
     node = vim.treesitter.get_node()
@@ -2069,22 +2162,26 @@ _G.load_config = function()
   vim.api.nvim_create_autocmd('FileType', {
       pattern = {"org"},
       callback = function()
-        vim.keymap.set('n', '>>', function()
-          set_org_indent()
-          vim.cmd[[>]]
-          unset_org_indent()
-        end, { noremap = true, buffer = 0 })
-        vim.keymap.set('n', '<<', function()
-          set_org_indent()
-          vim.cmd[[<]]
-          unset_org_indent()
-        end, { noremap = true, buffer = 0 })
-        vim.keymap.set('v', '>', function()
-          set_org_indent()
-          vim.cmd[[:'<,'>>]]
-          unset_org_indent()
-        end, { noremap = true, buffer = 0 })
-        vim.fn.shiftwidth = function()
+        -- vim.keymap.set('n', '>>', function()
+        --   set_org_indent()
+        --   vim.cmd[[>]]
+        --   unset_org_indent()
+        -- end, { noremap = true, buffer = 0 })
+        -- vim.keymap.set('n', '<<', function()
+        --   set_org_indent()
+        --   vim.cmd[[<]]
+        --   unset_org_indent()
+        -- end, { noremap = true, buffer = 0 })
+        -- vim.keymap.set('v', '>', function()
+        --   set_org_indent()
+        --   vim.cmd[[:'<,'>>]]
+        --   unset_org_indent()
+        -- end, { noremap = true, buffer = 0 })
+        vim.fn["shiftwidth"] = function()
+          local ok, ft = pcall(vim.api.nvim_get_option_value, "filetype", {})
+          if (not ok) or (ft ~= "org") then
+            return vim.o.shiftwidth
+          end
           level, block = org_section_level()
           return level
         end
