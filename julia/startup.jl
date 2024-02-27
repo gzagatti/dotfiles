@@ -34,7 +34,7 @@ atreplinit() do repl
     end
 
     # activate project at current path or at repo root
-    default_proj = "v1.9"
+    default_proj = "v1.10"
     project_file = dirname(abspath(Base.active_project()))
     # avoid over-writting --proj flag
     # loops through all possible default projects and activate project only if
