@@ -1,6 +1,5 @@
-[user]
-        name = gzagatti
-        email = gzagatti@users.noreply.github.com
+[include]
+        path = .gitcredentials
 [core]
         autocrlf = input
         attributesfile = \"$HOME/.gitattributes\"
