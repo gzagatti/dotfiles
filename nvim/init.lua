@@ -265,7 +265,8 @@ local function load_plugins()
 
           -- on_attach {{{
           local on_attach = function(client, bufnr)
-            print("Attaching ", client.name, " LSP in buffer ", bufnr, "...")
+            -- local msg = "Attaching " .. client.name .. " LSP in buffer " .. bufnr .. "."
+            -- vim.api.nvim_echo({{msg, None}}, true, {})
 
             -- diagnostic {{{
 
@@ -1635,6 +1636,7 @@ _G.load_config = function()
   ---basic {{{
   vim.opt.encoding = "utf-8"
   vim.opt.lazyredraw = true
+  vim.opt.more = false
   ---}}}
 
   ---colors {{{
