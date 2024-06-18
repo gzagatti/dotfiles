@@ -7,14 +7,17 @@
 */
 
 :root {
-  --tab-min-height: 0 !important;
-  --toolbar-non-lwt-bgcolor: #2F2F2F !important;
-  --button-bgcolor: #4C4C4C !important;
-  --toolbar-field-focus-background-color: #4C4C4C !important;
+  --tab-min-height: 5 !important;
+  --button-bgcolor: #CFCFD8 !important;
+  --toolbar-field-background-color: #DADAE2 !important;
+  --toolbar-field-focus-background-color: #CFCFD8 !important;
+  --sidebar-background-color: #F0F0F4 !important;
+  /* this setting should affect TreeStyleTab background */
+  --toolbar-non-lwt-bgcolor: #F0F0F4 !important;
 }
 
 input.findbar-textbox {
-  background-color: #4C4C4C !important;
+  background-color: #CFCFD8 !important;
 }
 
 #tabs-newtab-button {
@@ -34,11 +37,11 @@ input.findbar-textbox {
 }
 
 #titlebar-spacer {
-  background-color: var(--chrome-secondary-background-color);
+  background-color: #0000ff !important;
 }
 
 .titlebar-buttonbox-container {
-  margin-top: 4px;
+  margin-top: 9px;
   margin-right: 5px;
 }
 
@@ -56,20 +59,20 @@ input.findbar-textbox {
   margin-bottom: 5px;
 }
 
-#nav-bar:hover #urlbar[breakout] {
+#nav-bar:hover #urlbar:is([focused="true"], [open]) {
   /* #nav-bar min-height changes the default; we must restore it once hovered */
+  /* inspired from below sources, but since at least Firefox v126 selectors were modified to the ones used here */
   /* see: https://github.com/WesleyBranton/Remove-Firefox-Megabar/blob/master/remove_megabar.css */
   /* see: https://www.userchrome.org/megabar-styling-firefox-address-bar.html */
-  --urlbar-toolbar-height: 40px !important;
+  --urlbar-container-height: 40px !important;
 }
 
 #sidebar-box {
   font-size: 12px !important;
-  background-color: #4C4C4C !important;
 }
 
 #sidebar-box #sidebar-header {
-  font-size: 12px !important;
+  font-size: 10px !important;
 }
 
 #sidebar-splitter {
