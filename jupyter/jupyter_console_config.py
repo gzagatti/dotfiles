@@ -1,4 +1,5 @@
 # Configuration file for jupyter-console.
+# see: https://jupyter-console.readthedocs.io/en/latest/config_options.html
 
 #------------------------------------------------------------------------------
 # JupyterConsoleApp configuration
@@ -14,9 +15,6 @@ c.JupyterConsoleApp.kernel_name = 'python3'
 #------------------------------------------------------------------------------
 # ZMQTerminalIPythonApp configuration
 #------------------------------------------------------------------------------
-
-# Configure matplotlib for interactive use with the default matplotlib backend.
-c.InteractiveShellApp.matplotlib = 'tk'
 
 # Set to confirm when you try to exit IPython with an EOF (Control-D in Unix,
 #  Control-Z/Enter in Windows). By typing 'exit' or 'quit', you can force a
@@ -37,6 +35,9 @@ c.TerminalInteractiveShell.autoindent = False
 
 # Shortcut style to use at the prompt. 'vi' or 'emacs'.
 c.ZMQTerminalInteractiveShell.editing_mode = 'vi'
+
+# Add shortcuts from 'emacs' insert mode to 'vi' insert mode.
+c.ZMQInteractiveShell.emacs_bindings_in_vi_insert_mode = True
 
 # Whether to include output from clients other than this one sharing the same
 # kernel.
