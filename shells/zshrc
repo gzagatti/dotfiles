@@ -1,8 +1,14 @@
 # Avoid breaking non-interactive logins (eg sftp)
 if [[ $- == *i* ]]; then
 
-  # Determine OS type {{{
+  # Environment variables {{{
   export OSTYPE="$(uname -s)"
+  if [[ "$OSTYPE" = darwin* ]]; then
+    # macOS's $HOST changes with dhcp, etc. Use ComputerName if possible.
+    SHORT_HOST=$(scutil --get ComputerName 2>/dev/null) || SHORT_HOST="${HOST/.*/}"
+  else
+    SHORT_HOST="${HOST/.*/}"
+  fi
   # }}}
 
   # Shell options {{{
@@ -157,7 +163,7 @@ if [[ $- == *i* ]]; then
       alias emacs="TERM=xterm-emacs emacs -nw"
     fi
   fi
-  ##}}}
+  ## }}}
 
   ## nnn {{{
   # https://github.com/jarun/nnn
@@ -182,7 +188,75 @@ if [[ $- == *i* ]]; then
       fi
     }
   fi
-  ##}}}
+  ## }}}
+
+  ## ssh {{{
+  # see: https://rabexc.org/posts/pitfalls-of-ssh-agents
+  # see: https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/ssh-agent/ssh-agent.plugin.zsh
+  ssh_env_cache="$HOME/.ssh/environment-$SHORT_HOST"
+
+  function _start_agent() {
+    # Check if ssh-agent is already running
+    if [[ -f "$ssh_env_cache" ]]; then
+      . "$ssh_env_cache" > /dev/null
+
+      # Test if $SSH_AUTH_SOCK is visible
+      zmodload zsh/net/socket
+      if [[ -S "$SSH_AUTH_SOCK" ]] && zsocket "$SSH_AUTH_SOCK" 2>/dev/null; then
+        return 0
+      fi
+    fi
+
+    if [[ ! -d "$HOME/.ssh" ]]; then
+      echo "ssh-agent requires ~/.ssh directory"
+      return 1
+    fi
+
+    # start ssh-agent and setup environment
+    ssh-agent -s -t 4h | sed '/^echo/d' >! "$ssh_env_cache"
+    chmod 600 "$ssh_env_cache"
+    . "$ssh_env_cache" > /dev/null
+  }
+
+  _start_agent
+
+  # adapted from ChatGPT
+  _ssh_add_identities() {
+
+    # variables managed by _arguments
+    local curcontext="$curcontext" state line
+    # declares an associative array which can be used to store and retrieve options and their values
+    typeset -A opt_args
+
+    local identities
+
+    # gather identities from .pub files, stripping the .pub extension
+    identities=($(
+      ls -1 $HOME/.ssh/*.pub 2>/dev/null | sed 's/\.pub$//'
+    ))
+
+    # zsh builtin for parsing and handling CLI arguments within completion functions
+    # -C option specifies that the completion should handle arguments starting
+    # with anything (`*`), with the last argument being an identity
+    # (`::identity`) which is directed to the `identity` state for further completion
+    _arguments -C '*::ssh_identity:->ssh_identity' && return
+
+    case $state in
+      ssh_identity)
+        if (( ${#identities[@]} )); then
+          _describe -t identities 'SSH identities' identities && return
+        fi
+        _files
+        ;;
+    esac
+  }
+
+  compdef _ssh_add_identities ssh-add
+  autoload -Uz _ssh_add_identities
+
+  unset ssh_env_cache
+  unfunction _start_agent
+  ## }}}
 
   # }}}
 
