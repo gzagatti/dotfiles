@@ -23,7 +23,7 @@ local function load_plugins()
       use({ "wbthomason/packer.nvim" })
       ---}}}
 
-      ---mason {{{
+        ---mason {{{
       -- package manager for external dependencies
       use({
         "williamboman/mason.nvim",
@@ -41,6 +41,7 @@ local function load_plugins()
               "clangd",
               "bashls",
               "lua_ls",
+              "pyright",
               "solargraph",
               "stylelint_lsp",
               "typst_lsp",
@@ -48,8 +49,7 @@ local function load_plugins()
             },
           })
           require("mason-null-ls").setup({
-            -- after installing mypy, install types `mypy --install.types`
-            ensure_installed = { "codespell", "mypy", "stylua" },
+            ensure_installed = { "codespell", "stylua" },
           })
         end,
       })
@@ -309,7 +309,7 @@ local function load_plugins()
                 }))
               end
 
-              _diagnostic_picker("Diagnostics - Buffer", ":error:", 0, "<right>")
+              _diagnostic_picker("Diagnostics - Buffer", "", 0, "<right>")
             end
 
             vim.keymap.set("n", "[telescope]l", function()
@@ -429,8 +429,37 @@ local function load_plugins()
               null_ls.builtins.diagnostics.codespell,
               null_ls.builtins.formatting.stylua,
               null_ls.builtins.diagnostics.mypy.with({
+                condition = function()
+                  return vim.system({ "mypy", "--version" }):wait().code == 0
+                end,
                 -- see issue https://github.com/nvimtools/none-ls.nvim/issues/97
                 args = function(params)
+                  -- local pyenv_version = vim.system({ "pyenv", "version-name" }):wait()
+                  -- local pyenv_exists = pyenv_version.code == 0
+                  -- local pyenv_version = pyenv_version.stdout:gsub("%s+", "")
+                  -- local python_path
+                  -- if pyenv_exists and pyenv_version ~= "system" then
+                  --   python_path = vim.system({ "pyenv", "which", "python" }):wait().stdout:gsub("%s+", "")
+                  -- else
+                  --   local mason_mypy_python = vim.fn.stdpath("data") .. "/mason/packages/mypy/venv/bin/python"
+                  --   if vim.fn.filereadable(mason_mypy_python) == 1 and vim.fn.executable(mason_mypy_python) then
+                  --     python_path = mason_mypy_python
+                  --   else
+                  --     if pyenv_exists then
+                  --       python_path = vim.system({ "pyenv", "which", "python3" }):wait().stdout:gsub("%s+", "")
+                  --     else
+                  --       python_path = vim.system({ "which", "python" }):wait().stdout
+                  --     end
+                  --   end
+                  -- end
+                  -- vim.api.nvim_echo({{python_path}}, true, {})
+                  -- vim.system({
+                  --   "mypy",
+                  --   "--install-types",
+                  --   "--non-interactive",
+                  --   "--python-executable",
+                  --   python_path,
+                  -- }):wait()
                   return {
                     "--hide-error-codes",
                     "--hide-error-context",
@@ -439,7 +468,10 @@ local function load_plugins()
                     "--show-column-numbers",
                     "--show-error-codes",
                     "--no-error-summary",
+                    "--ignore-missing-imports",
                     "--no-pretty",
+                    -- "--python-executable",
+                    -- python_path,
                     params.temp_path,
                   }
                 end,
@@ -468,23 +500,24 @@ local function load_plugins()
           -----python {{{
           -- see https://github.com/astral-sh/ruff/blob/main/crates/ruff_server/docs/setup/NEOVIM.md
           lspconfig.ruff.setup(my_config({ autostart = true }))
-          -- lspconfig.pyright.setup(
-          --   my_config({
-          --       settings = {
-          --         pyright = {
-          --           -- using Ruff's import organizer
-          --           disableOrganizeImports = true,
-          --         },
-          --         python = {
-          --           venvPath = vim.env.HOME .. '/.pyenv/versions',
-          --           analysis = {
-          --             -- ignore all files for analysis to exclusively use Ruff for linting
-          --             ignore = { '*'},
-          --           },
-          --         }
-          --       }
-          --   })
-          -- )
+          lspconfig.pyright.setup(
+            my_config({
+                autostart = true,
+                settings = {
+                  pyright = {
+                    -- using Ruff's import organizer
+                    disableOrganizeImports = true,
+                  },
+                  python = {
+                    venvPath = vim.env.HOME .. '/.pyenv/versions',
+                    analysis = {
+                      -- ignore all files for analysis to exclusively use Ruff for linting
+                      ignore = { '*'},
+                    },
+                  }
+                }
+            })
+          )
           -----}}}
 
           -----json {{{
@@ -1595,7 +1628,7 @@ local function load_plugins()
       ---theme: dracula {{{
       use({
         "dracula/vim",
-        after = { "mini.indentscope" },
+        -- after = { "mini.indentscope" },
         config = function()
           if (vim.env.THEME == "dracula") or (vim.env.THEME == nil) then
             vim.cmd([[
@@ -1645,7 +1678,7 @@ _G.load_config = function()
   ---}}}
 
   ---leaders {{{
-  vim.g.mapleader = "ö"
+  vim.g.mapleader = ";"
   vim.g.maplocalleader = "#"
   --}}}
 
