@@ -430,7 +430,7 @@ local function load_plugins()
               null_ls.builtins.formatting.stylua,
               null_ls.builtins.diagnostics.mypy.with({
                 condition = function()
-                  return vim.system({ "mypy", "--version" }):wait().code == 0
+                  return vim.fn.executable("mypy") == 1 and vim.system({ "mypy", "--version" }):wait().code == 0
                 end,
                 -- see issue https://github.com/nvimtools/none-ls.nvim/issues/97
                 args = function(params)
