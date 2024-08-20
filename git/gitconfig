@@ -17,8 +17,6 @@
         s = status -s
         lg = log --oneline --decorate --all --graph
         wdiff = diff --word-diff
-[github]
-        user = gzagatti
 [hub]
         protocol = https
 [filter "lfs"]
