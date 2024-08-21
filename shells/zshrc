@@ -203,6 +203,11 @@ if [[ $- == *i* ]]; then
   ssh_env_cache="$HOME/.ssh/environment-$SHORT_HOST"
 
   function _start_agent() {
+    # Do not start ssh agent in remote ssh session
+    if [[ -n "$SSH_CONNECTION" ]]; then
+      return 0
+    fi
+
     # Check if ssh-agent is already running
     if [[ -f "$ssh_env_cache" ]]; then
       . "$ssh_env_cache" > /dev/null
