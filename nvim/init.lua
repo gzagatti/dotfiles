@@ -23,11 +23,15 @@ local function load_plugins()
       use({ "wbthomason/packer.nvim" })
       ---}}}
 
-        ---mason {{{
+      ---mason {{{
       -- package manager for external dependencies
       use({
         "williamboman/mason.nvim",
-        requires = { "williamboman/mason-lspconfig.nvim", "jay-babu/mason-null-ls.nvim" },
+        requires = {
+          "mason-org/mason-registry",
+          "williamboman/mason-lspconfig.nvim",
+          "jay-babu/mason-null-ls.nvim"
+        },
         config = function()
           require("mason").setup()
           require("mason-lspconfig").setup({
@@ -676,6 +680,8 @@ local function load_plugins()
           require("nvim-treesitter.install").update()
           require("nvim-treesitter.configs").setup({
             ensure_installed = "all", -- one of 'all', 'maintained', or a list of languages
+            sync_install = false,
+            auto_install = false,
             ignore_install = {},      -- List of parsers to ignore installing
             highlight = {
               enable = true,
@@ -778,6 +784,7 @@ local function load_plugins()
       ---}}}
 
       ---nnn {{{
+      if vim.fn.executable("nnn") then
       use({
         "gzagatti/nnn.nvim",
         branch = "tweaks",
@@ -850,6 +857,7 @@ local function load_plugins()
       ]])
         end,
       })
+      end
       ---}}}
 
       ---kommentary {{{
