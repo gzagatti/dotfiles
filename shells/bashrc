@@ -3,6 +3,16 @@ if [[ $- == *i* ]]; then
 
   # Determine OS type {{{
   export OSTYPE="$(uname -s)"
+  if [[ "$OSTYPE" = Darwin* ]]; then
+    # macOS's $HOST changes with dhcp, etc. Use ComputerName if possible.
+    SHORT_HOST=$(scutil --get ComputerName 2>/dev/null) || SHORT_HOST="${HOSTNAME/.*/}"
+  else
+    # https://superuser.com/questions/1749781/how-can-i-check-if-the-environment-is-wsl-from-a-shell-script
+    if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
+      export OSTYPE="Wsl"
+    fi
+    SHORT_HOST="${HOSTNAME/.*/}"
+  fi
   # }}}
 
   # History {{{
@@ -15,30 +25,9 @@ if [[ $- == *i* ]]; then
   # }}}
 
   # Theme {{{
-  # https://gist.github.com/thomd/7667642
-  # https://geoff.greer.fm/lscolors/
-  function get_termbg() {
-    if [[ "$TERM" == "xterm-"* ]] || [[ "$TERM" == "alacritty" ]]; then
-      oldstty=$(stty -g)
-      stty raw -echo min 0 time 1
-      # terminal escape sequence to get the terminal background color
-      # only works in xterms
-      # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Operating-System-Commands
-      printf '\033]11;?\033\\'
-      sleep 0.00000001
-      read -r termbg
-      stty $oldstty
-      local termbg=$(echo $termbg | sed 's/.*\(rgb:[0-9a-f/]*\).*/\1/')
-      if [[ $termbg == "rgb:f8f8/fbfb/f8f8" ]]; then
-        export THEME="leuven"
-      elif [[ $termbg == "rgb:2828/2a2a/3636" ]]; then
-        export THEME="dracula"
-      fi
-    fi
-  }
-  if [[ -z "$THEME" ]]; then export THEME=""; fi
-  get_termbg
+  if [[ -z "$THEME" ]]; then export THEME="leuven"; fi
   export CLICOLOR=1
+  # https://geoff.greer.fm/lscolors/
   export LSCOLORS="excxhxDxbxhxhxhxhxfxfx"
   export LS_COLORS=""
   if [[ $THEME == "leuven" ]]; then
@@ -274,7 +263,7 @@ if [[ $- == *i* ]]; then
   alias ls='ls --color=auto'
   ## }}}
 
-  if [[ $OSTYPE == Linux* ]]; then
+  if [[ "$OSTYPE" = Linux* ]]; then
 
     ## More convenient xdg-open {{{
     function open { setsid xdg-open "$1" &>/dev/null; } 
@@ -282,7 +271,7 @@ if [[ $- == *i* ]]; then
 
   fi
 
-  if  [[ $OSTYPE == Darwin* ]]; then
+  if  [[ "$OSTYPE" = Darwin* ]]; then
 
     ## turn on/off hidden files visibility {{{
     alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
@@ -295,6 +284,20 @@ if [[ $- == *i* ]]; then
 
     ## firefox: open document in Firefox {{{
     firefox() { if [ $1 ]; then open -a Firefox $1; else open -a "Firefox"; fi }
+    ## }}}
+
+  fi
+
+  if [[ "$OSTYPE" = Wsl* ]]; then
+
+    ## More convenient explorer.exe {{{
+    function open {
+      win_path=$(wslpath -w "$1")
+      explorer.exe "$win_path" &>/dev/null
+      (( $? > 1 )) && return 1 || return 0
+    }
+
+    export WINHOME=$(wslpath -u $(cmd.exe /c "echo %USERPROFILE%" 2>&1 | tail -n 1 | tr -d '\r'))
     ## }}}
 
   fi
