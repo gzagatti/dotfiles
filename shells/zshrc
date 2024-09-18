@@ -3,10 +3,14 @@ if [[ $- == *i* ]]; then
 
   # Environment variables {{{
   export OSTYPE="$(uname -s)"
-  if [[ "$OSTYPE" = darwin* ]]; then
+  if [[ "$OSTYPE" = Darwin* ]]; then
     # macOS's $HOST changes with dhcp, etc. Use ComputerName if possible.
     SHORT_HOST=$(scutil --get ComputerName 2>/dev/null) || SHORT_HOST="${HOST/.*/}"
   else
+    # https://superuser.com/questions/1749781/how-can-i-check-if-the-environment-is-wsl-from-a-shell-script
+    if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
+      export OSTYPE="Wsl"
+    fi
     SHORT_HOST="${HOST/.*/}"
   fi
   # }}}
@@ -425,7 +429,7 @@ if [[ $- == *i* ]]; then
   function = { echo "$@" | bc -l }
   ## }}}
 
-  if [[ $OSTYPE == Linux* ]]; then
+  if [[ "$OSTYPE" == Linux* ]]; then
 
     ## More convenient xdg-open {{{
     function open { setsid xdg-open "$1" &>/dev/null }
@@ -433,7 +437,7 @@ if [[ $- == *i* ]]; then
 
   fi
 
-  if  [[ $OSTYPE == Darwin* ]]; then
+  if  [[ "$OSTYPE" == Darwin* ]]; then
 
     ## turn on/off hidden files visibility {{{
     alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
@@ -450,6 +454,19 @@ if [[ $- == *i* ]]; then
 
   fi
 
+  if [[ "$OSTYPE" = Wsl* ]]; then
+
+    ## More convenient explorer.exe {{{
+    function open {
+      win_path=$(wslpath -w "$1")
+      explorer.exe "$win_path" &>/dev/null
+      (( $? > 1 )) && return 1 || return 0
+    }
+
+    export WINHOME=$(wslpath -u $(cmd.exe /c "echo %USERPROFILE%" 2>&1 | tail -n 1 | tr -d '\r'))
+    ## }}}
+
+  fi
   # }}}
 
   # PATH {{{
