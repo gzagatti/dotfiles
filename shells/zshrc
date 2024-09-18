@@ -39,10 +39,9 @@ if [[ $- == *i* ]]; then
   # }}}
 
   # Theme {{{
-  # https://gist.github.com/thomd/7667642
-  # https://geoff.greer.fm/lscolors/
   if [[ -z "$THEME" ]]; then export THEME="leuven"; fi
   export CLICOLOR=1
+  # https://geoff.greer.fm/lscolors/
   export LSCOLORS="excxhxDxbxhxhxhxhxfxfx"
   export LS_COLORS="leuven"
   if [[ $THEME == "leuven" ]]; then
@@ -315,26 +314,6 @@ if [[ $- == *i* ]]; then
   # https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples#L51
   precmd_ps1() {
 
-    # if [[ "$TERM" == "xterm-"* ]] || [[ "$TERM" == "alacritty" ]] || [[ "$TERM" == "wezterm" ]]; then
-    #   # https://gist.github.com/blueyed/c8470c2aad3381c33ea3
-    #   # https://stackoverflow.com/questions/2507337/how-to-determine-a-terminals-background-color
-    #   local oldstty=$(stty -g)
-    #   stty raw -echo min 0 time 1
-    #   # terminal escape sequence to get the terminal background color
-    #   # only works in xterms
-    #   # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Operating-System-Commands
-    #   printf '\033]11;?\033\\'
-    #   sleep 0.00000001
-    #   read -r termbg
-    #   stty $oldstty
-    #   local termbg=$(echo $termbg | sed 's/.*\(rgb:[0-9a-f/]*\).*/\1/')
-    #   if [[ $termbg == "rgb:f8f8/fbfb/f8f8" ]]; then
-    #     THEME="leuven"
-    #   elif [[ $termbg == "rgb:2828/2a2a/3636" ]]; then
-    #     THEME="dracula"
-    #   fi
-    # fi
-
     # https://zsh.sourceforge.io/Doc/Release/Prompt-Expansion.html#Visual-effects
     color=""
     if [[ $THEME == "leuven" ]]; then
@@ -429,7 +408,7 @@ if [[ $- == *i* ]]; then
   function = { echo "$@" | bc -l }
   ## }}}
 
-  if [[ "$OSTYPE" == Linux* ]]; then
+  if [[ "$OSTYPE" = Linux* ]]; then
 
     ## More convenient xdg-open {{{
     function open { setsid xdg-open "$1" &>/dev/null }
@@ -437,7 +416,7 @@ if [[ $- == *i* ]]; then
 
   fi
 
-  if  [[ "$OSTYPE" == Darwin* ]]; then
+  if  [[ "$OSTYPE" = Darwin* ]]; then
 
     ## turn on/off hidden files visibility {{{
     alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
