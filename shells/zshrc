@@ -445,6 +445,43 @@ if [[ $- == *i* ]]; then
     export WINHOME=$(wslpath -u $(cmd.exe /c "echo %USERPROFILE%" 2>&1 | tail -n 1 | tr -d '\r'))
     ## }}}
 
+    ## More robust terminal image
+    if [ "$TERM_PROGRAM" = "WezTerm" ]; then
+      if hash timg 2>/dev/null; then
+        function timgcat() {
+          if [ $# -eq 0 ]; then
+            echo "No argument provided. Exiting ..."
+            exit 1
+          fi
+
+          timg -p i "$@"
+
+          printf "\rPress 'q' to exit."
+
+          # Save current terminal settings
+          old_stty_cfg=$(stty -g)
+
+          # Ensure terminal settings are restored on exit
+          trap 'stty "$old_stty_cfg"' EXIT
+
+          # Set terminal to raw mode
+          stty raw -echo
+
+          while : ; do
+              key=$(dd bs=1 count=1 2>/dev/null)
+              if [ "$key" = 'q' ]; then
+                  break
+              fi
+          done
+          stty "$old_stty_cfg"
+          printf "\n\033[2K\r"
+        }
+        if hash nnn 2>/dev/null; then
+          export NNN_PREVIEWIMGPROG="timg -p i"
+        fi
+      fi
+    fi
+
   fi
   # }}}
 
