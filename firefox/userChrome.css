@@ -6,33 +6,34 @@
   access developer tools; sandwich > More tools > Browser toolbox
 */
 
-:root {
+/* :root {
   --tab-min-height: 5 !important;
   --button-bgcolor: #CFCFD8 !important;
   --toolbar-field-background-color: #DADAE2 !important;
   --toolbar-field-focus-background-color: #CFCFD8 !important;
   --sidebar-background-color: #F0F0F4 !important;
-  /* this setting should affect TreeStyleTab background */
+  /* this setting should affect TreeStyleTab background
   --toolbar-non-lwt-bgcolor: #F0F0F4 !important;
 }
 
 input.findbar-textbox {
   background-color: #CFCFD8 !important;
-}
+} */
 
-#tabs-newtab-button {
+#new-tab-button {
   visibility: collapse !important;
 }
 
 #alltabs-button {
-  visibility: collapse;
+  visibility: collapse !important;
 }
 
 .tabbrowser-tab {
-  visibility: collapse;
+  /* visibility: collapse; */
+  font-size: 12px !important;
 }
 
-#titlebar {
+/* #titlebar {
   margin-bottom: -3px;
 }
 
@@ -43,7 +44,7 @@ input.findbar-textbox {
 .titlebar-buttonbox-container {
   margin-top: 9px;
   margin-right: 5px;
-}
+} */
 
 #nav-bar {
   box-shadow: none !important;
@@ -75,6 +76,6 @@ input.findbar-textbox {
   font-size: 10px !important;
 }
 
-#sidebar-splitter {
+/* #sidebar-splitter {
   width: 0px !important;
-}
+} */
