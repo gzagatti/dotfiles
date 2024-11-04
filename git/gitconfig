@@ -5,6 +5,15 @@
         attributesfile = \"$HOME/.gitattributes\"
 [ui]
         color = true
+[color "decorate"]
+        branch = green brightgreen
+        HEAD = red brightred
+        remoteBranch = blue brightblue
+        tag = magenta brightmagenta
+        stash = green
+        grafted = blue
+[log]
+        graphColors=red,green,blue,magenta,cyan
 [push]
         default = simple
 [color]
