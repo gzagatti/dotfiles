@@ -20,6 +20,10 @@ gtk/%:
 	ln -fs $(dotfiles)/$@ $(workspace)/.config/gtk-3.0/$(@F)
 	ln -fs $(dotfiles)/$@ $(workspace)/.config/gtk-4.0/$(@F)
 
+ipython/%:
+	mkdir -p $(workspace)/.ipython/profile_default
+	ln -fs $(dotfiles)/$@ $(workspace)/.ipython/profile_default/$(@F)
+
 julia/%:
 	mkdir -p $(workspace)/.julia/config
 	ln -fs $(dotfiles)/$@ $(workspace)/.julia/config/$(@F)
@@ -34,6 +38,7 @@ nix/%:
 
 # symlinks to ~/
 ctags/%   \
+editorconfig/% \
 git/%     \
 r/%       \
 shells/%  \
@@ -74,9 +79,11 @@ jupyter: $(wildcard jupyter/*)
 alacritty \
 bin       \
 ctags     \
+editorconfig \
 emacs     \
 git       \
 gtk       \
+ipython   \
 julia     \
 kitty     \
 nix       \

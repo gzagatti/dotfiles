@@ -1,14 +1,9 @@
-:root {
-  --tab-highlighted-glow: #E920A3;
-  --tab-surface-active: #5F5F5F;
+:root.sidebar tab-item {
+  font-size: 10px !important;
 }
 
-:root #background {
-  background: #4C4C4C;
-}
-
-tab-item {
-  font-size: 12px !important;
+:root.sidebar #background {
+  background-color: #F0F0F4 /* or something background color */;
 }
 
 tab-item tab-favicon {
@@ -16,13 +11,5 @@ tab-item tab-favicon {
 }
 
 ::part(extra-contents-by-tst-active-tab-in-collapsed-tree_piro_sakura_ne_jp) {
-   background-color: #4C4C4C;
+   background-color: #F0F0F4;
 }
-
-/*tab-item:not(.loading):not(.active):not(.pinned) tab-favicon {
-  filter: drop-shadow(0px 0px 2.5px white);
-}
-
-tab-item:not(.some-descendants-highlighted) ::part(extra-contents-by-tst-active-tab-in-collapsed-tree_piro_sakura_ne_jp favicon) {
-  filter: drop-shadow(0px 0px 5px white);
-}*/

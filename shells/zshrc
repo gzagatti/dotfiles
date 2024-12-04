@@ -1,8 +1,18 @@
 # Avoid breaking non-interactive logins (eg sftp)
 if [[ $- == *i* ]]; then
 
-  # Determine OS type {{{
+  # Environment variables {{{
   export OSTYPE="$(uname -s)"
+  if [[ "$OSTYPE" = Darwin* ]]; then
+    # macOS's $HOST changes with dhcp, etc. Use ComputerName if possible.
+    SHORT_HOST=$(scutil --get ComputerName 2>/dev/null) || SHORT_HOST="${HOST/.*/}"
+  else
+    # https://superuser.com/questions/1749781/how-can-i-check-if-the-environment-is-wsl-from-a-shell-script
+    if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
+      export OSTYPE="Wsl"
+    fi
+    SHORT_HOST="${HOST/.*/}"
+  fi
   # }}}
 
   # Shell options {{{
@@ -29,12 +39,11 @@ if [[ $- == *i* ]]; then
   # }}}
 
   # Theme {{{
-  # https://gist.github.com/thomd/7667642
-  # https://geoff.greer.fm/lscolors/
-  if [[ -z "$THEME" ]]; then export THEME=""; fi
+  if [[ -z "$THEME" ]]; then export THEME="leuven"; fi
   export CLICOLOR=1
+  # https://geoff.greer.fm/lscolors/
   export LSCOLORS="excxhxDxbxhxhxhxhxfxfx"
-  export LS_COLORS=""
+  export LS_COLORS="leuven"
   if [[ $THEME == "leuven" ]]; then
     LS_COLORS="no=00:fi=00:di=34:ln=32;102:so=30;107:pi=33;103:ex=31:cd=33;107:bd=33;107:su=31;101:sg=34;106:tw=35;101:ow=34;101"
   elif [[ $THEME == "dracula" ]]; then
@@ -134,10 +143,17 @@ if [[ $- == *i* ]]; then
   ## pyenv {{{
   if hash pyenv 2>/dev/null; then
     export PYENV_ROOT="$(pyenv root)"
+  elif [ -d "$HOME/.pyenv" ]; then
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+  fi
+  if hash pyenv 2>/dev/null; then
     eval "$(pyenv init --path)"
     eval "$(pyenv init -)"
     eval "$(pyenv virtualenv-init -)"
-    alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew'
+    if hash brew 2>/dev/null; then
+      alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew'
+    fi
   fi
   ## }}}
 
@@ -157,7 +173,7 @@ if [[ $- == *i* ]]; then
       alias emacs="TERM=xterm-emacs emacs -nw"
     fi
   fi
-  ##}}}
+  ## }}}
 
   ## nnn {{{
   # https://github.com/jarun/nnn
@@ -182,7 +198,80 @@ if [[ $- == *i* ]]; then
       fi
     }
   fi
-  ##}}}
+  ## }}}
+
+  ## ssh {{{
+  # see: https://rabexc.org/posts/pitfalls-of-ssh-agents
+  # see: https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/ssh-agent/ssh-agent.plugin.zsh
+  ssh_env_cache="$HOME/.ssh/environment-$SHORT_HOST"
+
+  function _start_agent() {
+    # Do not start ssh agent in remote ssh session
+    if [[ -n "$SSH_CONNECTION" ]]; then
+      return 0
+    fi
+
+    # Check if ssh-agent is already running
+    if [[ -f "$ssh_env_cache" ]]; then
+      . "$ssh_env_cache" > /dev/null
+
+      # Test if $SSH_AUTH_SOCK is visible
+      zmodload zsh/net/socket
+      if [[ -S "$SSH_AUTH_SOCK" ]] && zsocket "$SSH_AUTH_SOCK" 2>/dev/null; then
+        return 0
+      fi
+    fi
+
+    if [[ ! -d "$HOME/.ssh" ]]; then
+      echo "ssh-agent requires ~/.ssh directory"
+      return 1
+    fi
+
+    # start ssh-agent and setup environment
+    ssh-agent -s -t 8h | sed '/^echo/d' >! "$ssh_env_cache"
+    chmod 600 "$ssh_env_cache"
+    . "$ssh_env_cache" > /dev/null
+  }
+
+  _start_agent
+
+  # adapted from ChatGPT
+  _ssh_add_identities() {
+
+    # variables managed by _arguments
+    local curcontext="$curcontext" state line
+    # declares an associative array which can be used to store and retrieve options and their values
+    typeset -A opt_args
+
+    local identities
+
+    # gather identities from .pub files, stripping the .pub extension
+    identities=($(
+      ls -1 $HOME/.ssh/*.pub 2>/dev/null | sed 's/\.pub$//'
+    ))
+
+    # zsh builtin for parsing and handling CLI arguments within completion functions
+    # -C option specifies that the completion should handle arguments starting
+    # with anything (`*`), with the last argument being an identity
+    # (`::identity`) which is directed to the `identity` state for further completion
+    _arguments -C '*::ssh_identity:->ssh_identity' && return
+
+    case $state in
+      ssh_identity)
+        if (( ${#identities[@]} )); then
+          _describe -t identities 'SSH identities' identities && return
+        fi
+        _files
+        ;;
+    esac
+  }
+
+  compdef _ssh_add_identities ssh-add
+  autoload -Uz _ssh_add_identities
+
+  unset ssh_env_cache
+  unfunction _start_agent
+  ## }}}
 
   # }}}
 
@@ -224,26 +313,6 @@ if [[ $- == *i* ]]; then
   # inspired by
   # https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples#L51
   precmd_ps1() {
-
-    if [[ "$TERM" == "xterm-"* ]] || [[ "$TERM" == "alacritty" ]]; then
-      # https://gist.github.com/blueyed/c8470c2aad3381c33ea3
-      # https://stackoverflow.com/questions/2507337/how-to-determine-a-terminals-background-color
-      local oldstty=$(stty -g)
-      stty raw -echo min 0 time 1
-      # terminal escape sequence to get the terminal background color
-      # only works in xterms
-      # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Operating-System-Commands
-      printf '\033]11;?\033\\'
-      sleep 0.00000001
-      read -r termbg
-      stty $oldstty
-      local termbg=$(echo $termbg | sed 's/.*\(rgb:[0-9a-f/]*\).*/\1/')
-      if [[ $termbg == "rgb:f8f8/fbfb/f8f8" ]]; then
-        THEME="leuven"
-      elif [[ $termbg == "rgb:2828/2a2a/3636" ]]; then
-        THEME="dracula"
-      fi
-    fi
 
     # https://zsh.sourceforge.io/Doc/Release/Prompt-Expansion.html#Visual-effects
     color=""
@@ -339,7 +408,7 @@ if [[ $- == *i* ]]; then
   function = { echo "$@" | bc -l }
   ## }}}
 
-  if [[ $OSTYPE == Linux* ]]; then
+  if [[ "$OSTYPE" = Linux* ]]; then
 
     ## More convenient xdg-open {{{
     function open { setsid xdg-open "$1" &>/dev/null }
@@ -347,7 +416,7 @@ if [[ $- == *i* ]]; then
 
   fi
 
-  if  [[ $OSTYPE == Darwin* ]]; then
+  if  [[ "$OSTYPE" = Darwin* ]]; then
 
     ## turn on/off hidden files visibility {{{
     alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
@@ -364,6 +433,56 @@ if [[ $- == *i* ]]; then
 
   fi
 
+  if [[ "$OSTYPE" = Wsl* ]]; then
+
+    ## More convenient explorer.exe {{{
+    function open {
+      win_path=$(wslpath -w "$1")
+      explorer.exe "$win_path" &>/dev/null
+      (( $? > 1 )) && return 1 || return 0
+    }
+
+    export WINHOME=$(wslpath -u $(cmd.exe /c "echo %USERPROFILE%" 2>&1 | tail -n 1 | tr -d '\r'))
+    ## }}}
+
+    ## More robust terminal image
+    if [ "$TERM_PROGRAM" = "WezTerm" ]; then
+      if hash timg 2>/dev/null; then
+        function timgcat() {
+          if [ $# -eq 0 ]; then
+            echo "No argument provided. Exiting ..."
+            exit 1
+          fi
+
+          timg -p i "$@"
+
+          printf "\rPress 'q' to exit."
+
+          # Save current terminal settings
+          old_stty_cfg=$(stty -g)
+
+          # Ensure terminal settings are restored on exit
+          trap 'stty "$old_stty_cfg"' EXIT
+
+          # Set terminal to raw mode
+          stty raw -echo
+
+          while : ; do
+              key=$(dd bs=1 count=1 2>/dev/null)
+              if [ "$key" = 'q' ]; then
+                  break
+              fi
+          done
+          stty "$old_stty_cfg"
+          printf "\n\033[2K\r"
+        }
+        if hash nnn 2>/dev/null; then
+          export NNN_PREVIEWIMGPROG="timg -p i"
+        fi
+      fi
+    fi
+
+  fi
   # }}}
 
   # PATH {{{
