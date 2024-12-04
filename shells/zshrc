@@ -18,6 +18,8 @@ if [[ $- == *i* ]]; then
   # Shell options {{{
   setopt NO_CASE_GLOB
   setopt AUTO_CD
+  autoload -Uz bashcompinit && bashcompinit
+  autoload -Uz compinit && compinit
   autoload edit-command-line
   zle -N edit-command-line
   bindkey -v
@@ -385,12 +387,6 @@ if [[ $- == *i* ]]; then
   # partial completion
   zstyle ':completion:*' list-suffixes
   zstyle ':completion:*' expand prefix suffix
-
-  # load bashcompinit for some old bash completions
-  autoload bashcompinit && bashcompinit
-
-  autoload -Uz compinit
-  compinit -u
   # }}}
 
   # Alias and functions {{{
