@@ -6,42 +6,46 @@
   access developer tools; sandwich > More tools > Browser toolbox
 */
 
-:root {
-  --tab-min-height: 0 !important;
-  --toolbar-non-lwt-bgcolor: #2F2F2F !important;
-  --button-bgcolor: #4C4C4C !important;
-  --toolbar-field-focus-background-color: #4C4C4C !important;
+/* :root {
+  --tab-min-height: 5 !important;
+  --button-bgcolor: #CFCFD8 !important;
+  --toolbar-field-focus-background-color: #DADAE2 !important;
+  --toolbar-field-background-color: #CFCFD8 !important;
+  --sidebar-background-color: #F0F0F0 !important;
+  --toolbar-non-lwt-bgcolor: #F0F0F4 !important;
 }
 
 input.findbar-textbox {
-  background-color: #4C4C4C !important;
-}
+  background-color: #CFCFD8 !important;
+} */
 
-#tabs-newtab-button {
+#new-tab-button {
   visibility: collapse !important;
 }
 
 #alltabs-button {
-  visibility: collapse;
+  visibility: collapse !important;
 }
 
 .tabbrowser-tab {
-  visibility: collapse;
+  /* visibility: collapse; */
+  font-size: 14px !important;
 }
 
-#titlebar {
+/* #titlebar {
   margin-bottom: -3px;
 }
 
 #titlebar-spacer {
-  background-color: var(--chrome-secondary-background-color);
+  background-color: #FF00FF !important;
 }
 
 .titlebar-buttonbox-container {
-  margin-top: 4px;
+  margin-top: 9px;
   margin-right: 5px;
-}
+} */
 
+/*
 #nav-bar {
   box-shadow: none !important;
   opacity: 0;
@@ -55,23 +59,32 @@ input.findbar-textbox {
   min-height: 40px !important;
   margin-bottom: 5px;
 }
+*/
 
-#nav-bar:hover #urlbar[breakout] {
-  /* #nav-bar min-height changes the default; we must restore it once hovered */
-  /* see: https://github.com/WesleyBranton/Remove-Firefox-Megabar/blob/master/remove_megabar.css */
-  /* see: https://www.userchrome.org/megabar-styling-firefox-address-bar.html */
+/* #nav-bar {
+  opacity: 1;
+  height: initial;
+  min-height: 40px !important;
+  margin-bottom: 5px;
+  background: #F0F0F4 !important;
+  font-size: 18px !important;
+} */
+
+/* #nav-bar:hover #urlbar[breakout] {
+  /* #nav-bar min-height changes the default; we must restore it once hovered
+  /* see: https://github.com/WesleyBranton/Remove-Firefox-Megabar/blob/master/remove_megabar.css
+  /* see: https://www.userchrome.org/megabar-styling-firefox-address-bar.html
   --urlbar-toolbar-height: 40px !important;
-}
+} */
 
 #sidebar-box {
-  font-size: 12px !important;
-  background-color: #4C4C4C !important;
+  font-size: 14px !important;
 }
 
 #sidebar-box #sidebar-header {
-  font-size: 12px !important;
+  font-size: 16px !important;
 }
 
-#sidebar-splitter {
+/* #sidebar-splitter {
   width: 0px !important;
-}
+} */
