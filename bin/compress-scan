@@ -10,6 +10,10 @@ display_help() {
     echo "Examples:"
     echo "  $0 input.pdf output.pdf"
     echo "  $0 input.pdf output.pdf -resize 25% -quality 60"
+    echo
+    echo "  # A4 portrait"
+    echo "  $0 input.pdf output.pdf -resize 794x1123\> -density 96"
+    echo "  $0 input.pdf output.pdf -resize 595x842\> -density 72"
 }
 
 # check if no arguments or -h/--help is provided
@@ -42,11 +46,11 @@ pdfimages -j "$input_pdf" "$temp_dir/extracted_image"
 
 # process images with the remaining arguments
 for img in "$temp_dir"/extracted_image*.jpg; do
-    convert "$@" "$img" "${img%.jpg}_small.jpg"
+    magick "$img" "$@" "${img%.jpg}_small.jpg"
 done
 
 # convert images back to PDF
-convert $(ls "$temp_dir"/*small.jpg | sort -V) "$output_pdf"
+magick $(ls "$temp_dir"/*small.jpg | sort -V) "$output_pdf"
 
 # clean up
 rm -r "$temp_dir"
