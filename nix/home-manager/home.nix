@@ -58,6 +58,7 @@ in
 
     # terminal
     (nixGuiWrap { pkg = pkgs.kitty; })
+    (nixGuiWrap { pkg = pkgs.wezterm; })
 
     # browser
     (nixGuiWrap { pkg = pkgs.firefox; })
@@ -67,6 +68,7 @@ in
 
     # text editor
     pkgs.emacs
+    pkgs.neovim
 
     # doc
     (nixGuiWrap { pkg = pkgs.libreoffice; })
@@ -84,13 +86,15 @@ in
     pkgs.typst
 
     # reference
-    (nixGuiWrap { pkg = pkgs.calibre; light = true; })
+    # (nixGuiWrap { pkg = pkgs.calibre; light = true; })
     (nixGuiWrap { pkg = pkgs.font-manager; })
     (nixGuiWrap { pkg = pkgs.zotero; light = true; })
+    (nixGuiWrap { pkg = pkgs.anki; })
 
     # graphics
     (nixGuiWrap { pkg = pkgs.gimp; })
-    (nixGuiWrap { pkg = pkgs.gpick; })
+    # TODO does not work in Wayland
+    # (nixGuiWrap { pkg = pkgs.gpick; })
     (nixGuiWrap { pkg = pkgs.loupe; })
     (nixGuiWrap { pkg = pkgs.gthumb; })
     pkgs.fontforge
@@ -137,12 +141,12 @@ in
     pkgs.socat
     pkgs.jless
     pkgs.valgrind
+    pkgs.tree-sitter
+    pkgs.nss
     # does not load apps correctly, mixes nix and system paths
     # pkgs.rofi
 
     # compilers
-    pkgs.cmake
-    pkgs.maven
     pkgs.ninja
 
     # langs
@@ -158,6 +162,8 @@ in
     pkgs.go
     pkgs.sassc
     pkgs.jdk21
+    pkgs.php
+    pkgs.pyenv
 
     # misc
     pkgs.gsettings-desktop-schemas
@@ -168,8 +174,13 @@ in
     pkgs.fava
     pkgs.beancount
     pkgs.gnuplot
+    # on-screen permanent keyboard; help with XPS faulty keyboard
+    # pkgs.onboard
     # TODO plugins do not work with installed version
     # (nixGuiWrap pkgs.qgis)
+    # iOS backup
+    pkgs.libimobiledevice
+    pkgs.libplist
 
     # TODO doesn't work
     # layers and layers of wrapping; Zoom does not seem to play nicely with nixGL
@@ -178,6 +189,10 @@ in
     # doesn't install tlmgr
     # pkgs.texlive.combined.scheme-small
     # pkgs.biber
+
+    # backup
+    pkgs.borgmatic
+    pkgs.borgbackup
 
   ];
 
@@ -188,5 +203,27 @@ in
   xdg.enable = true;
   xdg.mime.enable = true;
   targets.genericLinux.enable = true;
+  fonts.fontconfig.enable = true;
+
+  # TODO: clean up
+  # modified /etc/environment which was taking precedence; then added ~/.config/environment.d/90-profile.conf
+  # need to remove /etc/environment.bkp if that's the case
+  # link desktop files
+  # https://github.com/nix-community/home-manager/issues/1439
+  # home.activation = {
+  #   linkDesktopApplications = {
+  #     after = [ "writeBoundary" "createXdgUserDirectories" ];
+  #     before = [ ];
+  #     data = ''
+  #       rm -rf ${config.home.homeDirectory}/.local/share/applications/home-manager
+  #       rm -rf ${config.home.homeDirectory}/.icons/nix-icons
+  #       mkdir -p ${config.home.homeDirectory}/.icons
+  #       ln -sf ${config.home.homeDirectory}/.nix-profile/share/icons ${config.home.homeDirectory}/.icons/nix-icons
+  #       /usr/bin/desktop-file-install ${config.home.homeDirectory}/.nix-profile/share/applications/*.desktop --dir ${config.xdg.dataHome}/applications/home-manager
+  #       sed -i 's/Exec=/Exec=\/home\/${config.home.username}\/.nix-profile\/bin\//g' ${config.xdg.dataHome}/applications/home-manager/*.desktop
+  #       /usr/bin/update-desktop-database ${config.xdg.dataHome}/applications
+  #     '';
+  #   };
+  # };
 
 }
