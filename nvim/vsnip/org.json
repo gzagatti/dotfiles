@@ -32,5 +32,12 @@
       "\\( $1 \\)$0"
     ],
     "description": "inline math template."
+  },
+  "frac": {
+    "prefix": ["frac"],
+    "body": [
+      "\\frac{$1}{$2}$0"
+    ],
+    "description": "fraction."
   }
 }
