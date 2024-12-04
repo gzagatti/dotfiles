@@ -875,16 +875,6 @@ local function load_plugins()
       ---}}}
 
       ---navigators {{{
-      -- kitty-navigator
-      use({
-        'knubie/vim-kitty-navigator',
-        config = function()
-          if vim.env.TERM ~= 'xterm-kitty' then
-            vim.g['kitty_navigator_no_mappings'] = 1
-          end
-        end,
-      })
-
       -- tmux-navigator
       -- seamless navigation between tmux panes and vim splits
       use({
@@ -1212,13 +1202,6 @@ local function load_plugins()
       })
       ---}}}
 
-      ---org-goodies {{{
-      use({
-        here 'org-goodies.nvim',
-        requires = { 'nvim-orgmode/orgmode' },
-      })
-      ---}}}
-
       ---tablemode {{{
       --- instant table creation
       use({
@@ -1462,7 +1445,7 @@ local function load_plugins()
       -- REPL/debug console for nvim
       use({
         -- 'bfredl/nvim-luadev',
-        here("nvim-luadev"),
+        "gzagatti/nvim-luadev",
         config = function()
           vim.api.nvim_set_keymap("n", "<leader>ee", "<plug>(Luadev-RunLine):Luadev<cr>", { silent = true })
           vim.api.nvim_set_keymap("v", "<leader>ee", "<plug>(Luadev-Run):Luadev<cr>", { silent = true })
@@ -1513,7 +1496,7 @@ local function load_plugins()
       ---clipboard image {{{
       -- paste image from clipboard
       use({
-        here("clipboard-image.nvim"),
+        "gzagatti/clipboard-image.nvim",
         config = function()
           local function uuid_name()
             local img_dir = vim.fn.expand("%:p:h") .. "/assets"
@@ -1570,23 +1553,6 @@ local function load_plugins()
           end, { nargs = 0 })
         end,
       })
-      --}}}
-
-      ---nabla {{{
-      -- equation rendering
-      -- TODO support LaTex equations
-      -- TODO support visual selection
-      -- use {
-      --   'jbyuki/nabla.nvim',
-      --   config = function()
-      --     vim.api.nvim_set_keymap('n', '<leader>gE', "<cmd>lua require'nabla'.popup()<cr>", { noremap=true })
-      --   end,
-      -- }
-      --}}}
-
-      ---beancount {{{
-      -- support for beancount files
-      use({ "nathangrigg/vim-beancount" })
       --}}}
 
       ---drawit {{{
@@ -1683,7 +1649,7 @@ local function load_plugins()
 
       ---theme: leuven {{{
       use({
-        here("vim-leuven-theme"),
+        "gzagatti/vim-leuven-theme",
         after = { "mini.indentscope" },
         config = function()
           if vim.env.THEME == "leuven" then
