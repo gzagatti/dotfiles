@@ -839,7 +839,7 @@ require'packer'.startup {function (use)
           -- do not add virtual text to title sections
           local captures = vim.treesitter.get_captures_at_pos(ctx.bufnr, lnum-1, 0)
           for _, c in pairs(captures) do
-              if c.capture:match("^text.title") then
+              if c.capture:match("^org.headline") then
                 return virtText
               end
           end
@@ -946,7 +946,7 @@ require'packer'.startup {function (use)
       vim.cmd [[
         augroup pencil
           autocmd!
-          autocmd FileType tex,org,typst call pencil#init({'wrap': 'soft'})
+          autocmd FileType tex,org,typst,markdown call pencil#init({'wrap': 'soft'})
         augroup END
       ]]
     end
@@ -1004,7 +1004,7 @@ require'packer'.startup {function (use)
       config = function ()
         require'orgmode'.setup_ts_grammar()
         require'orgmode'.setup {
-          org_indent_mode = 'noindent',
+          org_startup_indented = false,
           mappings = {
             org = {
               org_do_promote = '<h',
@@ -1031,21 +1031,22 @@ require'packer'.startup {function (use)
   }
   ---}}}
 
-  ---norg {{{
-  use {
-    'nvim-neorg/neorg',
-    config = function()
-      require'neorg'.setup({
-        ["core.defaults"] = {},
-        ["core.dirman"] = {
-            config = {
-              home = "~/norg"
-            }
-        }
-      })
-    end
-  }
-  ---}}}
+  -- ---norg {{{
+  -- use {
+  --   'nvim-neorg/neorg',
+  --   requires = { 'nvim-neorg/lua-utils.nvim' },
+  --   config = function()
+  --     require'neorg'.setup({
+  --       ["core.defaults"] = {},
+  --       ["core.dirman"] = {
+  --           config = {
+  --             home = "~/norg"
+  --           }
+  --       }
+  --     })
+  --   end
+  -- }
+  -- ---}}}
 
   ---tablemode {{{
   --- instant table creation
@@ -1285,7 +1286,7 @@ require'packer'.startup {function (use)
   -- run lines/blocs of code (independently of the rest of the file)
   use {
     'michaelb/sniprun',
-    run = "bash ./install.sh 1",
+    run = "sh ./install.sh 1",
     config = function ()
       require'sniprun'.setup {
         repl_enable = {'Python3_jupyter', 'Julia_jupyter'},
@@ -1297,9 +1298,6 @@ require'packer'.startup {function (use)
             interpreter = 'julia',
           },
         },
-        snipruncolors = {
-          SniprunVirtualTextOk = {bg="#66eeff",fg="#000000",ctermbg="61",cterfg="black"},
-        }
       }
     end
   }
