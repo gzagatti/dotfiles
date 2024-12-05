@@ -43,6 +43,7 @@ git/%     \
 r/%       \
 shells/%  \
 vim/%     \
+wezterm/% \
 :
 	ln -fs $(dotfiles)/$@ $(workspace)/.$(@F)
 
@@ -96,4 +97,5 @@ vim       \
 zathura   \
 direnv    \
 sc-im     \
+wezterm   \
 : %: $$(shell find % -type f)

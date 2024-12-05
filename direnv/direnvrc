@@ -11,3 +11,14 @@ layout_pyenv() {
         fi
     fi
 }
+
+layout_uv() {
+  if [[ -d ".venv" ]]; then
+    local VIRTUAL_ENV="$(pwd)/.venv"
+    source "$VIRTUAL_ENV/bin/activate"
+    PATH_add "$VIRTUAL_ENV/bin"
+    export UV_ACTIVE=1
+  else
+    echo -e "\e[38:5:1mUV virtual environment not available.\e[0m"
+  fi
+}
