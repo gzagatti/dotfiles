@@ -3,8 +3,9 @@ local wezterm = require("wezterm")
 local config = wezterm.config_builder()
 
 config.term = "wezterm"
-config.default_domain = "local"
-config.default_prog = { "wsl.exe", "--cd", "~" }
+config.front_end = "WebGpu"
+-- config.default_domain = "local"
+-- config.default_prog = { "wsl.exe", "--cd", "~" }
 -- config.default_domain = "WSL:Ubuntu"
 -- config.default_cwd = wezterm.home_dir
 config.pane_focus_follows_mouse = false
@@ -47,6 +48,13 @@ config.keys = {
 }
 
 -- theme
+-- font
+config.font = wezterm.font({
+  family = "Fira Code",
+  harfbuzz_features = { 'ss08=1', 'onum' },
+})
+config.font_size = 16
+
 -- tab
 config.tab_bar_at_bottom = true
 config.use_fancy_tab_bar = false
