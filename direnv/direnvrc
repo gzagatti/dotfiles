@@ -18,6 +18,9 @@ layout_uv() {
     source "$VIRTUAL_ENV/bin/activate"
     PATH_add "$VIRTUAL_ENV/bin"
     export UV_ACTIVE=1
+    # see https://github.com/astral-sh/uv/issues/6893
+    # see https://github.com/astral-sh/uv/issues/7036
+    export MPLBACKEND=Agg
   else
     echo -e "\e[38:5:1mUV virtual environment not available.\e[0m"
   fi
