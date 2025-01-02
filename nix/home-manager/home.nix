@@ -59,6 +59,7 @@ in
     # terminal
     (nixGuiWrap { pkg = pkgs.kitty; })
     (nixGuiWrap { pkg = pkgs.wezterm; })
+    (nixGuiWrap { pkg = pkgs.alacritty; })
 
     # browser
     (nixGuiWrap { pkg = pkgs.firefox; })
