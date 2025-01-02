@@ -30,7 +30,7 @@ local function load_plugins()
         requires = {
           "mason-org/mason-registry",
           "williamboman/mason-lspconfig.nvim",
-          "jay-babu/mason-null-ls.nvim"
+          "jay-babu/mason-null-ls.nvim",
         },
         config = function()
           require("mason").setup()
@@ -48,8 +48,9 @@ local function load_plugins()
               "pyright",
               "solargraph",
               "stylelint_lsp",
-              "typst_lsp",
+              "tinymist",
               "ruff",
+              "taplo",
             },
           })
           require("mason-null-ls").setup({
@@ -504,24 +505,22 @@ local function load_plugins()
           -----python {{{
           -- see https://github.com/astral-sh/ruff/blob/main/crates/ruff_server/docs/setup/NEOVIM.md
           lspconfig.ruff.setup(my_config({ autostart = true }))
-          lspconfig.pyright.setup(
-            my_config({
-                autostart = true,
-                settings = {
-                  pyright = {
-                    -- using Ruff's import organizer
-                    disableOrganizeImports = true,
-                  },
-                  python = {
-                    venvPath = vim.env.HOME .. '/.pyenv/versions',
-                    analysis = {
-                      -- ignore all files for analysis to exclusively use Ruff for linting
-                      ignore = { '*'},
-                    },
-                  }
-                }
-            })
-          )
+          lspconfig.pyright.setup(my_config({
+            autostart = true,
+            settings = {
+              pyright = {
+                -- using Ruff's import organizer
+                disableOrganizeImports = true,
+              },
+              python = {
+                venvPath = vim.env.HOME .. "/.pyenv/versions",
+                analysis = {
+                  -- ignore all files for analysis to exclusively use Ruff for linting
+                  ignore = { "*" },
+                },
+              },
+            },
+          }))
           -----}}}
 
           -----json {{{
@@ -647,10 +646,16 @@ local function load_plugins()
           -----}}}
 
           -----typst {{{
-          lspconfig.typst_lsp.setup(my_config({
+          lspconfig.tinymist.setup(my_config({
             settings = {
               exportPdf = "never",
             },
+          }))
+          -----}}}
+
+          -----taplo {{{
+          lspconfig.taplo.setup(my_config({
+            autostart = true,
           }))
           -----}}}
 
@@ -682,7 +687,7 @@ local function load_plugins()
             ensure_installed = "all", -- one of 'all', 'maintained', or a list of languages
             sync_install = false,
             auto_install = false,
-            ignore_install = {},      -- List of parsers to ignore installing
+            ignore_install = {}, -- List of parsers to ignore installing
             highlight = {
               enable = true,
               -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
@@ -785,78 +790,78 @@ local function load_plugins()
 
       ---nnn {{{
       if vim.fn.executable("nnn") then
-      use({
-        "gzagatti/nnn.nvim",
-        branch = "tweaks",
-        config = function()
-          local builtin = require("nnn").builtin
-          require("nnn").setup({
-            explorer = {
-              cmd = "nnn",
-            },
-            picker = {
-              cmd = "tmux new-session nnn -Pp",
-            },
-            auto_open = {
-              empty = true,
-            },
-            mappings = {
-              {
-                "<C-x>",
-                function(files)
-                  local nnnwin
-                  for _, win in pairs(vim.api.nvim_tabpage_list_wins(0)) do
-                    if vim.api.nvim_buf_get_option(vim.api.nvim_win_get_buf(win), "filetype") == "nnn" then
-                      nnnwin = win
-                      break
-                    end
-                  end
-                  for i, file in ipairs(files) do
-                    if i == 1 and vim.api.nvim_buf_get_name(0) == "" then
-                      vim.cmd("edit " .. file)
-                    else
-                      vim.cmd("split " .. file)
-                    end
-                  end
-                  vim.api.nvim_set_current_win(nnnwin)
-                end,
+        use({
+          "gzagatti/nnn.nvim",
+          branch = "tweaks",
+          config = function()
+            local builtin = require("nnn").builtin
+            require("nnn").setup({
+              explorer = {
+                cmd = "nnn",
               },
-              {
-                "<C-v>",
-                function(files)
-                  local nnnwin
-                  for _, win in pairs(vim.api.nvim_tabpage_list_wins(0)) do
-                    if vim.api.nvim_buf_get_option(vim.api.nvim_win_get_buf(win), "filetype") == "nnn" then
-                      nnnwin = win
-                      break
-                    end
-                  end
-                  for i, file in ipairs(files) do
-                    if i == 1 and vim.api.nvim_buf_get_name(0) == "" then
-                      vim.cmd("edit " .. file)
-                    else
-                      vim.cmd("vsplit " .. file)
-                    end
-                  end
-                  vim.api.nvim_set_current_win(nnnwin)
-                end,
+              picker = {
+                cmd = "tmux new-session nnn -Pp",
               },
-            },
-            quitcd = "cd",
-          })
-          vim.api.nvim_set_keymap(
-            "",
-            "<f8>",
-            ":execute 'NnnExplorer' (expand('%:p') ==? expand('%:.') ? '%:p:h' : '')<cr>",
-            { noremap = true, silent = true }
-          )
-          vim.cmd([[
+              auto_open = {
+                empty = true,
+              },
+              mappings = {
+                {
+                  "<C-x>",
+                  function(files)
+                    local nnnwin
+                    for _, win in pairs(vim.api.nvim_tabpage_list_wins(0)) do
+                      if vim.api.nvim_buf_get_option(vim.api.nvim_win_get_buf(win), "filetype") == "nnn" then
+                        nnnwin = win
+                        break
+                      end
+                    end
+                    for i, file in ipairs(files) do
+                      if i == 1 and vim.api.nvim_buf_get_name(0) == "" then
+                        vim.cmd("edit " .. file)
+                      else
+                        vim.cmd("split " .. file)
+                      end
+                    end
+                    vim.api.nvim_set_current_win(nnnwin)
+                  end,
+                },
+                {
+                  "<C-v>",
+                  function(files)
+                    local nnnwin
+                    for _, win in pairs(vim.api.nvim_tabpage_list_wins(0)) do
+                      if vim.api.nvim_buf_get_option(vim.api.nvim_win_get_buf(win), "filetype") == "nnn" then
+                        nnnwin = win
+                        break
+                      end
+                    end
+                    for i, file in ipairs(files) do
+                      if i == 1 and vim.api.nvim_buf_get_name(0) == "" then
+                        vim.cmd("edit " .. file)
+                      else
+                        vim.cmd("vsplit " .. file)
+                      end
+                    end
+                    vim.api.nvim_set_current_win(nnnwin)
+                  end,
+                },
+              },
+              quitcd = "cd",
+            })
+            vim.api.nvim_set_keymap(
+              "",
+              "<f8>",
+              ":execute 'NnnExplorer' (expand('%:p') ==? expand('%:.') ? '%:p:h' : '')<cr>",
+              { noremap = true, silent = true }
+            )
+            vim.cmd([[
         augroup nnn
           autocmd FileType * if &ft ==# "nnn" |:tnoremap <buffer> <f8> q| endif
         augroup end
       ]])
-        end,
-      })
+          end,
+        })
       end
       ---}}}
 
@@ -1318,7 +1323,20 @@ local function load_plugins()
                   cmp.select_prev_item({ behavior = cmp.SelectBehavior })
                 end
               end, { "i", "s" }),
-              ["<CR>"] = cmp.mapping.confirm({ select = true }),
+              ["<CR>"] = cmp.mapping(function(fallback)
+                if cmp.visible() then
+                  cmp.confirm({ select = true })
+                elseif vim.bo.filetype == "org" then
+                  -- fix weird interaction between cmp and orgmode
+                  vim.api.nvim_feedkeys(
+                    vim.api.nvim_replace_termcodes("<CR>", true, true, true),
+                    "n",
+                    false
+                  )
+                else
+                  fallback()
+                end
+              end, { "i", "s" }),
               ["<C-Space>"] = cmp.mapping.complete(),
               ["<Right>"] = cmp.mapping(function(fallback)
                 if cmp.visible() and has_words_before() then
@@ -2231,7 +2249,7 @@ _G.load_config = function()
     while node ~= nil do
       node = node:parent()
       if node == nil then
-        return nil, block
+        return 0, block
       elseif node:type() == "section" then
         stars = node:child(0):child(0)
         if stars ~= nil then
@@ -2240,7 +2258,7 @@ _G.load_config = function()
           -- print("Level", level)
           return level, block
         else
-          return nil, block
+          return 0, block
         end
       elseif node:type() == "block" then
         block_node = node:child(1)
