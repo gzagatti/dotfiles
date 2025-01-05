@@ -118,6 +118,13 @@ in
     # media
     (nixGuiWrap { pkg = pkgs.spotify; })
     (nixGuiWrap { pkg = pkgs.vlc; })
+    # the AppArmor profile ./apparmor.d/nix-electron needs to be added to
+    # /etc/apparmor.d/ and be owned by root in order to allow SUID sandbox
+    # helper to run, otherwise electron apps installed with nix cannot be
+    # started
+    # see: https://github.com/NixOS/nixpkgs/issues/121694
+    # see: https://discourse.ubuntu.com/t/ubuntu-24-04-lts-noble-numbat-release-notes/39890#p-99950-unprivileged-user-namespace-restrictions
+    (nixGuiWrap { pkg = pkgs.freetube; })
 
     # messaging
     pkgs.weechat
