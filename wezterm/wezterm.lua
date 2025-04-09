@@ -19,19 +19,23 @@ config.visual_bell = {
 -- keys
 config.keys = {
   {
-      key = "+",
+    key = "+",
     mods = "CTRL|SHIFT",
     action = wezterm.action.Nop,
   },
   {
-      key = "_",
+    key = "_",
     mods = "CTRL|SHIFT",
-    action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
+    action = wezterm.action_callback(function(win, pane)
+      pane:split({ direction = "Bottom" })
+    end),
   },
   {
     key = "|",
     mods = "CTRL|SHIFT",
-    action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+    action = wezterm.action_callback(function(win, pane)
+      pane:split({ direction = "Right" })
+    end),
   },
   {
     key = "r",
@@ -44,6 +48,11 @@ config.keys = {
     action = wezterm.action_callback(function(win, pane)
       local tab, window = pane:move_to_new_window()
     end),
+  },
+  {
+    key = "s",
+    mods = "CTRL|SHIFT",
+    action = wezterm.action.PaneSelect({ show_pane_ids = true }),
   },
 }
 
@@ -179,5 +188,8 @@ config.colors = {
     },
   },
 }
+
+config.pane_select_bg_color = "#ffffff"
+config.pane_select_fg_color = "#000000"
 
 return config
