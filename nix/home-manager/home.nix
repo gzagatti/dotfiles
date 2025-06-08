@@ -73,7 +73,7 @@ in
 
     # doc
     (nixGuiWrap { pkg = pkgs.libreoffice; })
-    (nixGuiWrap { pkg = pkgs.okular; })
+    (nixGuiWrap { pkg = pkgs.libsForQt5.okular; })
     # does not work properly; crashes randomly and does not navigate properly
     # (nixGuiWrap { pkg = pkgs.zathura; })
 
@@ -85,6 +85,7 @@ in
     pkgs.biber
     pkgs.languagetool
     pkgs.typst
+    pkgs.poppler_utils
 
     # reference
     # (nixGuiWrap { pkg = pkgs.calibre; light = true; })
@@ -114,6 +115,7 @@ in
     pkgs.zopfli
     pkgs.trimage
     pkgs.pngcrush
+    pkgs.swayimg
 
     # media
     (nixGuiWrap { pkg = pkgs.spotify; })
@@ -151,6 +153,7 @@ in
     pkgs.valgrind
     pkgs.tree-sitter
     pkgs.nss
+    pkgs.uv
     # does not load apps correctly, mixes nix and system paths
     # pkgs.rofi
 
@@ -171,36 +174,31 @@ in
     pkgs.sassc
     pkgs.jdk21
     pkgs.php
-    pkgs.pyenv
+    # pkgs.pyenv
+    pkgs.maven
 
     # misc
     pkgs.gsettings-desktop-schemas
     pkgs.openfortivpn
-    pkgs.python311Packages.jupyterlab
     pkgs.android-tools
     pkgs.qdl
     pkgs.fava
     pkgs.beancount
+    pkgs.beanquery
+    pkgs.beanprice
     pkgs.gnuplot
     # on-screen permanent keyboard; help with XPS faulty keyboard
     # pkgs.onboard
     # TODO plugins do not work with installed version
     # (nixGuiWrap pkgs.qgis)
-    # iOS backup
-    pkgs.libimobiledevice
-    pkgs.libplist
-
-    # TODO doesn't work
-    # layers and layers of wrapping; Zoom does not seem to play nicely with nixGL
-    # https://github.com/NixOS/nixpkgs/issues/94958
-    # pkgs.zoom-us
-    # doesn't install tlmgr
-    # pkgs.texlive.combined.scheme-small
-    # pkgs.biber
 
     # backup
     pkgs.borgmatic
     pkgs.borgbackup
+
+    # iOS backup
+    pkgs.libimobiledevice
+    pkgs.libplist
 
   ];
 
