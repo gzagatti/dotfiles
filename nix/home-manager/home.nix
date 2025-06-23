@@ -187,6 +187,7 @@ in
     pkgs.beanquery
     pkgs.beanprice
     pkgs.gnuplot
+    pkgs.sc-im
     # on-screen permanent keyboard; help with XPS faulty keyboard
     # pkgs.onboard
     # TODO plugins do not work with installed version
