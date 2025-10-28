@@ -54,7 +54,9 @@ local function load_plugins()
             },
           })
           require("mason-null-ls").setup({
-            ensure_installed = { "codespell", "stylua" },
+            ensure_installed = {
+              "codespell",
+            },
           })
         end,
       })
@@ -257,182 +259,192 @@ local function load_plugins()
           "nvimtools/none-ls.nvim",
         },
         config = function()
-          ----config {{{
           vim.lsp.set_log_level("ERROR")
 
-          local lspconfig = require("lspconfig")
+          local opts = { noremap = true, silent = true }
+
+          ----on_attach {{{
+          vim.api.nvim_create_autocmd("LspAttach", {
+            callback = function(args)
+              local client = vim.lsp.get_client_by_id(args.data.client_id)
+              -- local msg = "Attaching " .. client.name .. " LSP in buffer " .. bufnr .. "."
+              -- vim.api.nvim_echo({{msg, None}}, true, {})
+
+              --diagnostic {{{
+
+              -- diagnostic without clutter
+              vim.diagnostic.config({ virtual_text = false, signs = false })
+
+              telescope_diagnostic_picker = function()
+                local pickers = require("telescope_pickers")
+                local themes = require("telescope.themes")
+                local actions = require("telescope.actions")
+                local action_state = require("telescope.actions.state")
+
+                local _diagnostic_picker = nil
+
+                local function toggle_diagnostic(prompt_bufnr)
+                  local picker = action_state.get_current_picker(prompt_bufnr)
+                  local prompt_text = picker:_get_prompt()
+                  if picker.prompt_title == "Diagnostics - Buffer" then
+                    new_prompt_title = "Diagnostics - Workspace"
+                    new_key = "<left>"
+                    new_picker_bufnr = nil
+                  else
+                    new_prompt_title = "Diagnostics - Buffer"
+                    new_key = "<right>"
+                    new_picker_bufnr = 0
+                  end
+                  pcall(actions.close, prompt_bufnr)
+                  _diagnostic_picker(new_prompt_title, prompt_text, new_picker_bufnr, new_key)
+                end
+
+                _diagnostic_picker = function(prompt_title, default_text, bufnr, key)
+                  pickers.diagnostics(themes.get_ivy({
+                    prompt_title = prompt_title,
+                    default_text = default_text,
+                    bufnr = bufnr,
+                    attach_mappings = function(_, map)
+                      map({ "i", "n" }, key, toggle_diagnostic)
+                      return true
+                    end,
+                  }))
+                end
+
+                _diagnostic_picker("Diagnostics - Buffer", "", 0, "<right>")
+              end
+
+              vim.keymap.set("n", "[telescope]l", function()
+                telescope_diagnostic_picker(nil)
+              end)
+
+              local diagnostic_hidden = {}
+
+              function diagnostic_toggle(toggle_bufnr, revert)
+                toggle_bufnr = vim.api.nvim_buf_get_number(toggle_bufnr)
+                print("Toggle diagnostics", toggle_bufnr, diagnostic_hidden[toggle_bufnr])
+                if
+                    (diagnostic_hidden[toggle_bufnr] and not revert) or (not diagnostic_hidden[toggle_bufnr] and revert)
+                then
+                  vim.diagnostic.enable(toggle_bufnr, nil)
+                  diagnostic_hidden[toggle_bufnr] = false
+                else
+                  vim.diagnostic.disable(toggle_bufnr, nil)
+                  diagnostic_hidden[toggle_bufnr] = true
+                end
+              end
+
+              vim.api.nvim_buf_set_keymap(args.buf, "n", "gl", "<cmd>lua diagnostic_toggle(0)<cr>", opts)
+              vim.api.nvim_buf_set_keymap(args.buf, "n", "gL", "<cmd>lua vim.diagnostic.open_float()<cr>", opts)
+              vim.api.nvim_buf_set_keymap(args.buf, "n", "]d", "<cmd>lua vim.diagnostic.goto_next()<cr>", opts)
+              vim.api.nvim_buf_set_keymap(args.buf, "n", "[d", "<cmd>lua vim.diagnostic.goto_prev()<cr>", opts)
+
+              --}}}
+
+              --formatting {{{
+
+              local function is_null_ls_formatting_enabled(bufnr)
+                local file_type = vim.api.nvim_buf_get_option(bufnr, "filetype")
+                local generators =
+                    require("null-ls.generators").get_available(file_type, require("null-ls.methods").internal
+                      .FORMATTING)
+                return #generators > 0
+              end
+
+              -- see https://github.com/astral-sh/ruff/issues/11634
+              -- see https://github.com/nvimtools/none-ls.nvim/wiki/Avoiding-LSP-formatting-conflicts
+              vim.bo[args.buf].formatexpr = nil
+
+              if client.server_capabilities.documentFormattingProvider then
+                if
+                    (client.name == "null-ls" and is_null_ls_formatting_enabled(args.buf)) or (client.name ~= "null-ls")
+                then
+                  -- vim.bo[bufnr].formatexpr = "v:lua.vim.lsp.formatexpr()"
+                  vim.keymap.set({ "n", "v" }, "<leader>gq", function()
+                    vim.lsp.buf.format({
+                      async = true,
+                    })
+                  end, opts)
+                end
+              end
+
+              --}}}
+
+              --documentation help {{{
+              vim.api.nvim_buf_set_keymap(args.buf, "n", "gD", "<cmd>lua vim.lsp.buf.declaration()<cr>", opts)
+              vim.api.nvim_buf_set_keymap(args.buf, "n", "gd", "<cmd>lua vim.lsp.buf.definition()<cr>", opts)
+              vim.api.nvim_buf_set_keymap(args.buf, "n", "K", "<cmd>lua vim.lsp.buf.signature_help()<cr>", opts)
+
+              -- code action
+              vim.api.nvim_buf_set_keymap(args.buf, "n", "gA", "<cmd>lua vim.lsp.buf.code_action()<cr>", opts)
+
+              -- variable management
+              vim.api.nvim_buf_set_keymap(args.buf, "n", "gr", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
+
+              --}}}
+
+              --server specific {{{
+              if client.name == "texlab" then
+                vim.api.nvim_buf_set_keymap(
+                  args.buf,
+                  "n",
+                  "<c-c><c-c>",
+                  "<cmd>echo 'Building file.'<cr><cmd>TexlabBuild<cr>",
+                  opts
+                )
+                vim.api.nvim_buf_set_keymap(args.buf, "n", "gt", "<cmd>TexlabForward<cr>", opts)
+              end
+
+              if client.name == "ltex" then
+                -- tmpdir = vim.api.nvim_eval[[tempname()]] .. "-ltex"
+                require("ltex_extra").setup({
+                  load_langs = { "en-US" },
+                  init_check = true,
+                  path = ".ltex", -- tmpdir
+                })
+              end
+
+              --}}}
+            end,
+          })
+          ----}}}
 
           local capabilities = vim.lsp.protocol.make_client_capabilities()
           capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
           capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-          local opts = { noremap = true, silent = true }
-
-          -- on_attach {{{
-          local on_attach = function(client, bufnr)
-            -- local msg = "Attaching " .. client.name .. " LSP in buffer " .. bufnr .. "."
-            -- vim.api.nvim_echo({{msg, None}}, true, {})
-
-            -- diagnostic {{{
-
-            -- diagnostic without clutter
-            vim.diagnostic.config({ virtual_text = false, signs = false })
-
-            telescope_diagnostic_picker = function()
-              local pickers = require("telescope_pickers")
-              local themes = require("telescope.themes")
-              local actions = require("telescope.actions")
-              local action_state = require("telescope.actions.state")
-
-              local _diagnostic_picker = nil
-
-              local function toggle_diagnostic(prompt_bufnr)
-                local picker = action_state.get_current_picker(prompt_bufnr)
-                local prompt_text = picker:_get_prompt()
-                if picker.prompt_title == "Diagnostics - Buffer" then
-                  new_prompt_title = "Diagnostics - Workspace"
-                  new_key = "<left>"
-                  new_picker_bufnr = nil
-                else
-                  new_prompt_title = "Diagnostics - Buffer"
-                  new_key = "<right>"
-                  new_picker_bufnr = 0
-                end
-                pcall(actions.close, prompt_bufnr)
-                _diagnostic_picker(new_prompt_title, prompt_text, new_picker_bufnr, new_key)
-              end
-
-              _diagnostic_picker = function(prompt_title, default_text, bufnr, key)
-                pickers.diagnostics(themes.get_ivy({
-                  prompt_title = prompt_title,
-                  default_text = default_text,
-                  bufnr = bufnr,
-                  attach_mappings = function(_, map)
-                    map({ "i", "n" }, key, toggle_diagnostic)
-                    return true
-                  end,
-                }))
-              end
-
-              _diagnostic_picker("Diagnostics - Buffer", "", 0, "<right>")
-            end
-
-            vim.keymap.set("n", "[telescope]l", function()
-              telescope_diagnostic_picker(nil)
-            end)
-
-            local diagnostic_hidden = {}
-
-            function diagnostic_toggle(toggle_bufnr, revert)
-              toggle_bufnr = vim.api.nvim_buf_get_number(toggle_bufnr)
-              print("Toggle diagnostics", toggle_bufnr, diagnostic_hidden[toggle_bufnr])
-              if
-                  (diagnostic_hidden[toggle_bufnr] and not revert)
-                  or (not diagnostic_hidden[toggle_bufnr] and revert)
-              then
-                vim.diagnostic.enable(toggle_bufnr, nil)
-                diagnostic_hidden[toggle_bufnr] = false
-              else
-                vim.diagnostic.disable(toggle_bufnr, nil)
-                diagnostic_hidden[toggle_bufnr] = true
-              end
-            end
-
-            vim.api.nvim_buf_set_keymap(bufnr, "n", "gl", "<cmd>lua diagnostic_toggle(0)<cr>", opts)
-            vim.api.nvim_buf_set_keymap(bufnr, "n", "gL", "<cmd>lua vim.diagnostic.open_float()<cr>", opts)
-            vim.api.nvim_buf_set_keymap(bufnr, "n", "]d", "<cmd>lua vim.diagnostic.goto_next()<cr>", opts)
-            vim.api.nvim_buf_set_keymap(bufnr, "n", "[d", "<cmd>lua vim.diagnostic.goto_prev()<cr>", opts)
-
-            -- }}}
-
-            -- formatting {{{
-
-            local function is_null_ls_formatting_enabled(bufnr)
-              local file_type = vim.api.nvim_buf_get_option(bufnr, "filetype")
-              local generators =
-                  require("null-ls.generators").get_available(file_type, require("null-ls.methods").internal.FORMATTING)
-              return #generators > 0
-            end
-
-            -- see https://github.com/astral-sh/ruff/issues/11634
-            -- see https://github.com/nvimtools/none-ls.nvim/wiki/Avoiding-LSP-formatting-conflicts
-            vim.bo[bufnr].formatexpr = nil
-
-            if client.server_capabilities.documentFormattingProvider then
-              if client.name == "null-ls" and is_null_ls_formatting_enabled(bufnr) or client.name ~= "null-ls" then
-                -- vim.bo[bufnr].formatexpr = "v:lua.vim.lsp.formatexpr()"
-                vim.keymap.set({ "n", "v" }, "<leader>gq", function()
-                  vim.lsp.buf.format({ async = true })
-                end, opts)
-              end
-            end
-
-            -- }}}
-
-            -- documentation help {{{
-            vim.api.nvim_buf_set_keymap(bufnr, "n", "gD", "<cmd>lua vim.lsp.buf.declaration()<cr>", opts)
-            vim.api.nvim_buf_set_keymap(bufnr, "n", "gd", "<cmd>lua vim.lsp.buf.definition()<cr>", opts)
-            vim.api.nvim_buf_set_keymap(bufnr, "n", "K", "<cmd>lua vim.lsp.buf.signature_help()<cr>", opts)
-
-            -- code action
-            vim.api.nvim_buf_set_keymap(bufnr, "n", "gA", "<cmd>lua vim.lsp.buf.code_action()<cr>", opts)
-
-            -- variable management
-            vim.api.nvim_buf_set_keymap(bufnr, "n", "gr", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
-
-            -- }}}
-
-            -- server specific {{{
-            if client.name == "texlab" then
-              vim.api.nvim_buf_set_keymap(
-                bufnr,
-                "n",
-                "<c-c><c-c>",
-                "<cmd>echo 'Building file.'<cr><cmd>TexlabBuild<cr>",
-                opts
-              )
-              vim.api.nvim_buf_set_keymap(bufnr, "n", "gt", "<cmd>TexlabForward<cr>", opts)
-            end
-
-            if client.name == "ltex" then
-              -- tmpdir = vim.api.nvim_eval[[tempname()]] .. "-ltex"
-              require("ltex_extra").setup({
-                load_langs = { "en-US" },
-                init_check = true,
-                path = ".ltex", -- tmpdir
-              })
-            end
-
-            -- }}}
-          end
-          -- }}}
-
-          -- my_config {{{
-          local function my_config(config)
-            config = config or {}
-            local defaults = {
-              on_attach = on_attach,
-              autostart = false,
-              capabilities = capabilities,
-            }
-            return vim.tbl_deep_extend("keep", config, defaults)
-          end
-          -- }}}
-          ----}}}
+          vim.lsp.config("*", {
+            capabilities = capabilities,
+            on_attach = function(client, bufnr)
+              -- if client.name == "lua_ls" then
+              --   vim.api.nvim_echo({ { "HERE lua_ls", None } }, true, {})
+              --   client.server_capabilities.documentFormattingProvider = false
+              --   client.server_capabilities.documentRangeFormattingProvider = false
+              -- end
+            end,
+          })
 
           ----servers {{{
           -- https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
           -- to check status: :lua vim.cmd('split'..vim.lsp.get_log_path())
           -- to check start options: :help lsp.start
 
-          ----null-ls {{{
+          --autostart {{{
+          vim.lsp.enable({
+            "ruff",
+            "pyright",
+            "lua_ls",
+            "taplo",
+          })
+          --}}}
+
+          --null-ls {{{
           local null_ls = require("null-ls")
           null_ls.setup({
             debug = false,
             fallback_severity = vim.diagnostic.severity.WARN,
             sources = {
               null_ls.builtins.diagnostics.codespell,
-              null_ls.builtins.formatting.stylua,
               null_ls.builtins.diagnostics.mypy.with({
                 condition = function()
                   return vim.fn.executable("mypy") == 1 and vim.system({ "mypy", "--version" }):wait().code == 0
@@ -486,27 +498,12 @@ local function load_plugins()
                 end,
               }),
             },
-            on_attach = on_attach,
           })
-          ----}}}
+          --}}}
 
-          -----vim {{{
-          lspconfig.vimls.setup(my_config())
-          -----}}}
-
-          -----html {{{
-          lspconfig.html.setup(my_config())
-          -----}}}
-
-          -----julia {{{
-          lspconfig.julials.setup(my_config())
-          -----}}}
-
-          -----python {{{
+          --python {{{
           -- see https://github.com/astral-sh/ruff/blob/main/crates/ruff_server/docs/setup/NEOVIM.md
-          lspconfig.ruff.setup(my_config({ autostart = true }))
-          lspconfig.pyright.setup(my_config({
-            autostart = true,
+          vim.lsp.config("pyright", {
             settings = {
               pyright = {
                 -- using Ruff's import organizer
@@ -520,15 +517,11 @@ local function load_plugins()
                 },
               },
             },
-          }))
-          -----}}}
+          })
+          --}}}
 
-          -----json {{{
-          lspconfig.jsonls.setup(my_config())
-          -----}}}
-
-          -----text {{{
-          lspconfig.ltex.setup(my_config({
+          --ltex {{{
+          vim.lsp.config("ltex", {
             settings = {
               ltex = {
                 disabledRules = {
@@ -577,12 +570,12 @@ local function load_plugins()
                 end
               end
             end,
-          }))
-          -----}}}
+          })
+          --}}}
 
-          -----latex {{{
+          --latex {{{
           -- https://github.com/wbthomason/dotfiles/blob/linux/neovim/.config/nvim/plugin/lsp.lua#L168
-          lspconfig.texlab.setup(my_config({
+          vim.lsp.config("texlab", {
             settings = {
               texlab = {
                 build = { args = { "-lualatex", "-interaction=nonstopmode", "--shell-escape", "-synctex=1", "%f" } },
@@ -591,20 +584,11 @@ local function load_plugins()
                 forwardSearch = { executable = "zathura", args = { "--synctex-forward=%l:1:%f", "%p" } },
               },
             },
-          }))
-          -----}}}
+          })
+          --}}}
 
-          -----clang {{{
-          lspconfig.clangd.setup(my_config())
-          -----}}}
-
-          -----bash {{{
-          lspconfig.bashls.setup(my_config())
-          -----}}}
-
-          -----lua {{{
-          lspconfig.lua_ls.setup(my_config({
-            autostart = true,
+          --lua {{{
+          vim.lsp.config("lua_ls", {
             settings = {
               Lua = {
                 diagnostics = {
@@ -620,44 +604,38 @@ local function load_plugins()
                 },
               },
             },
-          }))
-          -----}}}
+          })
+          --}}}
 
-          -----ruby {{{
-          lspconfig.solargraph.setup(my_config({
+          --ruby {{{
+          vim.lsp.config("solargraph", {
             settings = {
               solargraph = {
                 diagnostic = true,
                 useBundler = true,
               },
             },
-          }))
-          -----}}}
+          })
+          --}}}
 
-          -----css {{{
-          lspconfig.stylelint_lsp.setup(my_config({
+          --css {{{
+          vim.lsp.config("stylelint_lsp", {
             settings = {
               stylelintplus = {
                 autoFixOnSave = true,
                 autoFixOnFormat = true,
               },
             },
-          }))
-          -----}}}
+          })
+          --}}}
 
-          -----typst {{{
-          lspconfig.tinymist.setup(my_config({
+          --typst {{{
+          vim.lsp.config("tinymist", {
             settings = {
               exportPdf = "never",
             },
-          }))
-          -----}}}
-
-          -----taplo {{{
-          lspconfig.taplo.setup(my_config({
-            autostart = true,
-          }))
-          -----}}}
+          })
+          --}}}
 
           ----}}}
         end,
@@ -1219,37 +1197,37 @@ local function load_plugins()
       use({
         "jmbuhr/otter.nvim",
         requires = { "neovim/nvim-lspconfig" },
-        config = function()
-          function otter_extensions(arglead, _, _)
-            local extensions = require("otter.tools.extensions")
-            local out = {}
-            for k, v in pairs(extensions) do
-              if arglead == nil then
-                table.insert(out, "*.otter." .. v)
-              elseif k:find("^" .. arglead) ~= nil then
-                table.insert(out, k)
-              end
-            end
-            return out
-          end
+        -- config = function()
+        --   function otter_extensions(arglead, _, _)
+        --     local extensions = require("otter.tools.extensions")
+        --     local out = {}
+        --     for k, v in pairs(extensions) do
+        --       if arglead == nil then
+        --         table.insert(out, "*.otter." .. v)
+        --       elseif k:find("^" .. arglead) ~= nil then
+        --         table.insert(out, k)
+        --       end
+        --     end
+        --     return out
+        --   end
 
-          vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
-            group = vim.api.nvim_create_augroup("lspconfig", { clear = false }),
-            pattern = otter_extensions(),
-            callback = function(ev)
-              local buf = ev.buf
-              local ft = vim.api.nvim_get_option_value("filetype", { buf = ev.buf })
-              local matching_configs = require("lspconfig.util").get_config_by_ft(ft)
-              for _, config in ipairs(matching_configs) do
-                print("Activating ", config.name, " LspOtter in buffer ", buf, "...")
-                config.launch(buf)
-              end
-            end,
-          })
-          vim.cmd(
-            [[ command! -nargs=* -complete=customlist,v:lua.otter_extensions LspOtter lua require'otter'.activate({<f-args>}) ]]
-          )
-        end,
+        --   vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+        --     group = vim.api.nvim_create_augroup("lspconfig", { clear = false }),
+        --     pattern = otter_extensions(),
+        --     callback = function(ev)
+        --       local buf = ev.buf
+        --       local ft = vim.api.nvim_get_option_value("filetype", { buf = ev.buf })
+        --       local matching_configs = require("lspconfig.util").get_config_by_ft(ft)
+        --       for _, config in ipairs(matching_configs) do
+        --         print("Activating ", config.name, " LspOtter in buffer ", buf, "...")
+        --         config.launch(buf)
+        --       end
+        --     end,
+        --   })
+        --   vim.cmd(
+        --     [[ command! -nargs=* -complete=customlist,v:lua.otter_extensions LspOtter lua require'otter'.activate({<f-args>}) ]]
+        --   )
+        -- end,
       })
       ---}}}
 
@@ -1311,11 +1289,7 @@ local function load_plugins()
                   cmp.confirm({ select = true })
                 elseif vim.bo.filetype == "org" then
                   -- fix weird interaction between cmp and orgmode
-                  vim.api.nvim_feedkeys(
-                    vim.api.nvim_replace_termcodes("<CR>", true, true, true),
-                    "n",
-                    false
-                  )
+                  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, true, true), "n", false)
                 else
                   fallback()
                 end
@@ -1439,7 +1413,7 @@ local function load_plugins()
       ---}}}
 
       ---sniprun {{{
-      -- run lines/blocs of code (independently of the rest of the file)
+      -- run lines/blocks of code (independently of the rest of the file)
       use({
         "michaelb/sniprun",
         run = "bash ./install.sh 1",
@@ -1583,6 +1557,18 @@ local function load_plugins()
       use({ "jbyuki/venn.nvim" })
       --}}}
 
+      ---markdown-preview {{{
+      use({
+        "iamcco/markdown-preview.nvim",
+        run = "cd app & npm install",
+        setup = function()
+          vim.g.mkdp_filetypes = { "markdown" }
+          vim.g.mkdp_auto_close = 0
+        end,
+        ft = { "markdown" },
+      })
+      ---}}}
+
       -- ---chatgpt {{{
       -- -- ChatGPT
       -- use {
@@ -1619,6 +1605,129 @@ local function load_plugins()
       --   end
       -- }
       -- ---}}}
+
+      ---avante {{{
+      use({
+        "yetone/avante.nvim",
+        requires = {
+          "nvim-lua/plenary.nvim",
+          "MunifTanjim/nui.nvim",
+          "MeanderingProgrammer/render-markdown.nvim",
+          "hrsh7th/nvim-cmp",
+          "echasnovski/mini.icons",
+          "HakonHarnes/img-clip.nvim",
+          "zbirenbaum/copilot.lua",
+          "folke/snacks.nvim",
+        },
+        branch = "main",
+        run = "make",
+        config = function()
+          require("avante").setup({
+            input = {
+              provider = "snacks",
+              provider_opts = {
+                title = "Avante Input",
+                icon = " ",
+                placeholder = "Enter your API key...",
+              },
+            },
+            provider = "dbr-gpt-4o",
+            providers = {
+              ["dbr-gpt-4o"] = {
+                -- input: ?
+                -- output: ?
+                __inherited_from = "openai",
+                endpoint = "https://adb-1164363397801872.12.azuredatabricks.net/serving-endpoints",
+                model = "gpt-4o",
+                api_key_name = "DATABRICKS_TOKEN",
+              },
+              -- ["dbr-gpt-4o-mini"] = {
+              --   -- input: ?
+              --   -- output: ?
+              --   __inherited_from = "openai",
+              --   endpoint = "https://adb-1164363397801872.12.azuredatabricks.net/serving-endpoints",
+              --   model = "gpt_4o_mini",
+              --   api_key_name = "DATABRICKS_TOKEN",
+              -- },
+              -- ["dbr-claude-3-7-sonnet"] = {
+              --   -- input: 42.857 DBUs   / 1M tokens
+              --   -- output: 214.286 DBUs / 1M tokens
+              --   __inherited_from = "claude",
+              --   endpoint = "https://adb-1164363397801872.12.azuredatabricks.net/serving-endpoints",
+              --   model = "databricks-claude-3-7-sonnet",
+              --   api_key_name = "DATABRICKS_TOKEN",
+              -- },
+              -- ["dbr-llama-4"] = {
+              --   -- input: 7.143 DBUs   / 1M tokens
+              --   -- output: 21.429 DBUs / 1M tokens
+              --   __inherited_from = "openai",
+              --   endpoint = "https://adb-1164363397801872.12.azuredatabricks.net/serving-endpoints",
+              --   model = "databricks-llama-4-maverick",
+              --   api_key_name = "DATABRICKS_TOKEN",
+              -- },
+            },
+          })
+        end,
+      })
+      --- }}}
+
+      ---code-companion {{{
+      use({
+        "olimorris/codecompanion.nvim",
+        requires = {
+          "nvim-lua/plenary.nvim",
+          "nvim-treesitter/nvim-treesitter",
+          "echasnovski/mini.diff",
+          "HakonHarnes/img-clip.nvim",
+        },
+        config = function()
+          require("codecompanion").setup({
+            adapters = {
+              http = {
+                databricks = function()
+                  -- TODO: probably create a custom databricks adapter as not all models work with this setup
+                  return require("codecompanion.adapters").extend("openai_compatible", {
+                    url = "https://adb-1164363397801872.12.azuredatabricks.net/serving-endpoints/${model}/invocations",
+                    env = {
+                      api_key = "DATABRICKS_TOKEN",
+                      model = "schema.model.default",
+                    },
+                    schema = {
+                      model = {
+                        default = "gpt-4o",
+                        choices = {
+                          "gpt-4o",
+                          "gpt_4o_mini",
+                        },
+                      },
+                    },
+                    opts = {
+                      log_level = "DEBUG",
+                    },
+                  })
+                end,
+              },
+            },
+            strategies = {
+              chat = {
+                adapter = "databricks",
+              },
+              inline = {
+                adapter = "databricks",
+              },
+              cmd = {
+                adapter = "databricks",
+              },
+            },
+            display = {
+              chat = {
+                show_settings = true,
+              },
+            },
+          })
+        end,
+      })
+      ---}}}
 
       ---mini.indentscope {{{
       -- visualize scope with animated vertical line
