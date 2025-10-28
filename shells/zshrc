@@ -202,6 +202,12 @@ if [[ $- == *i* ]]; then
   fi
   ## }}}
 
+  ## claude {{{
+  if [[ -d "$HOME/.claude/local" ]]; then
+    alias claude="~/.claude/local/claude"
+  fi
+  ## }}}
+
   ## ssh {{{
   # see: https://rabexc.org/posts/pitfalls-of-ssh-agents
   # see: https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/ssh-agent/ssh-agent.plugin.zsh
