@@ -8,8 +8,12 @@ if [[ $- == *i* ]]; then
     SHORT_HOST=$(scutil --get ComputerName 2>/dev/null) || SHORT_HOST="${HOST/.*/}"
   else
     # https://superuser.com/questions/1749781/how-can-i-check-if-the-environment-is-wsl-from-a-shell-script
-    if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
+    if [ -f /proc/sys/fs/binfmt_misc/WSLInterop-late ]; then
       export OSTYPE="Wsl"
+
+      # ca certificates
+      export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+      export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     fi
     SHORT_HOST="${HOST/.*/}"
   fi

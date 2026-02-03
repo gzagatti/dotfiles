@@ -16,7 +16,8 @@ layout_uv() {
   if [[ -d ".venv" ]]; then
     local VIRTUAL_ENV="$(pwd)/.venv"
     source "$VIRTUAL_ENV/bin/activate"
-    PATH_add "$VIRTUAL_ENV/bin"
+    # path is already added by the activate command above
+    # PATH_add "$VIRTUAL_ENV/bin"
     export UV_ACTIVE=1
     # see https://github.com/astral-sh/uv/issues/6893
     # see https://github.com/astral-sh/uv/issues/7036

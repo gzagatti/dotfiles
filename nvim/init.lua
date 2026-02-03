@@ -1586,147 +1586,24 @@ local function load_plugins()
       -- }
       -- ---}}}
 
-      -- ---copilot {{{
-      -- -- Github copilot
-      -- use {
-      --   'github/copilot.vim',
-      --   requires = { 'gzagatti/cmp-copilot' },
-      --   cmd = "Copilot",
-      --   config = function()
-      --     vim.g.copilot_no_tab_map = true
-      --     vim.g.copilot_filetypes = { ['*'] = false }
-      --     vim.api.nvim_set_keymap('n', '<leader>co', ':Copilot panel<cr>', { noremap = true })
-      --     vim.api.nvim_create_autocmd('FileType', {
-      --       pattern = { "copilot.*" },
-      --       callback = function()
-      --           vim.api.nvim_buf_set_keymap(0, 'n', 'q', ':q<cr>', { noremap = true, nowait = true })
-      --       end,
-      --     })
-      --   end
-      -- }
-      -- ---}}}
-
-      ---avante {{{
-      use({
-        "yetone/avante.nvim",
-        requires = {
-          "nvim-lua/plenary.nvim",
-          "MunifTanjim/nui.nvim",
-          "MeanderingProgrammer/render-markdown.nvim",
-          "hrsh7th/nvim-cmp",
-          "echasnovski/mini.icons",
-          "HakonHarnes/img-clip.nvim",
-          "zbirenbaum/copilot.lua",
-          "folke/snacks.nvim",
-        },
-        branch = "main",
-        run = "make",
+      ---copilot {{{
+      -- Github copilot
+      use {
+        'github/copilot.vim',
+        -- requires = { 'gzagatti/cmp-copilot' },
+        cmd = "Copilot",
         config = function()
-          require("avante").setup({
-            input = {
-              provider = "snacks",
-              provider_opts = {
-                title = "Avante Input",
-                icon = " ",
-                placeholder = "Enter your API key...",
-              },
-            },
-            provider = "dbr-gpt-4o",
-            providers = {
-              ["dbr-gpt-4o"] = {
-                -- input: ?
-                -- output: ?
-                __inherited_from = "openai",
-                endpoint = "https://adb-1164363397801872.12.azuredatabricks.net/serving-endpoints",
-                model = "gpt-4o",
-                api_key_name = "DATABRICKS_TOKEN",
-              },
-              -- ["dbr-gpt-4o-mini"] = {
-              --   -- input: ?
-              --   -- output: ?
-              --   __inherited_from = "openai",
-              --   endpoint = "https://adb-1164363397801872.12.azuredatabricks.net/serving-endpoints",
-              --   model = "gpt_4o_mini",
-              --   api_key_name = "DATABRICKS_TOKEN",
-              -- },
-              -- ["dbr-claude-3-7-sonnet"] = {
-              --   -- input: 42.857 DBUs   / 1M tokens
-              --   -- output: 214.286 DBUs / 1M tokens
-              --   __inherited_from = "claude",
-              --   endpoint = "https://adb-1164363397801872.12.azuredatabricks.net/serving-endpoints",
-              --   model = "databricks-claude-3-7-sonnet",
-              --   api_key_name = "DATABRICKS_TOKEN",
-              -- },
-              -- ["dbr-llama-4"] = {
-              --   -- input: 7.143 DBUs   / 1M tokens
-              --   -- output: 21.429 DBUs / 1M tokens
-              --   __inherited_from = "openai",
-              --   endpoint = "https://adb-1164363397801872.12.azuredatabricks.net/serving-endpoints",
-              --   model = "databricks-llama-4-maverick",
-              --   api_key_name = "DATABRICKS_TOKEN",
-              -- },
-            },
-          })
-        end,
-      })
-      --- }}}
-
-      ---code-companion {{{
-      use({
-        "olimorris/codecompanion.nvim",
-        requires = {
-          "nvim-lua/plenary.nvim",
-          "nvim-treesitter/nvim-treesitter",
-          "echasnovski/mini.diff",
-          "HakonHarnes/img-clip.nvim",
-        },
-        config = function()
-          require("codecompanion").setup({
-            adapters = {
-              http = {
-                databricks = function()
-                  -- TODO: probably create a custom databricks adapter as not all models work with this setup
-                  return require("codecompanion.adapters").extend("openai_compatible", {
-                    url = "https://adb-1164363397801872.12.azuredatabricks.net/serving-endpoints/${model}/invocations",
-                    env = {
-                      api_key = "DATABRICKS_TOKEN",
-                      model = "schema.model.default",
-                    },
-                    schema = {
-                      model = {
-                        default = "gpt-4o",
-                        choices = {
-                          "gpt-4o",
-                          "gpt_4o_mini",
-                        },
-                      },
-                    },
-                    opts = {
-                      log_level = "DEBUG",
-                    },
-                  })
-                end,
-              },
-            },
-            strategies = {
-              chat = {
-                adapter = "databricks",
-              },
-              inline = {
-                adapter = "databricks",
-              },
-              cmd = {
-                adapter = "databricks",
-              },
-            },
-            display = {
-              chat = {
-                show_settings = true,
-              },
-            },
-          })
-        end,
-      })
+          -- vim.g.copilot_no_tab_map = true
+          -- vim.g.copilot_filetypes = { ['*'] = false }
+          -- vim.api.nvim_set_keymap('n', '<leader>co', ':Copilot panel<cr>', { noremap = true })
+          -- vim.api.nvim_create_autocmd('FileType', {
+          --   pattern = { "copilot.*" },
+          --   callback = function()
+          --       vim.api.nvim_buf_set_keymap(0, 'n', 'q', ':q<cr>', { noremap = true, nowait = true })
+          --   end,
+          -- })
+        end
+      }
       ---}}}
 
       ---mini.indentscope {{{
@@ -1988,7 +1865,7 @@ _G.load_config = function()
 
   ---.vimrc {{{
   --open .vimrc in a horizantal split$
-  vim.api.nvim_set_keymap("n", "<leader><f4>", ":split $MYVIMRC<cr>", { noremap = true })
+  vim.api.nvim_set_keymap("n", "<leader><f4>", ":split $MYVIMRC | setlocal noreadonly modifiable<cr>", { noremap = true })
   vim.api.nvim_set_keymap("n", "<leader><f5>", ":source $MYVIMRC<cr>:PackerCompile<cr>", { noremap = true })
   ---}}}
 
@@ -2240,6 +2117,26 @@ _G.load_config = function()
         autocmd FileType qf nnoremap <buffer> <silent> <nowait> q :cclose<CR>
   augroup END
   ]])
+  ---}}}
+
+  ---open files outside of repo as readonly {{{
+  vim.api.nvim_create_autocmd({"BufReadPost", "BufNewFile"}, {
+    callback = function()
+      local function _in_repo(path)
+        if not path or path == "" then return true end
+        local real_path = vim.loop.fs_realpath(path) or path
+        local cwd = vim.fn.getcwd()
+        local real_root = vim.loop.fs_realpath(cwd) or cwd
+        if not real_root:match("/$") then real_root = real_root .. "/" end
+        return real_path:sub(1, #real_root) == real_root
+      end
+      local file_path  = vim.fn.expand("%:p")
+      if not _in_repo(file_path) then
+        vim.opt_local.readonly = true
+        vim.opt_local.modifiable = false
+      end
+    end
+  })
   ---}}}
 
   ---rc {{{
