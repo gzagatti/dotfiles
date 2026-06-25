@@ -642,64 +642,94 @@ local function load_plugins()
       })
       ---}}}
 
-      ---treesiter {{{
-      -- an incremental parsing system for programming tools
+      ---treesitter {{{
+      -- parser/query manager for Neovim's native Tree-sitter integration
       use({
         "nvim-treesitter/nvim-treesitter",
-        -- run = ':TSUpdate',
+        branch = "main",
+        run = function()
+          local nvim_treesitter = require("nvim-treesitter")
+          nvim_treesitter.setup({
+            install_dir = vim.fn.stdpath("data") .. "/site",
+          })
+          nvim_treesitter.update({ "stable", "unstable" }):wait(300000)
+        end,
         config = function()
-          -- https://github.com/nvim-treesitter/nvim-treesitter#adding-parsers
-          local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-          parser_config.typst = {
-            install_info = {
-              url = "https://github.com/uben0/tree-sitter-typst", -- local path or git repo
-              files = { "src/parser.c", "src/scanner.c" },        -- note that some parsers also require src/scanner.c or src/scanner.cc
-              -- optional entries:
-              branch = "master",                                  -- default branch in case of git repo if different from master
-              generate_requires_npm = false,                      -- if stand-alone parser without npm dependencies
-              requires_generate_from_grammar = false,             -- if folder contains pre-generated src/parser.c
-            },
-          }
-          require("nvim-treesitter.install").update()
-          require("nvim-treesitter.configs").setup({
-            ensure_installed = "all", -- one of 'all', 'maintained', or a list of languages
-            sync_install = false,
-            auto_install = false,
-            ignore_install = {}, -- List of parsers to ignore installing
-            highlight = {
-              enable = true,
-              -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-              -- Set to `true` if you depend on 'syntax' being enabled.
-              -- This option may slow down the editor, and cause duplicate highlights.
-              -- Instead of true it can also be a list of languages
-              -- additional_vim_regex_highlighting = { 'org' },
-              additional_vim_regex_highlighting = false,
-            },
-            incremental_selection = {
-              enable = true,
-              keymaps = {
-                init_selection = "gnn",
-                node_incremental = "n",
-                scope_incremental = "gs",
-                node_decremental = "N",
-              },
-            },
-            indent = {
-              enable = true,
-              disable = { "julia" },
-            },
-            query_linter = {
-              enable = true,
-              use_virtual_text = true,
-              lint_events = { "BufWrite", "CursorHold" },
-            },
+          require("nvim-treesitter").setup({
+            install_dir = vim.fn.stdpath("data") .. "/site",
+          })
+
+          local function parser_exists(lang)
+            return #vim.api.nvim_get_runtime_file("parser/" .. lang .. ".so", false) > 0
+          end
+
+          local function query_exists(lang, query_name)
+            return #vim.api.nvim_get_runtime_file("queries/" .. lang .. "/" .. query_name .. ".scm", false) > 0
+          end
+
+          local function indent_query_exists(lang)
+            return query_exists(lang, "indents")
+          end
+
+          local available_languages
+          local installing = {}
+
+          local function get_available_languages()
+            if available_languages then
+              return available_languages
+            end
+            local nvim_treesitter = require("nvim-treesitter")
+            available_languages = vim.list_extend(nvim_treesitter.get_available(1), nvim_treesitter.get_available(2))
+            available_languages = vim.list.unique(available_languages)
+            return available_languages
+          end
+
+          local function start_treesitter(bufnr, lang)
+            if not parser_exists(lang) then
+              return false
+            end
+            local ok_add, added = pcall(vim.treesitter.language.add, lang)
+            if not ok_add or not added then
+              return false
+            end
+            return pcall(vim.treesitter.start, bufnr, lang)
+          end
+
+          vim.api.nvim_create_autocmd("FileType", {
+            pattern = "*",
+            callback = function(args)
+              local ft = vim.bo[args.buf].filetype
+              local lang = vim.treesitter.language.get_lang(ft) or ft
+              if not lang or lang == "" then
+                return
+              end
+
+              if parser_exists(lang) and indent_query_exists(lang) then
+                vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+              end
+
+              if
+                  (parser_exists(lang) and query_exists(lang, "highlights"))
+                  or not vim.tbl_contains(get_available_languages(), lang)
+                  or installing[lang]
+              then
+                return
+              end
+
+              installing[lang] = true
+              require("nvim-treesitter").install({ lang }):await(function()
+                installing[lang] = nil
+                if vim.api.nvim_buf_is_valid(args.buf) then
+                  pcall(vim.treesitter.stop, args.buf)
+                  start_treesitter(args.buf, lang)
+                  if indent_query_exists(lang) then
+                    vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+                  end
+                end
+              end)
+            end,
           })
         end,
-      })
-      -- debugging and learning about treesitter
-      use({
-        "nvim-treesitter/playground",
-        requires = { "nvim-treesitter/nvim-treesitter", opt = true },
       })
       ---}}}
 
@@ -978,7 +1008,7 @@ local function load_plugins()
       -- ultra fold
       use({
         "kevinhwang91/nvim-ufo",
-        requires = { "kevinhwang91/promise-async", "nvim-treesitter/nvim-treesitter" },
+        requires = { "kevinhwang91/promise-async" },
         config = function()
           require("ufo").setup({
             open_fold_hl_timeout = 150,
@@ -989,15 +1019,19 @@ local function load_plugins()
             fold_virt_text_handler = function(virtText, lnum, endLnum, width, truncate, ctx)
               -- include the bottom line in folded text for additional context
               local filling = " ⋯ "
+              local suffix = ""
               local sufWidth = vim.fn.strdisplaywidth(suffix)
               local targetWidth = width - sufWidth
               local curWidth = 0
               table.insert(virtText, { filling, "Folded" })
               -- do not add virtual text to title sections
-              local captures = vim.treesitter.get_captures_at_pos(ctx.bufnr, lnum - 1, 0)
-              for _, c in pairs(captures) do
-                if c.capture:match("^text.title") then
-                  return virtText
+              local ok_captures, captures = pcall(vim.treesitter.get_captures_at_pos, ctx.bufnr, lnum - 1, 0)
+              if ok_captures then
+                for _, c in pairs(captures) do
+                  local capture = type(c) == "table" and c.capture or c
+                  if type(capture) == "string" and capture:match("^text.title") then
+                    return virtText
+                  end
                 end
               end
               local endVirtText = ctx.get_fold_virt_text(endLnum)
@@ -1044,12 +1078,16 @@ local function load_plugins()
                   require("ufo").closeAllFolds()
                   return
                 end
-                -- getFolds returns a Promise if providerName == 'lsp', use vim.wait in this case
-                local ok, ranges = pcall(require("ufo").getFolds, bufnr, "treesitter")
-                if ok and ranges then
-                  if require("ufo").applyFolds(bufnr, ranges) then
-                    pcall(require("ufo").closeAllFolds)
+                local ranges
+                for _, provider in ipairs({ "treesitter", "indent" }) do
+                  local ok, provider_ranges = pcall(require("ufo").getFolds, bufnr, provider)
+                  if ok and provider_ranges and #provider_ranges > 0 then
+                    ranges = provider_ranges
+                    break
                   end
+                end
+                if ranges and require("ufo").applyFolds(bufnr, ranges) then
+                  pcall(require("ufo").closeAllFolds)
                 end
               end
             end,
@@ -1158,7 +1196,6 @@ local function load_plugins()
       -- orgmode clone written in Lua
       use({
         "nvim-orgmode/orgmode",
-        requires = { "nvim-treesitter/nvim-treesitter" },
         config = function()
           require("orgmode").setup({
             org_startup_indent_mode = "noindent",
@@ -1833,6 +1870,72 @@ _G.load_config = function()
   ]])
   ---}}}
 
+  ---treesitter {{{
+  -- Neovim 0.12 provides Tree-sitter highlighting/folding primitives natively.
+  -- Parser/query installation is handled by the nvim-treesitter plugin hook.
+  vim.g.query_lint_on = { "BufWrite", "CursorHold" }
+
+  local function register_ts_language(lang, filetypes)
+    if vim.treesitter.language and vim.treesitter.language.register then
+      pcall(vim.treesitter.language.register, lang, filetypes)
+    end
+  end
+
+  register_ts_language("bash", { "sh" })
+  register_ts_language("latex", { "tex", "plaintex" })
+  register_ts_language("markdown", { "jmd", "pandoc", "quarto", "rmd" })
+  register_ts_language("jsx", { "javascriptreact" })
+  register_ts_language("tsx", { "typescriptreact" })
+
+  local function parser_exists(lang)
+    return #vim.api.nvim_get_runtime_file("parser/" .. lang .. ".so", false) > 0
+  end
+
+  local function start_treesitter(bufnr, lang)
+    if not parser_exists(lang) then
+      return false
+    end
+    local ok_add, added = pcall(vim.treesitter.language.add, lang)
+    if not ok_add or not added then
+      return false
+    end
+    local ok_start = pcall(vim.treesitter.start, bufnr, lang)
+    if not ok_start then
+      return false
+    end
+    return true
+  end
+
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "*",
+    callback = function(args)
+      local ft = vim.bo[args.buf].filetype
+      local lang = vim.treesitter.language.get_lang(ft) or ft
+      if not lang or lang == "" then
+        return
+      end
+
+      start_treesitter(args.buf, lang)
+    end,
+  })
+
+  vim.keymap.set({ "n", "x" }, "gnn", function()
+    vim.treesitter.select("parent")
+  end, { noremap = true })
+
+  vim.keymap.set("x", "n", function()
+    vim.treesitter.select("parent")
+  end, { noremap = true })
+
+  vim.keymap.set("x", "gs", function()
+    vim.treesitter.select("parent")
+  end, { noremap = true })
+
+  vim.keymap.set("x", "N", function()
+    vim.treesitter.select("child")
+  end, { noremap = true })
+  ---}}}
+
   ---providers {{{
   -- python
   vim.g["loaded_python_provider"] = 0
@@ -2181,6 +2284,14 @@ _G.load_config = function()
   vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
     pattern = { "*.tex" },
     command = [[set filetype=tex]],
+  })
+  ---}}}
+
+  ---typst {{{
+  vim.filetype.add({
+    extension = {
+      typ = "typst",
+    },
   })
   ---}}}
 
