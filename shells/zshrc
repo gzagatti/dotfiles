@@ -91,6 +91,17 @@ if [[ $- == *i* ]]; then
   fi
   ## }}}
 
+  ## bun {{{
+  if [ -d "$HOME/.bun" ]; then
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$BUN_INSTALL/bin:$PATH"
+    if [ -s "$BUN_INSTALL/_bun" ]; then
+      source "$BUN_INSTALL/_bun"
+    fi
+    hash -f
+  fi
+  ## }}}
+
   ## text editor {{{
   if hash nvim 2>/dev/null; then
     export EDITOR=$(which nvim)
@@ -337,9 +348,17 @@ if [[ $- == *i* ]]; then
     fi
     return
   }
+  _wezterm_set_cwd() {
+    if [[ -n "$WEZTERM_PANE" || "$TERM_PROGRAM" == "WezTerm" ]]; then
+      command wezterm set-working-directory 2>/dev/null
+    fi
+  }
+
   # inspired by
   # https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples#L51
   precmd_ps1() {
+
+    _wezterm_set_cwd
 
     # https://zsh.sourceforge.io/Doc/Release/Prompt-Expansion.html#Visual-effects
     color=""

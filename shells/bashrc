@@ -227,6 +227,12 @@ if [[ $- == *i* ]]; then
     return 0
   }
 
+  function _wezterm_set_cwd() {
+    if [[ -n "$WEZTERM_PANE" || "$TERM_PROGRAM" == "WezTerm" ]]; then
+      command wezterm set-working-directory 2>/dev/null
+    fi
+  }
+
   # prompt will be highlighted in red if previous command fails
   # command prompt text is always highlited in yellow
   function PreCommand() {
@@ -242,6 +248,7 @@ if [[ $- == *i* ]]; then
   FIRST_PROMPT=1
   function PostCommand() {
     AT_PROMPT=1
+    _wezterm_set_cwd
     PS1=$(_ps1)
     if [ -n "$FIRST_PROMPT" ]; then
       unset FIRST_PROMPT
@@ -312,6 +319,13 @@ if [[ $- == *i* ]]; then
   # }}}
 
   # Program specific {{{
+
+  ## bun {{{
+  if [ -d "$HOME/.bun" ]; then
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$BUN_INSTALL/bin:$PATH"
+  fi
+  ## }}}
 
   # direnv {{{
   # the hook has to appear at the end

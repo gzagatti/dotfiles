@@ -2,12 +2,37 @@
 local wezterm = require("wezterm")
 local config = wezterm.config_builder()
 
+local wsl_domains = wezterm.default_wsl_domains()
+
+local function current_working_dir(pane)
+  local cwd = pane:get_current_working_dir()
+  if not (cwd and cwd.file_path) then
+    return nil
+  end
+
+  -- In WSL, OSC 7 reports file://host/Distro/path, but WSL expects /path.
+  for _, domain in ipairs(wsl_domains) do
+    local prefix = "/" .. domain.distribution .. "/"
+    if cwd.file_path:sub(1, #prefix) == prefix then
+      return "/" .. cwd.file_path:sub(#prefix + 1)
+    end
+  end
+
+  return cwd.file_path
+end
+
 config.term = "wezterm"
 config.front_end = "WebGpu"
-config.default_domain = "local"
-config.default_prog = { "wsl.exe", "--cd", "~" }
-config.default_domain = "WSL:Ubuntu"
-config.default_cwd = wezterm.home_dir
+-- Use WezTerm's WSL domain instead of spawning wsl.exe manually so
+-- pane cwd tracking can be reused by splits and tabs.
+config.wsl_domains = wsl_domains
+for _, domain in ipairs(config.wsl_domains) do
+  if domain.distribution ~= "docker-desktop" then
+    config.default_domain = domain.name
+    break
+  end
+end
+config.default_cwd = "~"
 config.pane_focus_follows_mouse = false
 config.audible_bell = "Disabled"
 config.visual_bell = {
@@ -15,6 +40,8 @@ config.visual_bell = {
   fade_out_duration_ms = 75,
   fade_out_function = "EaseOut",
 }
+config.default_cursor_style = "SteadyBlock"
+config.cursor_blink_rate = 0
 
 -- keys
 config.enable_kitty_keyboard = false
@@ -30,18 +57,29 @@ config.keys = {
     key = "_",
     mods = "CTRL|SHIFT",
     action = wezterm.action_callback(function(win, pane)
-      pane:split({ direction = "Bottom" })
+      pane:split({
+        direction = "Bottom",
+        cwd = current_working_dir(pane),
+      })
     end),
   },
   {
     key = "|",
     mods = "CTRL|SHIFT",
     action = wezterm.action_callback(function(win, pane)
-      pane:split({ direction = "Right" })
+      pane:split({
+        direction = "Right",
+        cwd = current_working_dir(pane),
+      })
     end),
   },
   {
     key = "r",
+    mods = "CTRL|SHIFT",
+    action = wezterm.action.PaneSelect({ mode = "SwapWithActive" }),
+  },
+  {
+    key = "}",
     mods = "CTRL|SHIFT",
     action = wezterm.action.RotatePanes("Clockwise"),
   },
@@ -51,6 +89,11 @@ config.keys = {
     action = wezterm.action_callback(function(win, pane)
       local tab, window = pane:move_to_new_window()
     end),
+  },
+  {
+    key = "t",
+    mods = "CTRL|SHIFT",
+    action = wezterm.action.SpawnCommandInNewTab({ cwd = "~" }),
   },
   {
     key = "s",
