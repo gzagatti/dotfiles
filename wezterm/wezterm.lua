@@ -4,10 +4,10 @@ local config = wezterm.config_builder()
 
 config.term = "wezterm"
 config.front_end = "WebGpu"
--- config.default_domain = "local"
--- config.default_prog = { "wsl.exe", "--cd", "~" }
--- config.default_domain = "WSL:Ubuntu"
--- config.default_cwd = wezterm.home_dir
+config.default_domain = "local"
+config.default_prog = { "wsl.exe", "--cd", "~" }
+config.default_domain = "WSL:Ubuntu"
+config.default_cwd = wezterm.home_dir
 config.pane_focus_follows_mouse = false
 config.audible_bell = "Disabled"
 config.visual_bell = {
@@ -17,6 +17,9 @@ config.visual_bell = {
 }
 
 -- keys
+config.enable_kitty_keyboard = false
+config.bold_brightens_ansi_colors = "No"
+
 config.keys = {
   {
     key = "+",
@@ -54,15 +57,30 @@ config.keys = {
     mods = "CTRL|SHIFT",
     action = wezterm.action.PaneSelect({ show_pane_ids = true }),
   },
+  {
+    key = 'Enter',
+    mods = 'SHIFT',
+    action = wezterm.action.SendString('\x1b[13;2u'),
+  },
+  {
+    key = 'Enter',
+    mods = 'ALT',
+    action = wezterm.action.SendString('\x1b[13;3u'),
+  },
+  {
+    key = 'Enter',
+    mods = 'CTRL',
+    action = wezterm.action.SendString('\x1b[13;5u'),
+  },
 }
 
 -- theme
 -- font
-config.font = wezterm.font({
-  family = "Fira Code",
-  harfbuzz_features = { 'ss08=1', 'onum' },
+config.font = wezterm.font_with_fallback({
+  "JetBrains Mono",
+  "Consolas",
 })
-config.font_size = 16
+config.font_size = 13
 
 -- tab
 config.tab_bar_at_bottom = true
@@ -89,7 +107,7 @@ config.colors = {
   -- Specifies the border color of the cursor when the cursor style is set to Block,
   -- or the color of the vertical or horizontal bar when the cursor style is set to
   -- Bar or Underline.
-  cursor_border = "#52ad70",
+  cursor_border = "#0fb300",
 
   -- the foreground color of selected text
   selection_fg = "#000000",
