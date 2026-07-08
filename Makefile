@@ -36,6 +36,18 @@ nix/%:
 	mkdir -p $(workspace)/.config/$(@D:nix/%=%)
 	ln -fs $(dotfiles)/$@ $(workspace)/.config/$(@:nix/%=%)
 
+wsl/bin/%:
+	mkdir -p $(workspace)/.local/bin
+	ln -fs $(dotfiles)/$@ $(workspace)/.local/bin/$(@F)
+
+wsl/applications/%:
+	mkdir -p $(workspace)/.local/share/applications
+	ln -fs $(dotfiles)/$@ $(workspace)/.local/share/applications/$(@F)
+
+wsl: $(shell find wsl -type f)
+	xdg-mime default browser.desktop x-scheme-handler/http
+	xdg-mime default browser.desktop x-scheme-handler/https
+
 # symlinks to ~/
 ctags/%   \
 editorconfig/% \

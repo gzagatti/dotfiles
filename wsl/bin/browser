@@ -1,0 +1,13 @@
+#!/bin/sh
+
+case "$1" in
+http://*|https://*)
+    exec explorer.exe "$1"
+    ;;
+file://*)
+    exec explorer.exe "${1#file://}"
+    ;;
+*)
+    exec explorer.exe "$(wslpath -w "$1")"
+    ;;
+esac
